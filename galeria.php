@@ -287,16 +287,18 @@ include 'includes/navbar.php';
             <button class="filter-btn active" data-filter="all">
                 <i class="bi bi-grid-3x3"></i> Todos
             </button>
-            <button class="filter-btn" data-filter="fotos">
+            <button class="filter-btn" data-filter="imagem">
                 <i class="bi bi-image"></i> Fotos
             </button>
-            <button class="filter-btn" data-filter="videos">
+            <button class="filter-btn" data-filter="video">
                 <i class="bi bi-play-btn"></i> Vídeos
             </button>
             <?php foreach ($tipos as $tipo): ?>
-            <button class="filter-btn" data-filter="<?php echo htmlspecialchars($tipo); ?>">
-                <i class="bi bi-tag"></i> <?php echo htmlspecialchars(ucfirst($tipo)); ?>
-            </button>
+                <?php if ($tipo !== 'imagem' && $tipo !== 'video'): ?>
+                <button class="filter-btn" data-filter="<?php echo htmlspecialchars($tipo); ?>">
+                    <i class="bi bi-tag"></i> <?php echo htmlspecialchars(ucfirst($tipo)); ?>
+                </button>
+                <?php endif; ?>
             <?php endforeach; ?>
         </div>
         <?php endif; ?>
@@ -309,30 +311,31 @@ include 'includes/navbar.php';
             if ($result && $result->num_rows > 0) {
                 while ($row = $result->fetch_assoc()) {
                     $tipo = !empty($row["tipo"]) ? htmlspecialchars($row["tipo"]) : 'outros';
-                    $isVideo = !empty($row["video_url"]);
+                    $isVideo = ($tipo === 'video');
+                    $isImage = ($tipo === 'imagem');
                     
                     // Classes diferentes para vídeos e imagens
                     $cardClass = $isVideo ? 'video-card' : 'image-card';
-                    $contentType = $isVideo ? 'video' : 'image';
+                    $contentType = $tipo; // Usa o próprio tipo como content type
                     
                     echo '<div class="col-lg-4 col-md-6 gallery-item-wrapper" data-category="' . $tipo . '" data-content-type="' . $contentType . '">';
                     echo '<div class="gallery-item ' . $cardClass . '" data-id="' . $row["id"] . '" data-titulo="' . htmlspecialchars($row["titulo"]) . '" data-descricao="' . htmlspecialchars($row["descricao"]) . '" data-tipo="' . $tipo . '"';
                     
                     // Adicionar atributo específico para vídeos
                     if ($isVideo) {
-                        echo ' data-video-url="' . htmlspecialchars($row["video_url"]) . '"';
+                        echo ' data-video-url="' . htmlspecialchars($row["link"]) . '"';
                     }
                     
                     echo '>';
                     
-                    if (!empty($row["tipo"])) {
+                    if (!empty($row["tipo"]) && $row["tipo"] !== 'imagem' && $row["tipo"] !== 'video') {
                         echo '<span class="gallery-badge">' . htmlspecialchars($row["tipo"]) . '</span>';
                     }
                     
-                    // Conteúdo diferente para imagens vs vídeos
+                    // Conteúdo diferente baseado no tipo
                     if ($isVideo) {
                         // Para vídeos - card específico com thumbnail do YouTube
-                        $videoId = extractYouTubeId($row["video_url"]);
+                        $videoId = extractYouTubeId($row["link"]);
                         $thumbnailUrl = $videoId ? "https://img.youtube.com/vi/$videoId/hqdefault.jpg" : '';
                         
                         echo '<div class="video-thumbnail">';
@@ -340,23 +343,46 @@ include 'includes/navbar.php';
                         
                         if ($thumbnailUrl) {
                             echo '<img src="' . $thumbnailUrl . '" alt="' . htmlspecialchars($row["titulo"]) . '" onerror="this.style.display=\'none\'">';
+                        } else {
+                            // Fallback se não conseguir pegar thumbnail
+                            echo '<div style="background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">';
+                            echo '<i class="bi bi-play-circle-fill" style="font-size: 80px; color: white;"></i>';
+                            echo '</div>';
                         }
                         
                         echo '<div class="video-play-overlay">';
                         echo '<div class="video-play-icon"><i class="bi bi-play-circle-fill"></i></div>';
                         echo '</div>';
                         echo '</div>';
-                    } else {
+                    } else if ($isImage) {
                         // Para imagens - comportamento original
-                        $imagemBLOB = base64_encode($row["foto"]);
-                        echo '<img src="data:image/jpeg;base64,' . $imagemBLOB . '" alt="' . htmlspecialchars($row["titulo"]) . '">';
+                        if (!empty($row["foto"])) {
+                            $imagemBLOB = base64_encode($row["foto"]);
+                            echo '<img src="data:image/jpeg;base64,' . $imagemBLOB . '" alt="' . htmlspecialchars($row["titulo"]) . '">';
+                        } else {
+                            // Fallback para imagem vazia
+                            echo '<div style="background: #f8f9fa; width: 100%; height: 300px; display: flex; align-items: center; justify-content: center;">';
+                            echo '<i class="bi bi-image" style="font-size: 50px; color: #6c757d;"></i>';
+                            echo '</div>';
+                        }
+                    } else {
+                        // Para outros tipos (fallback)
+                        if (!empty($row["foto"])) {
+                            $imagemBLOB = base64_encode($row["foto"]);
+                            echo '<img src="data:image/jpeg;base64,' . $imagemBLOB . '" alt="' . htmlspecialchars($row["titulo"]) . '">';
+                        } else {
+                            echo '<div style="background: #f8f9fa; width: 100%; height: 300px; display: flex; align-items: center; justify-content: center;">';
+                            echo '<i class="bi bi-file-earmark" style="font-size: 50px; color: #6c757d;"></i>';
+                            echo '</div>';
+                        }
                     }
                     
                     echo '<div class="gallery-overlay">';
                     echo '<h5>' . htmlspecialchars($row["titulo"]) . '</h5>';
                     
                     if (!empty($row["descricao"])) {
-                        echo '<p>' . htmlspecialchars(substr($row["descricao"], 0, 80)) . '...</p>';
+                        $descricao = htmlspecialchars($row["descricao"]);
+                        echo '<p>' . (strlen($descricao) > 80 ? substr($descricao, 0, 80) . '...' : $descricao) . '</p>';
                     }
                     
                     echo '</div></div></div>';
@@ -416,9 +442,9 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
             
             if (filter === 'all') {
                 shouldShow = true;
-            } else if (filter === 'fotos') {
-                shouldShow = contentType === 'image';
-            } else if (filter === 'videos') {
+            } else if (filter === 'imagem') {
+                shouldShow = contentType === 'imagem';
+            } else if (filter === 'video') {
                 shouldShow = contentType === 'video';
             } else {
                 shouldShow = category === filter;
@@ -426,6 +452,9 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
             
             item.style.display = shouldShow ? 'block' : 'none';
         });
+        
+        // Atualizar itens do lightbox após filtrar
+        setTimeout(updateGalleryItems, 100);
     });
 });
 
@@ -453,48 +482,36 @@ function updateGalleryItems() {
     document.querySelectorAll('.gallery-item-wrapper:not([style*="display: none"]) .gallery-item').forEach((item, index) => {
         const videoUrl = item.getAttribute('data-video-url');
         const isVideo = !!videoUrl;
+        const tipo = item.getAttribute('data-tipo');
         
         galleryItems.push({
             element: item,
             src: isVideo ? null : item.querySelector('img').src,
             videoUrl: videoUrl,
             isVideo: isVideo,
+            tipo: tipo,
             titulo: item.getAttribute('data-titulo'),
-            descricao: item.getAttribute('data-descricao'),
-            tipo: item.getAttribute('data-tipo')
+            descricao: item.getAttribute('data-descricao')
         });
     });
 }
 
-// Atualizar itens quando filtrar
-document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        setTimeout(updateGalleryItems, 100);
+// Inicializar eventos dos itens da galeria
+function initializeGalleryItems() {
+    document.querySelectorAll('.gallery-item').forEach((item, index) => {
+        item.addEventListener('click', () => {
+            // Encontrar o índice atual baseado nos itens visíveis
+            const visibleItems = Array.from(document.querySelectorAll('.gallery-item-wrapper:not([style*="display: none"]) .gallery-item'));
+            currentIndex = visibleItems.indexOf(item);
+            updateGalleryItems();
+            openLightbox();
+        });
     });
-});
-
-// Inicializar itens da galeria
-document.querySelectorAll('.gallery-item').forEach((item, index) => {
-    const videoUrl = item.getAttribute('data-video-url');
-    const isVideo = !!videoUrl;
-    
-    galleryItems.push({
-        element: item,
-        src: isVideo ? null : item.querySelector('img').src,
-        videoUrl: videoUrl,
-        isVideo: isVideo,
-        titulo: item.getAttribute('data-titulo'),
-        descricao: item.getAttribute('data-descricao'),
-        tipo: item.getAttribute('data-tipo')
-    });
-    
-    item.addEventListener('click', () => {
-        currentIndex = galleryItems.findIndex(gItem => gItem.element === item);
-        openLightbox();
-    });
-});
+}
 
 function openLightbox() {
+    if (galleryItems.length === 0) return;
+    
     const item = galleryItems[currentIndex];
     
     if (item.isVideo) {
@@ -568,6 +585,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Inicializar filtros
+// Inicializar
 updateGalleryItems();
+initializeGalleryItems();
 </script>
