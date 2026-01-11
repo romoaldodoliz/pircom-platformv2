@@ -1,0 +1,11 @@
+# Ignore vendor dependencies
+/vendor/
+/admin/vendor/
+
+# Ignore submodules local changes
+**/.git/modules/
+
+# OS / Editor
+.DS_Store
+.vscode/
+.idea/
