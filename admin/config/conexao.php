@@ -1,10 +1,10 @@
 <?php
 
 $hostname = "localhost";
-$username = "root"; 
-$port = 8889; // Defina o número da porta como um inteiro
-$password = "root";
-$database = "strongwoman";
+$port = "8889"; // Substitua pelo nome do host do seu banco de dados
+$username = "root"; // Substitua pelo nome de usu���rio do seu banco de dados
+$password = "root"; // Substitua pela senha do seu banco de dados
+$database = "pircom"; // Substitua pelo nome do seu banco de dados
 
 // Tentar estabelecer a conexão
 $conn = new mysqli($hostname, $username, $password, $database, $port);

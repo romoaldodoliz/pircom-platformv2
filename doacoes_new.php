@@ -1,5 +1,5 @@
 <?php
-$page_title = "Strong Woman - Doações";
+$page_title = "Pircom - Doações";
 include 'includes/navbar.php';
 include('config/conexao.php');
 

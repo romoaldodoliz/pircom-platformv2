@@ -12,3 +12,31 @@
 [2025-11-30 08:48:25] User: Administrador (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
 [2025-11-30 10:24:09] User: Administrador (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
 [2025-11-30 10:26:05] User: Administrador (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2025-12-03 09:17:32] User: pircomadmin (ID: 2) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2025-12-03 12:52:57] User: pircomadmin (ID: 2) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2025-12-03 14:00:57] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.127.113
+[2025-12-03 14:04:14] User: mahumane sergio (ID: 1) | Action: LOGOUT | Details: Usuário fez logout | IP: 197.218.127.113
+[2025-12-03 14:05:34] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.127.113
+[2025-12-03 15:14:51] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.127.113
+[2025-12-03 15:15:03] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.127.113
+[2025-12-04 14:20:25] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.126.241
+[2025-12-05 05:41:13] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.249.7.43
+[2025-12-05 05:41:36] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.249.7.43
+[2025-12-05 06:43:08] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.249.7.43
+[2025-12-05 06:43:18] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.249.7.43
+[2025-12-05 09:06:21] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.249.7.43
+[2025-12-05 09:06:53] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.249.7.43
+[2025-12-11 20:38:27] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.118.11
+[2025-12-28 14:43:10] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.60.215
+[2025-12-28 14:43:16] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.60.215
+[2026-01-06 11:29:02] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.118.3
+[2026-01-08 14:02:15] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.124.204
+[2026-01-09 00:22:34] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.126.94
+[2026-01-09 00:23:37] User: mahumane sergio (ID: 1) | Action: LOGOUT | Details: Usuário fez logout | IP: 197.218.126.94
+[2026-01-10 10:20:23] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.118.193
+[2026-01-10 10:59:56] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.126.50
+[2026-01-10 11:00:49] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.126.50
+[2026-01-11 08:37:34] User: Romoaldo Doliz (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-01-11 09:41:50] User: Romoaldo Doliz (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-01-11 10:13:33] User: Romoaldo Doliz (ID: 1) | Action: LOGOUT | Details: Usuário fez logout | IP: ::1
+[2026-01-11 10:13:45] User: Romoaldo Doliz (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1

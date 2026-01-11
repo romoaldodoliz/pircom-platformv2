@@ -1,0 +1,18 @@
+[30-Dec-2025 11:41:31 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'qsnrwyjb_admin'@'localhost' to database 'qsnrwyjb_pircom_v2' in /home/qsnrwyjb/public_html/config/conexao.php:10
+Stack trace:
+#0 /home/qsnrwyjb/public_html/config/conexao.php(10): mysqli->__construct()
+#1 /home/qsnrwyjb/public_html/api/provincias.php(19): require_once('/home/qsnrwyjb/...')
+#2 {main}
+  thrown in /home/qsnrwyjb/public_html/config/conexao.php on line 10
+[31-Dec-2025 06:45:06 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'qsnrwyjb_admin'@'localhost' to database 'qsnrwyjb_pircom_v2' in /home/qsnrwyjb/public_html/config/conexao.php:10
+Stack trace:
+#0 /home/qsnrwyjb/public_html/config/conexao.php(10): mysqli->__construct()
+#1 /home/qsnrwyjb/public_html/api/provincias.php(19): require_once('/home/qsnrwyjb/...')
+#2 {main}
+  thrown in /home/qsnrwyjb/public_html/config/conexao.php on line 10
+[03-Jan-2026 08:42:15 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'qsnrwyjb_admin'@'localhost' to database 'qsnrwyjb_pircom_v2' in /home/qsnrwyjb/public_html/config/conexao.php:10
+Stack trace:
+#0 /home/qsnrwyjb/public_html/config/conexao.php(10): mysqli->__construct()
+#1 /home/qsnrwyjb/public_html/api/provincias.php(19): require_once('/home/qsnrwyjb/...')
+#2 {main}
+  thrown in /home/qsnrwyjb/public_html/config/conexao.php on line 10

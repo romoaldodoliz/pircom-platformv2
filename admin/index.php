@@ -14,12 +14,12 @@
         content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
 
-    <title>Admin - Strong Man</title>
+    <title>Admin - PIRCOM</title>
 
     <meta name="description" content="" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="assets/img/favicon/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="assets/pircom.png" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -60,7 +60,7 @@
                     <!-- Logo -->
                     <div class="app-brand justify-content-center">
                         <a href="index.php" class="app-brand-link gap-2">
-                            <img src="assets/logo.png" width="250" alt="">
+                            <img src="assets/pircom.png" width="250" alt="">
                         </a>
                     </div>
                     <!-- /Logo -->

@@ -7,12 +7,11 @@
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
   <meta name="author" content="Romoaldo Doliz">
   <meta name="co-author" content="Romoaldo Doliz">
-  <title>Strong Woman - Estamos Focados no Futuro das Mulheres</title>
-  <meta name="robots" content="Strong Woman - Estamos Focados no Futuro das Mulheres">
-  <meta name="description" content="Fundada por Palmira Mucavele, Strong Woman é um Projecto no ramo de desenvolvimento pessoal e profissional que visa motivar, inspirar e prover ferramentas educativas para as mulheres num contexto social de estigmatização, 
-  descriminação de gênero, exclusão social, e violência doméstica.">
+  <title>PIRCOM - Plataforma Inter-Religiosa de Comunicação para a Saúde</title>
+  <meta name="robots" content="PIRCOM - Plataforma Inter-Religiosa de Comunicação para a Saúde">
+  <meta name="description" content="Criada em 19 de abril de 2006, a PIRCOM é a primeira aliança múltipla baseada na fé através da colaboração entre comunidades Cristãs, Muçulmanas, Hindus e Bahai visando contribuir na melhoria da saúde em Moçambique.">
   <!-- Favicons -->
-  <link rel="icon" href="../assets/img/logo.png" type="image/png">
+  <link rel="icon" href="../assets/pircom.png" type="image/png">
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
   <!-- Vendor CSS Files -->
@@ -32,7 +31,7 @@
   <!-- ======= Header ======= -->
   <header id="header" class="fixed-top ">
     <div class="container d-flex align-items-center justify-content-lg-between">
-      <a href="index.php" class="logo me-auto me-lg-0"><img src="../assets/img/logo.png" alt="strongwoman" style="height: 50px;" class="img-fluid"></a>
+      <a href="index.php" class="logo me-auto me-lg-0"><img src="../assets/pircom.png" alt="PIRCOM" style="height: 50px;" class="img-fluid"></a>
       <nav id="navbar" class="navbar order-last order-lg-0">
         <ul>
           <li><a href="index.php"><span>INICIO</span></a>

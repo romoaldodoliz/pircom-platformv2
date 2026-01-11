@@ -2,12 +2,17 @@
 <html lang="pt-br">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo isset($page_title) ? $page_title : 'Strong Woman - Estamos Focados no Futuro das Mulheres'; ?></title>
+    <title>Pircom - Plataforma Inter-Religiosa de Comunicação para a Saúde</title>
+    <meta name="author" content="Romoaldo Edmundo Doliz">
+    <meta name="co-author" content="Romoaldo Edmundo Doliz">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta name="robots" content="Pircom - Plataforma Inter-Religiosa de Comunicação para a Saúde">
+    <meta name="description" content="A Plataforma Inter-Religiosa de Comunicação para a Saúde (PIRCOM) é uma organização baseada na fé, empenhada e comprometida com a melhoria da qualidade de ...">
+    <title><?php echo isset($page_title) ? $page_title : 'PIRCOM - Plataforma Inter-Religiosa de Comunicação para a Saúde'; ?></title>
     
     
     <!-- Bootstrap CSS -->
-     <link rel="icon" href="assets/img/logo.png" type="image/png">
+     <link rel="icon" href="assets/img/hello.png" type="image/png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <?php if (isset($include_swiper) && $include_swiper): ?>
@@ -16,8 +21,8 @@
     
   <style>
     :root {
-        --primary-color: #fb0a0a;
-        --secondary-color: #151515;
+        --primary-color: #FF6F0F;
+        --secondary-color: #000000;
     }
 
     * {
@@ -80,7 +85,7 @@
 
     .nav-link:hover {
         color: var(--primary-color) !important;
-        background-color: rgba(251, 10, 10, 0.05);
+        background-color: rgba(255, 111, 15, 0.05);
         transform: translateY(-1px);
     }
 
@@ -133,7 +138,7 @@
 
     .card:hover {
         transform: translateY(-15px);
-        box-shadow: 0 15px 40px rgba(251, 10, 10, 0.2);
+        box-shadow: 0 15px 40px rgba(255, 111, 15, 0.2);
     }
 
     .card img {
@@ -146,19 +151,19 @@
 
     /* Buttons */
     .btn-primary {
-        background: linear-gradient(135deg, var(--primary-color) 0%, #c70808 100%);
+        background: linear-gradient(135deg, var(--primary-color) 0%, #E05A00 100%);
         border: none;
         padding: 12px 30px;
         font-weight: 600;
         border-radius: 30px;
         transition: all 0.3s;
-        box-shadow: 0 4px 15px rgba(251, 10, 10, 0.3);
+        box-shadow: 0 4px 15px rgba(255, 111, 15, 0.3);
     }
 
     .btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(251, 10, 10, 0.4);
-        background: linear-gradient(135deg, #c70808 0%, var(--primary-color) 100%);
+        box-shadow: 0 8px 25px rgba(255, 111, 15, 0.4);
+        background: linear-gradient(135deg, #E05A00 0%, var(--primary-color) 100%);
     }
 
     .btn-outline-primary {
@@ -174,7 +179,7 @@
         background: var(--primary-color);
         color: white;
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(251, 10, 10, 0.4);
+        box-shadow: 0 8px 25px rgba(255, 111, 15, 0.4);
     }
 
     /* Icon Boxes */
@@ -189,7 +194,7 @@
 
     .icon-box:hover {
         transform: translateY(-10px);
-        box-shadow: 0 10px 30px rgba(251, 10, 10, 0.2);
+        box-shadow: 0 10px 30px rgba(255, 111, 15, 0.2);
     }
 
     .icon-box i {
@@ -275,7 +280,7 @@
         }
 
         .navbar .dropdown-item:hover {
-            background: rgba(251, 10, 10, 0.1);
+            background: rgba(255, 111, 15, 0.1);
             color: var(--primary-color);
             padding-left: 30px;
         }
@@ -299,7 +304,7 @@
     <nav class="navbar navbar-expand-lg navbar-light fixed-top">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="index.php">
-                <img src="assets/img/logo.png" alt="Strong Woman" height="45" class="me-2">
+                <img src="assets/pircom.png" alt="PIRCOM" height="45" class="me-2">
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -313,11 +318,12 @@
                     </li>
                     
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle <?php echo (in_array(basename($_SERVER['PHP_SELF']), ['quem-somos.php', 'contacto.php'])) ? 'active' : ''; ?>" href="#" id="navbarDropdownSobre" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle <?php echo (in_array(basename($_SERVER['PHP_SELF']), ['quem-somos.php', 'mapa-cobertura.php', 'contacto.php'])) ? 'active' : ''; ?>" href="#" id="navbarDropdownSobre" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <span>SOBRE</span>
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownSobre">
                             <li><a class="dropdown-item" href="quem-somos.php">QUEM SOMOS</a></li>
+                            <li><a class="dropdown-item" href="mapa-cobertura.php">COBERTURA GEOGRÁFICA</a></li>
                         </ul>
                     </li>
                     

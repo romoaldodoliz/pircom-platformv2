@@ -1,5 +1,5 @@
 <?php
-$page_title = "Strong Woman - Eventos";
+$page_title = "PIRCOM - Eventos";
 include 'includes/navbar.php';
 ?>
 
@@ -7,7 +7,7 @@ include 'includes/navbar.php';
     <div class="container">
         <div class="section-title mb-5">
             <h2>EVENTOS</h2>
-            <p>Nossos Eventos Strong Woman</p>
+            <p>Eventos da PIRCOM - Plataforma Inter-Religiosa de Comunicação para a Saúde</p>
         </div>
 
         <div class="row g-4">
@@ -84,7 +84,7 @@ include 'includes/navbar.php';
                         $imagem = 'data:image/jpeg;base64,' . $imagemBLOB;
                     } else {
                         // Imagem placeholder caso não tenha foto
-                        $imagem = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="250" viewBox="0 0 400 250"%3E%3Crect fill="%23e9ecef" width="400" height="250"/%3E%3Ctext fill="%236c757d" font-family="Arial" font-size="18" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3EEvento Strong Woman%3C/text%3E%3C/svg%3E';
+                        $imagem = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="250" viewBox="0 0 400 250"%3E%3Crect fill="%23e9ecef" width="400" height="250"/%3E%3Ctext fill="%236c757d" font-family="Arial" font-size="18" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3EEvento PIRCOM%3C/text%3E%3C/svg%3E';
                     }
             ?>
             
@@ -108,7 +108,7 @@ include 'includes/navbar.php';
                         <!-- Data overlay -->
                         <?php if (!empty($dia) && !empty($mes)): ?>
                         <div class="position-absolute bottom-0 start-0 m-3 bg-white rounded shadow text-center" style="width: 60px; padding: 10px;">
-                            <div class="fw-bold" style="font-size: 24px; line-height: 1; color: var(--primary-color, #e91e63);"><?php echo $dia; ?></div>
+                            <div class="fw-bold" style="font-size: 24px; line-height: 1; color: var(--primary-color, #2563eb);"><?php echo $dia; ?></div>
                             <div class="text-uppercase" style="font-size: 12px; color: #666;"><?php echo strtoupper($mes); ?></div>
                         </div>
                         <?php endif; ?>
@@ -128,7 +128,7 @@ include 'includes/navbar.php';
                         <?php if (!empty($data_formatada)): ?>
                         <div class="mt-3 pt-3 border-top">
                             <p class="mb-0 small d-flex align-items-center">
-                                <i class="bi bi-calendar-event me-2" style="color: var(--primary-color, #e91e63); font-size: 1.2rem;"></i>
+                                <i class="bi bi-calendar-event me-2" style="color: var(--primary-color, #2563eb); font-size: 1.2rem;"></i>
                                 <span><strong>Data:</strong> <?php echo $data_formatada; ?></span>
                             </p>
                         </div>
@@ -170,7 +170,7 @@ include 'includes/navbar.php';
                             <!-- Data do evento -->
                             <?php if (!empty($data_formatada)): ?>
                             <div class="alert alert-light d-flex align-items-center mb-4" role="alert">
-                                <i class="bi bi-calendar-event me-3" style="font-size: 1.5rem; color: var(--primary-color, #e91e63);"></i>
+                                <i class="bi bi-calendar-event me-3" style="font-size: 1.5rem; color: var(--primary-color, #2563eb);"></i>
                                 <div>
                                     <strong>Data do Evento:</strong><br>
                                     <span class="text-muted"><?php echo $data_formatada; ?></span>
@@ -181,7 +181,7 @@ include 'includes/navbar.php';
                             <!-- Descrição -->
                             <?php if (!empty($descricao)): ?>
                             <div class="mb-4">
-                                <h6 class="fw-bold mb-3 text-uppercase" style="color: var(--primary-color, #e91e63); letter-spacing: 1px; font-size: 0.9rem;">
+                                <h6 class="fw-bold mb-3 text-uppercase" style="color: var(--primary-color, #2563eb); letter-spacing: 1px; font-size: 0.9rem;">
                                     <i class="bi bi-file-text me-2"></i>Sobre o Evento
                                 </h6>
                                 <p class="text-muted" style="line-height: 1.8; white-space: pre-line;"><?php echo $descricao; ?></p>
@@ -205,10 +205,10 @@ include 'includes/navbar.php';
                 <div class="col-12">
                     <div class="text-center py-5">
                         <div class="mb-4">
-                            <i class="bi bi-calendar-x" style="font-size: 80px; color: var(--primary-color, #e91e63); opacity: 0.3;"></i>
+                            <i class="bi bi-calendar-x" style="font-size: 80px; color: var(--primary-color, #2563eb); opacity: 0.3;"></i>
                         </div>
                         <h4 class="fw-bold mb-3">Nenhum evento disponível no momento</h4>
-                        <p class="text-muted mb-0">Volte em breve para ver nossos próximos eventos Strong Woman!</p>
+                        <p class="text-muted mb-0">Volte em breve para ver os próximos eventos da PIRCOM - Plataforma Inter-Religiosa de Comunicação para a Saúde!</p>
                     </div>
                 </div>
             <?php

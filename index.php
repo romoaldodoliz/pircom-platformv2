@@ -1,5 +1,5 @@
 <?php
-$page_title = "Strong Woman - Início";
+$page_title = "PIRCOM - Início";
 $include_swiper = true;
 include 'includes/navbar.php';
 include 'includes/swiper-styles.php';
@@ -32,7 +32,7 @@ include 'includes/swiper-styles.php';
             }
         } else {
             echo '<div class="swiper-slide" style="background:url(\'https://cdn.pixabay.com/photo/2017/08/07/14/02/people-2604149_960_720.jpg\') center center; background-size: cover;">';
-            echo '<h2>Strong Woman - Empoderamento Feminino</h2>';
+            echo '<h2>Pircom</h2>';
             echo '</div>';
         }
         ?>
@@ -102,9 +102,9 @@ include 'includes/swiper-styles.php';
 <!-- CTA -->
 <section class="cta">
     <div class="container text-center">
-        <h3>JUNTE-SE A NÓS</h3>
-        <p>"Com sua ajuda, podemos transformar vidas e empoderar mulheres em Moçambique."</p>
-        <a class="cta-btn" href="doacoes.php">Fazer Doação</a>
+        <h3>SEJA PARTE DA SOLUÇÃO</h3>
+        <p>"Desde 2006, unimos fé e ação para melhorar a saúde materno-infantil, combater a malária e o HIV. Ajude-nos a alcançar mais vidas!"</p>
+        <a class="cta-btn" href="doacoes.php">Doar Agora</a>
     </div>
 </section>
 

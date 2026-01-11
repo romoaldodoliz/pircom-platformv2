@@ -1,5 +1,5 @@
 <?php
-$page_title = "Strong Woman - " . ucfirst("capacitacoes");
+$page_title = "Pircom - " . ucfirst("capacitacoes");
 include 'includes/navbar.php';
 ?>
 

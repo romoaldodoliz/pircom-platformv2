@@ -1,5 +1,5 @@
 <?php
-$page_title = "Documentos - Strong Woman";
+$page_title = "Documentos - Pircom";
 include 'config/conexao.php';
 
 // Incrementar download se houver
@@ -39,7 +39,7 @@ include 'includes/navbar.php';
     
     .page-header {
         text-align: center;
-        margin-bottom: 50px;
+        margin-bottom: 30px;
     }
     
     .page-title {
@@ -47,11 +47,73 @@ include 'includes/navbar.php';
         font-weight: 700;
         color: var(--secondary-color);
         margin-bottom: 15px;
+        position: relative;
+        display: inline-block;
+        padding-bottom: 15px;
+    }
+
+    .page-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: var(--primary-color);
+        border-radius: 2px;
     }
     
     .page-subtitle {
         font-size: 18px;
         color: #666;
+        margin-bottom: 0;
+    }
+
+    .intro-banner {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #c70808 100%);
+        color: white;
+        border-radius: 20px;
+        padding: 40px;
+        margin-bottom: 50px;
+        text-align: center;
+    }
+
+    .intro-banner h3 {
+        font-weight: 700;
+        margin-bottom: 15px;
+        font-size: 24px;
+    }
+
+    .intro-banner p {
+        font-size: 16px;
+        margin-bottom: 0;
+        opacity: 0.95;
+        line-height: 1.8;
+    }
+
+    .intro-stats {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-top: 25px;
+        flex-wrap: wrap;
+    }
+
+    .intro-stat {
+        text-align: center;
+    }
+
+    .intro-stat-number {
+        font-size: 32px;
+        font-weight: 700;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .intro-stat-label {
+        font-size: 14px;
+        opacity: 0.9;
     }
     
     .filter-bar {
@@ -127,6 +189,7 @@ include 'includes/navbar.php';
         font-size: 12px;
         color: white;
         font-weight: 600;
+        text-transform: uppercase;
     }
     
     .document-body {
@@ -168,18 +231,21 @@ include 'includes/navbar.php';
     .document-actions {
         display: flex;
         gap: 10px;
+        margin-top: 15px;
     }
     
     .btn-view, .btn-download {
-        padding: 8px 15px;
-        border-radius: 20px;
+        padding: 10px 20px;
+        border-radius: 25px;
         font-size: 13px;
         font-weight: 600;
         transition: all 0.3s;
         text-decoration: none;
         display: inline-flex;
         align-items: center;
-        gap: 5px;
+        gap: 8px;
+        flex: 1;
+        justify-content: center;
     }
     
     .btn-view {
@@ -203,6 +269,58 @@ include 'includes/navbar.php';
         color: white;
         transform: scale(1.05);
     }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    }
+
+    .empty-state i {
+        font-size: 80px;
+        color: var(--primary-color);
+        opacity: 0.5;
+    }
+
+    .empty-state h4 {
+        font-size: 24px;
+        color: var(--secondary-color);
+        font-weight: 700;
+        margin: 20px 0 10px;
+    }
+
+    .empty-state p {
+        font-size: 16px;
+        color: #999;
+        margin-bottom: 0;
+    }
+
+    .info-box {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-top: 50px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    }
+
+    .info-box h4 {
+        color: var(--secondary-color);
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    .info-box ul {
+        margin: 0;
+        padding-left: 25px;
+    }
+
+    .info-box li {
+        color: #666;
+        margin-bottom: 10px;
+        line-height: 1.6;
+    }
     
     @media (max-width: 768px) {
         .documentos-page {
@@ -211,6 +329,18 @@ include 'includes/navbar.php';
         
         .page-title {
             font-size: 32px;
+        }
+
+        .intro-banner {
+            padding: 30px 20px;
+        }
+
+        .intro-banner h3 {
+            font-size: 20px;
+        }
+
+        .intro-stats {
+            gap: 20px;
         }
         
         .documents-grid {
@@ -226,6 +356,10 @@ include 'includes/navbar.php';
         .filter-btn {
             text-align: center;
         }
+
+        .document-actions {
+            flex-direction: column;
+        }
     }
 </style>
 
@@ -235,8 +369,29 @@ include 'includes/navbar.php';
 <section class="documentos-page">
     <div class="container">
         <div class="page-header">
-            <h1 class="page-title">Documentos</h1>
-            <p class="page-subtitle">Acesse relatórios, políticas e projetos da Strong Woman</p>
+            <h1 class="page-title">Centro de Documentos</h1>
+            <p class="page-subtitle">Acesse relatórios, estudos e recursos sobre saúde comunitária</p>
+        </div>
+
+        <!-- Banner Introdutório -->
+        <div class="intro-banner">
+            <h3><i class="bi bi-file-earmark-text me-2"></i>Transparência e Conhecimento</h3>
+            <p>A PIRCOM acredita na importância da transparência e partilha de conhecimento. Aqui você encontra documentos que refletem o nosso trabalho desde 2006 na promoção da saúde através da colaboração inter-religiosa entre comunidades cristãs, muçulmanas, hindus e bahai.</p>
+            
+            <div class="intro-stats">
+                <div class="intro-stat">
+                    <span class="intro-stat-number"><i class="bi bi-shield-check"></i></span>
+                    <span class="intro-stat-label">Transparência Total</span>
+                </div>
+                <div class="intro-stat">
+                    <span class="intro-stat-number"><i class="bi bi-book"></i></span>
+                    <span class="intro-stat-label">Recursos Educativos</span>
+                </div>
+                <div class="intro-stat">
+                    <span class="intro-stat-number"><i class="bi bi-people"></i></span>
+                    <span class="intro-stat-label">Acesso Público</span>
+                </div>
+            </div>
         </div>
 
         <!-- Filtros -->
@@ -247,7 +402,7 @@ include 'includes/navbar.php';
             <?php while ($cat = $categorias->fetch_assoc()): ?>
                 <a href="?categoria=<?php echo urlencode($cat['categoria']); ?>" 
                    class="filter-btn <?php echo $categoria_filtro === $cat['categoria'] ? 'active' : ''; ?>">
-                    <?php echo htmlspecialchars($cat['categoria']); ?>
+                    <i class="bi bi-folder"></i> <?php echo htmlspecialchars($cat['categoria']); ?>
                 </a>
             <?php endwhile; ?>
         </div>
@@ -266,19 +421,19 @@ include 'includes/navbar.php';
                             <?php 
                             echo $doc['descricao'] 
                                 ? htmlspecialchars(substr($doc['descricao'], 0, 100)) . (strlen($doc['descricao']) > 100 ? '...' : '')
-                                : 'Sem descrição disponível';
+                                : 'Documento disponível para consulta e download.';
                             ?>
                         </p>
                         <div class="document-meta">
                             <span><i class="bi bi-download"></i> <?php echo $doc['downloads']; ?> downloads</span>
                             <span><i class="bi bi-calendar3"></i> <?php echo date('d/m/Y', strtotime($doc['created_at'])); ?></span>
                         </div>
-                        <div class="document-actions mt-3">
+                        <div class="document-actions">
                             <a href="<?php echo $doc['arquivo']; ?>" target="_blank" class="btn-view">
-                                <i class="bi bi-eye"></i> Visualizar
+                                <i class="bi bi-eye-fill"></i> Visualizar
                             </a>
                             <a href="<?php echo $doc['arquivo']; ?>?download=1&id=<?php echo $doc['id']; ?>" download class="btn-download">
-                                <i class="bi bi-download"></i> Download
+                                <i class="bi bi-download"></i> Baixar
                             </a>
                         </div>
                     </div>
@@ -287,11 +442,45 @@ include 'includes/navbar.php';
         </div>
 
         <?php if ($result->num_rows === 0): ?>
-            <div style="text-align: center; padding: 60px 20px;">
-                <i class="bi bi-inbox" style="font-size: 80px; color: #ddd;"></i>
-                <p style="font-size: 18px; color: #999; margin-top: 20px;">Nenhum documento encontrado nesta categoria.</p>
+            <div class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <h4>Nenhum Documento Encontrado</h4>
+                <p>
+                    <?php if ($categoria_filtro): ?>
+                        Não há documentos disponíveis na categoria "<?php echo htmlspecialchars($categoria_filtro); ?>".
+                    <?php else: ?>
+                        Em breve disponibilizaremos documentos sobre o nosso trabalho nas comunidades.
+                    <?php endif; ?>
+                </p>
             </div>
         <?php endif; ?>
+
+        <!-- Informações Adicionais -->
+        <div class="info-box">
+            <h4><i class="bi bi-info-circle-fill text-danger me-2"></i>Sobre os Nossos Documentos</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 style="color: var(--secondary-color); font-weight: 600; margin-top: 15px;">Áreas Documentadas:</h6>
+                    <ul>
+                        <li><strong>Saúde Materno-Infantil</strong> - Relatórios e estudos sobre cuidados a grávidas e crianças</li>
+                        <li><strong>Prevenção da Malária</strong> - Materiais educativos e resultados de campanhas</li>
+                        <li><strong>HIV/SIDA</strong> - Estratégias de prevenção e sensibilização comunitária</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6 style="color: var(--secondary-color); font-weight: 600; margin-top: 15px;">Também Disponíveis:</h6>
+                    <ul>
+                        <li><strong>Nutrição</strong> - Guias e recursos sobre alimentação saudável</li>
+                        <li><strong>Construção da Paz</strong> - Documentos sobre diálogo inter-religioso</li>
+                        <li><strong>Relatórios Anuais</strong> - Prestação de contas e impacto das nossas ações</li>
+                    </ul>
+                </div>
+            </div>
+            <p style="color: #999; font-size: 14px; margin-top: 20px; margin-bottom: 0;">
+                <i class="bi bi-shield-check me-1"></i>
+                Todos os documentos são de acesso público e refletem o nosso compromisso com a transparência e partilha de conhecimento.
+            </p>
+        </div>
     </div>
 </section>
 

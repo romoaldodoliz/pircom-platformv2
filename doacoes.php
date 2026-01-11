@@ -1,5 +1,5 @@
 <?php
-$page_title = "Strong Woman - Doações";
+$page_title = "Pircom - Doações";
 include 'includes/navbar.php';
 include('config/conexao.php');
 
@@ -99,13 +99,31 @@ $config = ($result && $result->num_rows > 0) ? $result->fetch_assoc() : null;
         font-weight: 700;
         margin-bottom: 15px;
     }
+
+    .mission-highlight {
+        background: #f8f9fa;
+        border-left: 4px solid var(--primary-color);
+        padding: 25px;
+        margin-bottom: 30px;
+        border-radius: 10px;
+    }
+
+    .mission-highlight ul {
+        margin-bottom: 0;
+        padding-left: 20px;
+    }
+
+    .mission-highlight li {
+        margin-bottom: 10px;
+        color: #555;
+    }
 </style>
 
 <section class="py-5" style="min-height: 70vh;">
     <div class="container">
         <div class="section-title">
-            <h2>DOAÇÕES</h2>
-            <p>Apoie a Strong Woman</p>
+            <h2>APOIE A NOSSA MISSÃO</h2>
+            <p>Juntos pela saúde e bem-estar das comunidades moçambicanas</p>
         </div>
 
         <?php if ($message): ?>
@@ -117,8 +135,31 @@ $config = ($result && $result->num_rows > 0) ? $result->fetch_assoc() : null;
 
         <!-- Impacto -->
         <div class="impact-card">
-            <h3><i class="bi bi-heart-fill me-3"></i>Transforme Vidas</h3>
-            <p class="lead mb-0">Com sua ajuda, podemos empoderar mulheres em Moçambique através de capacitação profissional, apoio psicológico e assistência jurídica.</p>
+            <h3><i class="bi bi-heart-pulse me-3"></i>Transforme Vidas Através da Fé e Saúde</h3>
+            <p class="lead mb-0">Desde 2006, a PIRCOM une comunidades cristãs, muçulmanas, hindus e bahai na promoção da saúde em Moçambique. A sua contribuição fortalece o nosso trabalho na prevenção da malária, HIV, saúde materno-infantil e construção da paz.</p>
+        </div>
+
+        <!-- Áreas de Impacto -->
+        <div class="mission-highlight">
+            <h4 style="color: var(--secondary-color); font-weight: 700; margin-bottom: 20px;">
+                <i class="bi bi-bullseye text-danger me-2"></i>O Seu Apoio Contribui Para:
+            </h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <ul>
+                        <li><strong>Prevenção e tratamento da malária</strong> nas comunidades vulneráveis</li>
+                        <li><strong>Combate ao HIV/SIDA</strong> através de educação e sensibilização</li>
+                        <li><strong>Saúde materno-infantil</strong> - cuidados a grávidas, lactantes e crianças menores de 5 anos</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <ul>
+                        <li><strong>Nutrição comunitária</strong> para famílias em situação de vulnerabilidade</li>
+                        <li><strong>Construção da paz</strong> através do diálogo inter-religioso</li>
+                        <li><strong>Comunicação para mudança social</strong> usando rádios comunitárias e visitas domiciliárias</li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
         <!-- Métodos de Pagamento -->
@@ -182,7 +223,7 @@ $config = ($result && $result->num_rows > 0) ? $result->fetch_assoc() : null;
                     <h3 class="mb-4 text-center" style="color: var(--secondary-color);">
                         <i class="bi bi-clipboard-check text-danger me-2"></i>Registar Sua Doação
                     </h3>
-                    <p class="text-muted text-center mb-4">Após efetuar a doação, preencha o formulário abaixo.</p>
+                    <p class="text-muted text-center mb-4">Após efetuar a doação por um dos métodos acima, preencha o formulário abaixo para confirmarmos o seu apoio.</p>
                     
                     <form method="POST" enctype="multipart/form-data">
                         <div class="row">
@@ -221,20 +262,36 @@ $config = ($result && $result->num_rows > 0) ? $result->fetch_assoc() : null;
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">Comprovativo (Opcional)</label>
                                 <input type="file" class="form-control" name="comprovativo" accept="image/*">
+                                <small class="text-muted">Anexe o comprovativo de pagamento</small>
                             </div>
                             
                             <div class="col-12 mb-4">
                                 <label class="form-label fw-bold">Mensagem (Opcional)</label>
-                                <textarea class="form-control" name="mensagem" rows="3" placeholder="Deixe uma mensagem..."></textarea>
+                                <textarea class="form-control" name="mensagem" rows="3" placeholder="Deixe uma mensagem de apoio..."></textarea>
                             </div>
                             
                             <div class="col-12 text-center">
                                 <button type="submit" name="submit_doacao" class="btn btn-primary btn-lg px-5">
-                                    <i class="bi bi-heart-fill me-2"></i>Registar Doação
+                                    <i class="bi bi-heart-fill me-2"></i>Confirmar Doação
                                 </button>
+                                <p class="text-muted mt-3 mb-0">
+                                    <small><i class="bi bi-shield-check me-1"></i>As suas informações estão seguras connosco</small>
+                                </p>
                             </div>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mensagem Final -->
+        <div class="row mt-5">
+            <div class="col-lg-10 mx-auto text-center">
+                <div class="alert alert-info" style="background: #e8f4f8; border: none; border-radius: 15px;">
+                    <h5 style="color: var(--secondary-color); font-weight: 700;">
+                        <i class="bi bi-info-circle me-2"></i>Cada Contribuição Faz a Diferença
+                    </h5>
+                    <p class="mb-0">Através da união de comunidades de fé e do apoio de pessoas como você, continuamos a salvar vidas, promover a saúde e construir um Moçambique mais saudável e pacífico. Obrigado por fazer parte desta missão!</p>
                 </div>
             </div>
         </div>

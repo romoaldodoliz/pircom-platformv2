@@ -1,5 +1,5 @@
 <?php
-$page_title = "Movimento - Strong Woman";
+$page_title = "Causa - PIRCOM";
 include 'config/conexao.php';
 
 // Buscar movimento
@@ -41,6 +41,12 @@ include 'includes/navbar.php';
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
 <style>
+    :root {
+        --pircom-primary: #2563eb;
+        --pircom-secondary: #1e40af;
+        --pircom-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
     .movimento-detalhes {
         padding: 120px 0 50px;
         background: #f7f8fa;
@@ -67,19 +73,21 @@ include 'includes/navbar.php';
     
     .movimento-categoria {
         display: inline-block;
-        background: var(--primary-color);
+        background: var(--pircom-gradient);
         color: white;
         padding: 8px 20px;
         border-radius: 20px;
         font-size: 14px;
         font-weight: 600;
         margin-bottom: 15px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     
     .movimento-titulo {
         font-size: 42px;
         font-weight: 700;
-        color: #333;
+        color: #1f2937;
         margin-bottom: 20px;
         line-height: 1.2;
     }
@@ -102,7 +110,7 @@ include 'includes/navbar.php';
     }
     
     .movimento-info-item i {
-        color: var(--primary-color);
+        color: var(--pircom-primary);
         font-size: 20px;
     }
     
@@ -124,9 +132,23 @@ include 'includes/navbar.php';
     .galeria-titulo {
         font-size: 32px;
         font-weight: 700;
-        color: #333;
+        color: #1f2937;
         margin-bottom: 30px;
         text-align: center;
+        position: relative;
+        padding-bottom: 15px;
+    }
+    
+    .galeria-titulo::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: var(--pircom-gradient);
+        border-radius: 2px;
     }
     
     .galeria-grid {
@@ -142,6 +164,7 @@ include 'includes/navbar.php';
         cursor: pointer;
         height: 250px;
         transition: all 0.3s;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     
     .galeria-item img {
@@ -152,7 +175,7 @@ include 'includes/navbar.php';
     }
     
     .galeria-item:hover {
-        box-shadow: 0 10px 30px rgba(251, 10, 10, 0.3);
+        box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
         transform: translateY(-5px);
     }
     
@@ -184,19 +207,37 @@ include 'includes/navbar.php';
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        background: var(--secondary-color);
+        background: var(--pircom-gradient);
         color: white;
         padding: 12px 30px;
         border-radius: 25px;
         text-decoration: none;
         transition: all 0.3s;
         font-weight: 600;
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
     }
     
     .btn-voltar:hover {
-        background: var(--primary-color);
+        background: var(--pircom-secondary);
         color: white;
         transform: translateX(-5px);
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+    }
+    
+    .pircom-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(37, 99, 235, 0.1);
+        color: var(--pircom-primary);
+        padding: 10px 20px;
+        border-radius: 30px;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+    
+    .pircom-badge i {
+        font-size: 18px;
     }
     
     @media (max-width: 768px) {
@@ -236,6 +277,10 @@ include 'includes/navbar.php';
         .galeria-item {
             height: 150px;
         }
+        
+        .galeria-titulo {
+            font-size: 24px;
+        }
     }
 </style>
 
@@ -250,6 +295,12 @@ include 'includes/navbar.php';
             <?php endif; ?>
             
             <div class="movimento-header-content">
+                <!-- Badge PIRCOM -->
+                <div class="pircom-badge">
+                    <i class="bi bi-heart-pulse-fill"></i>
+                    <span>Área de Intervenção PIRCOM</span>
+                </div>
+                
                 <?php if ($movimento['tema']): ?>
                     <span class="movimento-categoria">
                         <?php echo htmlspecialchars($movimento['tema']); ?>
@@ -270,7 +321,7 @@ include 'includes/navbar.php';
                     
                     <?php if ($movimento['local']): ?>
                         <div class="movimento-info-item">
-                            <i class="bi bi-geo-alt"></i>
+                            <i class="bi bi-geo-alt-fill"></i>
                             <span><?php echo htmlspecialchars($movimento['local']); ?></span>
                         </div>
                     <?php endif; ?>
@@ -281,12 +332,17 @@ include 'includes/navbar.php';
                             <span><?php echo count($fotos); ?> foto<?php echo count($fotos) > 1 ? 's' : ''; ?></span>
                         </div>
                     <?php endif; ?>
+                    
+                    <div class="movimento-info-item">
+                        <i class="bi bi-eye-fill"></i>
+                        <span><?php echo number_format($movimento['visualizacoes'], 0, ',', '.'); ?> visualizações</span>
+                    </div>
                 </div>
                 
                 <div class="movimento-descricao">
                     <?php 
                     // Manter emojis e caracteres especiais
-                    echo nl2br($movimento['descricao']);
+                    echo nl2br(htmlspecialchars($movimento['descricao']));
                     ?>
                 </div>
             </div>
@@ -295,7 +351,7 @@ include 'includes/navbar.php';
         <!-- Galeria de Fotos -->
         <?php if (count($fotos) > 0): ?>
             <div class="galeria-section">
-                <h2 class="galeria-titulo">Galeria de Fotos</h2>
+                <h2 class="galeria-titulo">Galeria de Imagens</h2>
                 <div class="galeria-grid">
                     <?php foreach ($fotos as $foto): ?>
                         <a href="<?php echo htmlspecialchars($foto['foto']); ?>" 
@@ -305,7 +361,7 @@ include 'includes/navbar.php';
                            data-glightbox="title: <?php echo htmlspecialchars($foto['legenda']); ?>"
                            <?php endif; ?>>
                             <img src="<?php echo htmlspecialchars($foto['foto']); ?>" 
-                                 alt="<?php echo htmlspecialchars($foto['legenda'] ?? 'Foto do movimento'); ?>">
+                                 alt="<?php echo htmlspecialchars($foto['legenda'] ?? 'Imagem da causa PIRCOM'); ?>">
                             <div class="galeria-overlay">
                                 <i class="bi bi-zoom-in"></i>
                             </div>
@@ -319,7 +375,7 @@ include 'includes/navbar.php';
         <div class="text-center mt-5">
             <a href="movimentos.php" class="btn-voltar">
                 <i class="bi bi-arrow-left"></i>
-                Voltar para Movimentos
+                Voltar para Causas
             </a>
         </div>
     </div>
@@ -336,7 +392,8 @@ include 'includes/navbar.php';
         loop: true,
         autoplayVideos: false,
         closeButton: true,
-        closeOnOutsideClick: true
+        closeOnOutsideClick: true,
+        skin: 'clean'
     });
 </script>
 

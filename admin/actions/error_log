@@ -6,3 +6,88 @@
 [16-Mar-2024 07:42:24 UTC] PHP Notice:  Undefined index: password in /home/qsnrwyjb/public_html/admin/app/actions/loginAction.php on line 7
 [17-Apr-2024 20:13:06 UTC] PHP Notice:  Undefined index: email in /home/qsnrwyjb/public_html/admin/app/actions/loginAction.php on line 6
 [17-Apr-2024 20:13:06 UTC] PHP Notice:  Undefined index: password in /home/qsnrwyjb/public_html/admin/app/actions/loginAction.php on line 7
+[03-Dec-2025 14:00:57 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[03-Dec-2025 14:05:34 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[03-Dec-2025 15:14:51 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[03-Dec-2025 15:15:03 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[04-Dec-2025 14:20:25 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[05-Dec-2025 05:41:13 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[05-Dec-2025 05:41:36 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[05-Dec-2025 06:43:08 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[05-Dec-2025 06:43:18 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[05-Dec-2025 09:06:21 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[05-Dec-2025 09:06:53 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[11-Dec-2025 20:38:27 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[28-Dec-2025 14:43:10 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[28-Dec-2025 14:43:16 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[31-Dec-2025 12:54:34 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[31-Dec-2025 12:54:34 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'qsnrwyjb_admin'@'localhost' to database 'qsnrwyjb_pircom_v2' in /home/qsnrwyjb/public_html/admin/config/conexao.php:9
+Stack trace:
+#0 /home/qsnrwyjb/public_html/admin/config/conexao.php(9): mysqli->__construct()
+#1 /home/qsnrwyjb/public_html/admin/actions/loginAction.php(6): include('/home/qsnrwyjb/...')
+#2 {main}
+  thrown in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[31-Dec-2025 13:21:26 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[31-Dec-2025 13:21:27 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'qsnrwyjb_admin'@'localhost' to database 'qsnrwyjb_pircom_v2' in /home/qsnrwyjb/public_html/admin/config/conexao.php:9
+Stack trace:
+#0 /home/qsnrwyjb/public_html/admin/config/conexao.php(9): mysqli->__construct()
+#1 /home/qsnrwyjb/public_html/admin/actions/loginAction.php(6): include('/home/qsnrwyjb/...')
+#2 {main}
+  thrown in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[31-Dec-2025 13:21:37 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[31-Dec-2025 13:21:37 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'qsnrwyjb_admin'@'localhost' to database 'qsnrwyjb_pircom_v2' in /home/qsnrwyjb/public_html/admin/config/conexao.php:9
+Stack trace:
+#0 /home/qsnrwyjb/public_html/admin/config/conexao.php(9): mysqli->__construct()
+#1 /home/qsnrwyjb/public_html/admin/actions/loginAction.php(6): include('/home/qsnrwyjb/...')
+#2 {main}
+  thrown in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[31-Dec-2025 13:22:44 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[31-Dec-2025 13:22:44 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'qsnrwyjb_admin'@'localhost' to database 'qsnrwyjb_pircom_v2' in /home/qsnrwyjb/public_html/admin/config/conexao.php:9
+Stack trace:
+#0 /home/qsnrwyjb/public_html/admin/config/conexao.php(9): mysqli->__construct()
+#1 /home/qsnrwyjb/public_html/admin/actions/loginAction.php(6): include('/home/qsnrwyjb/...')
+#2 {main}
+  thrown in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[06-Jan-2026 08:35:32 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[06-Jan-2026 08:35:32 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'qsnrwyjb_admin'@'localhost' to database 'qsnrwyjb_pircom_v2' in /home/qsnrwyjb/public_html/admin/config/conexao.php:9
+Stack trace:
+#0 /home/qsnrwyjb/public_html/admin/config/conexao.php(9): mysqli->__construct()
+#1 /home/qsnrwyjb/public_html/admin/actions/loginAction.php(6): include('/home/qsnrwyjb/...')
+#2 {main}
+  thrown in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[06-Jan-2026 08:42:38 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[06-Jan-2026 08:42:38 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'qsnrwyjb_admin'@'localhost' to database 'qsnrwyjb_pircom_v2' in /home/qsnrwyjb/public_html/admin/config/conexao.php:9
+Stack trace:
+#0 /home/qsnrwyjb/public_html/admin/config/conexao.php(9): mysqli->__construct()
+#1 /home/qsnrwyjb/public_html/admin/actions/loginAction.php(6): include('/home/qsnrwyjb/...')
+#2 {main}
+  thrown in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[06-Jan-2026 11:05:22 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[06-Jan-2026 11:05:22 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'qsnrwyjb_admin'@'localhost' to database 'qsnrwyjb_pircom_v2' in /home/qsnrwyjb/public_html/admin/config/conexao.php:9
+Stack trace:
+#0 /home/qsnrwyjb/public_html/admin/config/conexao.php(9): mysqli->__construct()
+#1 /home/qsnrwyjb/public_html/admin/actions/loginAction.php(6): include('/home/qsnrwyjb/...')
+#2 {main}
+  thrown in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[06-Jan-2026 11:21:51 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[06-Jan-2026 11:21:51 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'qsnrwyjb_admin'@'localhost' to database 'qsnrwyjb_pircom_v2' in /home/qsnrwyjb/public_html/admin/config/conexao.php:9
+Stack trace:
+#0 /home/qsnrwyjb/public_html/admin/config/conexao.php(9): mysqli->__construct()
+#1 /home/qsnrwyjb/public_html/admin/actions/loginAction.php(6): include('/home/qsnrwyjb/...')
+#2 {main}
+  thrown in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[06-Jan-2026 11:23:30 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[06-Jan-2026 11:23:30 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'qsnrwyjb_admin'@'localhost' to database 'qsnrwyjb_pircom_v2' in /home/qsnrwyjb/public_html/admin/config/conexao.php:9
+Stack trace:
+#0 /home/qsnrwyjb/public_html/admin/config/conexao.php(9): mysqli->__construct()
+#1 /home/qsnrwyjb/public_html/admin/actions/loginAction.php(6): include('/home/qsnrwyjb/...')
+#2 {main}
+  thrown in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[06-Jan-2026 11:28:43 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[06-Jan-2026 11:28:43 UTC] Tentativa de login falhou para email: mahumanesergio@gmail.com
+[06-Jan-2026 11:29:02 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[08-Jan-2026 14:02:15 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[09-Jan-2026 00:22:34 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[10-Jan-2026 10:20:23 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[10-Jan-2026 10:59:56 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9
+[10-Jan-2026 11:00:49 UTC] PHP Warning:  Undefined variable $port in /home/qsnrwyjb/public_html/admin/config/conexao.php on line 9

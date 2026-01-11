@@ -1,5 +1,5 @@
 <?php
-$page_title = "Strong Woman - Galeria";
+$page_title = "Pircom - Galeria";
 include 'includes/navbar.php';
 ?>
 
@@ -260,13 +260,81 @@ include 'includes/navbar.php';
     .video-mode .lightbox-nav {
         display: none;
     }
+
+    .gallery-intro {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 20px;
+        padding: 40px;
+        margin-bottom: 50px;
+        text-align: center;
+    }
+
+    .gallery-intro h3 {
+        color: var(--secondary-color);
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    .gallery-intro p {
+        color: #666;
+        font-size: 16px;
+        margin-bottom: 0;
+        line-height: 1.8;
+    }
+
+    .stats-row {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-top: 25px;
+        flex-wrap: wrap;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--primary-color);
+        display: block;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        color: #666;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
 </style>
 
 <section class="py-5" style="min-height: 70vh;">
     <div class="container">
         <div class="section-title">
-            <h2>GALERIA</h2>
-            <p>Momentos Strong Woman</p>
+            <h2>GALERIA PIRCOM</h2>
+            <p>Registos do nosso trabalho pela saúde e paz</p>
+        </div>
+
+        <!-- Introdução -->
+        <div class="gallery-intro">
+            <h3><i class="bi bi-camera-fill text-danger me-2"></i>Nossa História em Imagens</h3>
+            <p>Desde 2006, a PIRCOM tem trabalhado em comunidades moçambicanas unindo cristãos, muçulmanos, hindus e bahai na promoção da saúde. Aqui compartilhamos momentos das nossas intervenções em prevenção da malária, combate ao HIV, saúde materno-infantil e construção da paz.</p>
+            
+            <div class="stats-row">
+                <div class="stat-item">
+                    <span class="stat-number"><i class="bi bi-calendar-check"></i> 18+</span>
+                    <span class="stat-label">Anos de Impacto</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number"><i class="bi bi-people"></i> 4</span>
+                    <span class="stat-label">Comunidades Religiosas</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number"><i class="bi bi-heart-pulse"></i> 5+</span>
+                    <span class="stat-label">Áreas de Saúde</span>
+                </div>
+            </div>
         </div>
 
         <?php
@@ -389,9 +457,11 @@ include 'includes/navbar.php';
                 }
             } else {
                 echo '<div class="col-12 text-center py-5">';
+                echo '<div style="background: white; border-radius: 20px; padding: 60px 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">';
                 echo '<i class="bi bi-images" style="font-size: 80px; color: var(--primary-color);"></i>';
-                echo '<h4 class="mt-3">Galeria Vazia</h4>';
-                echo '<p>Nenhum conteúdo disponível no momento.</p>';
+                echo '<h4 class="mt-4" style="color: var(--secondary-color);">Galeria em Construção</h4>';
+                echo '<p class="text-muted mb-0">Em breve, compartilharemos mais momentos do nosso trabalho nas comunidades moçambicanas.</p>';
+                echo '</div>';
                 echo '</div>';
             }
 
@@ -404,6 +474,19 @@ include 'includes/navbar.php';
                 return isset($matches[1]) ? $matches[1] : null;
             }
             ?>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="text-center mt-5">
+            <div class="alert" style="background: linear-gradient(135deg, var(--primary-color) 0%, #c70808 100%); color: white; border: none; border-radius: 15px; padding: 30px;">
+                <h5 style="font-weight: 700; margin-bottom: 15px;">
+                    <i class="bi bi-megaphone me-2"></i>Acompanhe Nosso Trabalho
+                </h5>
+                <p style="margin-bottom: 20px; opacity: 0.95;">Siga-nos nas redes sociais para mais atualizações sobre nossas atividades e impacto nas comunidades.</p>
+                <a href="contacto.php" class="btn btn-light btn-lg" style="font-weight: 700;">
+                    <i class="bi bi-telephone-fill me-2"></i>Entre em Contacto
+                </a>
+            </div>
         </div>
     </div>
 </section>

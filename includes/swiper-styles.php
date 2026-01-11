@@ -75,7 +75,7 @@
 }
 
 .cta {
-    background: linear-gradient(135deg, var(--primary-color) 0%, #c70808 50%, var(--secondary-color) 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, #0a0a0aff 50%, var(--secondary-color) 100%);
     padding: 80px 0;
     color: white;
 }

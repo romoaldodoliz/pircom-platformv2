@@ -17,12 +17,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <title>Strong Woman - Admin Panel</title>
+    <title>PIRCOM - Painel Administrativo</title>
 
     <meta name="description" content="" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="assets/img/favicon/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="assets/pircom.png" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -52,8 +52,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
       }
       
       :root {
-        --primary-red: #fb0a0a;
-        --primary-hover: #e00909;
+        --primary-red: #FF6F0F;
+        --primary-hover: #E05A00;
         --dark-bg: #0f0f0f;
         --darker-bg: #080808;
         --card-bg: #1a1a1a;
@@ -75,7 +75,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
       /* Logo Area */
       #layout-menu .app-brand {
         padding: 24px 20px;
-        background: linear-gradient(135deg, rgba(251, 10, 10, 0.1) 0%, transparent 100%);
+        background: linear-gradient(135deg, rgba(255, 111, 15, 0.1) 0%, transparent 100%);
         border-bottom: 1px solid var(--border-color);
         position: relative;
         overflow: hidden;
@@ -100,13 +100,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
       }
 
       #layout-menu .app-brand-link img {
-        filter: brightness(1.1) drop-shadow(0 4px 12px rgba(251, 10, 10, 0.3));
+        filter: brightness(1.1) drop-shadow(0 4px 12px rgba(255, 111, 15, 0.3));
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       #layout-menu .app-brand-link:hover img {
         transform: scale(1.08) translateY(-2px);
-        filter: brightness(1.2) drop-shadow(0 6px 20px rgba(251, 10, 10, 0.5));
+        filter: brightness(1.2) drop-shadow(0 6px 20px rgba(255, 111, 15, 0.5));
       }
 
       /* Menu Sections */
@@ -157,7 +157,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         content: '';
         position: absolute;
         inset: 0;
-        background: linear-gradient(90deg, rgba(251, 10, 10, 0.1), transparent);
+        background: linear-gradient(90deg, rgba(255, 111, 15, 0.1), transparent);
         opacity: 0;
         transition: opacity 0.3s ease;
       }
@@ -187,9 +187,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
       /* Active State */
       #layout-menu .menu-item.active > .menu-link {
-        background: linear-gradient(135deg, rgba(251, 10, 10, 0.15) 0%, rgba(251, 10, 10, 0.05) 100%);
+        background: linear-gradient(135deg, rgba(255, 111, 15, 0.15) 0%, rgba(255, 111, 15, 0.05) 100%);
         color: var(--text-primary) !important;
-        box-shadow: inset 0 0 0 1px rgba(251, 10, 10, 0.3), var(--shadow-sm);
+        box-shadow: inset 0 0 0 1px rgba(255, 111, 15, 0.3), var(--shadow-sm);
         font-weight: 600;
       }
 
@@ -200,14 +200,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
         top: 20%;
         bottom: 20%;
         width: 4px;
-        background: linear-gradient(180deg, var(--primary-red), rgba(251, 10, 10, 0.4));
+        background: linear-gradient(180deg, var(--primary-red), rgba(255, 111, 15, 0.4));
         border-radius: 0 4px 4px 0;
-        box-shadow: 0 0 12px rgba(251, 10, 10, 0.6);
+        box-shadow: 0 0 12px rgba(255, 111, 15, 0.6);
       }
 
       #layout-menu .menu-item.active > .menu-link .menu-icon {
         color: var(--primary-red);
-        filter: drop-shadow(0 0 8px rgba(251, 10, 10, 0.4));
+        filter: drop-shadow(0 0 8px rgba(255, 111, 15, 0.4));
       }
 
       /* Scrollbar - Removido efeito ao scroll */
@@ -234,7 +234,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
       }
 
       #layout-menu .menu-inner::-webkit-scrollbar-thumb:hover {
-        background: rgba(251, 10, 10, 0.3);
+        background: rgba(255, 111, 15, 0.3);
       }
       
       /* Shadow ao fazer scroll - removida */
@@ -519,7 +519,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
                 <div class="app-brand">
                     <a href="dashboard.php" class="app-brand-link">
-                        <img src="assets/logo.png" width="170" style="height:auto; width: 85px;" alt="Strong Woman Logo">
+                        <img src="assets/pircom.png" width="170" style="height:auto; width: 85px;" alt="PIRCOM Logo">
                     </a>
 
                     <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -587,6 +587,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         </a>
                     </li>
                     
+                    <li class="menu-item <?php echo (in_array($current_page, ['provincias.php', 'provinciasform.php'])) ? 'active' : ''; ?>">
+                        <a href="provincias.php" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-map"></i>
+                            <div>Cobertura Geográfica</div>
+                        </a>
+                    </li>
+                    
                     <li class="menu-header small text-uppercase">
                         <span class="menu-header-text">Multimédia</span>
                     </li>
@@ -649,7 +656,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             <h5 class="welcome-text">
                                 Bem-vindo, <span class="welcome-name"><?php echo htmlspecialchars($_SESSION["usuario_nome"]); ?></span>
                             </h5>
-                            <p class="welcome-subtitle">Gerencie seu painel Strong Woman</p>
+                            <p class="welcome-subtitle">Gerencie seu painel PIRCOM</p>
                         </div>
 
                         <!-- User Section -->
