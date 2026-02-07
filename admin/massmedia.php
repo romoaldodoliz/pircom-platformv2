@@ -35,10 +35,16 @@ include('config/conexao.php');
                                 echo "<td>" . $row["titulo"] . "</td>";
                                 echo "<td>" . $row["link"] . "</td>";
                                 echo "<td>";
-                                echo "<form method='POST' action='remover_massmedia.php'>";
-                                echo "<input type='hidden' name='massmedia_id' value='" . $row['id'] . "'>";
-                                echo "<button type='submit' class='btn btn-danger' name='remover'>Remover</button>";
-                                echo "</form>";
+                                if (isAdmin()) {
+                                    echo "<form method='POST' action='remover_massmedia.php' class='d-inline'>";
+                                    echo csrfField();
+                                    echo "<input type='hidden' name='massmedia_id' value='" . $row['id'] . "'>";
+                                    echo "<button type='submit' class='btn btn-danger' name='remover'>Remover</button>";
+                                    echo "</form>";
+                                } else {
+                                    $itemName = htmlspecialchars($row['titulo'], ENT_QUOTES);
+                                    echo "<button type='button' class='btn btn-danger disabled-delete' data-item-name='" . $itemName . "' aria-disabled='true'>Remover</button>";
+                                }
                                 echo "</td>";
                                 echo "</tr>";
                             }

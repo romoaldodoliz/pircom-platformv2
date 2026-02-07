@@ -1,6 +1,9 @@
 <?php
 // Incluir helper de autenticação
 require_once(__DIR__ . '/helpers/auth.php');
+if (file_exists(__DIR__ . '/helpers/notifications.php')) {
+    require_once(__DIR__ . '/helpers/notifications.php');
+}
 
 // Verificar se usuário está autenticado
 requireAuth();
@@ -9,6 +12,11 @@ requireAuth();
 checkSessionTimeout();
 
 $current_page = basename($_SERVER['PHP_SELF']);
+$notificacoes_nao_lidas = [];
+if (function_exists('obterNotificacoesNaoLidas') && isset($_SESSION['user_id'])) {
+    $notificacoes_nao_lidas = obterNotificacoesNaoLidas($_SESSION['user_id']);
+}
+$total_notificacoes = count($notificacoes_nao_lidas);
 ?>
 <!DOCTYPE html>
 <html lang="pt" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="assets/" data-template="vertical-menu-template-free">
@@ -23,6 +31,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="assets/pircom.png" />
+    <link rel="shortcut icon" href="assets/pircom.png" />
+    <link rel="apple-touch-icon" href="assets/pircom.png" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -36,6 +46,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <link rel="stylesheet" href="assets/vendor/css/core.css" class="template-customizer-core-css" />
     <link rel="stylesheet" href="assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
     <link rel="stylesheet" href="assets/css/demo.css" />
+    
+    <!-- Notification Styles -->
+    <link rel="stylesheet" href="assets/css/notifications.css" />
 
     <!-- Vendors CSS -->
     <link rel="stylesheet" href="assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
@@ -44,11 +57,20 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <!-- Helpers -->
     <script src="assets/vendor/js/helpers.js"></script>
     <script src="assets/js/config.js"></script>
+    
+    <!-- Notification System JS - Carregar antes de usar -->
+    <script src="assets/js/notifications.js"></script>
 
-    <!-- Modern Styles -->
+    <script>
+      // Disponibiliza flag de role para o JS (true se admin)
+      window.__isAdmin = <?php echo isAdmin() ? 'true' : 'false'; ?>;
+    </script>
+
+    <!-- Modern Responsive Styles -->
     <style>
       * {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        box-sizing: border-box;
       }
       
       :root {
@@ -62,23 +84,60 @@ $current_page = basename($_SERVER['PHP_SELF']);
         --text-secondary: #a0a0a0;
         --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
         --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+        --sidebar-width: 280px;
+        --sidebar-collapsed-width: 80px;
+        --navbar-height: 70px;
+        --transition-speed: 0.3s;
       }
 
-      /* ========== SIDEBAR MODERN ========== */
+      /* ========== LAYOUT BASE ========== */
+      .layout-wrapper {
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      .layout-container {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      .layout-page {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        transition: margin-left var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* ========== SIDEBAR MODERN RESPONSIVE ========== */
       #layout-menu.layout-menu {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: var(--sidebar-width);
         background: linear-gradient(180deg, var(--darker-bg) 0%, var(--dark-bg) 100%);
         border-right: 1px solid var(--border-color);
         box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
-        width: 280px;
+        transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1100;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
       }
 
       /* Logo Area */
       #layout-menu .app-brand {
-        padding: 24px 20px;
+        padding: 20px;
         background: linear-gradient(135deg, rgba(255, 111, 15, 0.1) 0%, transparent 100%);
         border-bottom: 1px solid var(--border-color);
         position: relative;
         overflow: hidden;
+        min-height: var(--navbar-height);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
       }
 
       #layout-menu .app-brand::before {
@@ -95,30 +154,89 @@ $current_page = basename($_SERVER['PHP_SELF']);
         display: flex;
         align-items: center;
         justify-content: center;
-        position: relative;
-        z-index: 2;
+        transition: opacity var(--transition-speed);
       }
 
       #layout-menu .app-brand-link img {
+        max-width: 85px;
+        height: auto;
         filter: brightness(1.1) drop-shadow(0 4px 12px rgba(255, 111, 15, 0.3));
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       #layout-menu .app-brand-link:hover img {
-        transform: scale(1.08) translateY(-2px);
+        transform: scale(1.05);
         filter: brightness(1.2) drop-shadow(0 6px 20px rgba(255, 111, 15, 0.5));
       }
 
+      /* Menu Toggle Button - Desktop */
+      .layout-menu-toggle {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+      }
+
+      .layout-menu-toggle:hover {
+        background: rgba(255, 111, 15, 0.2);
+        transform: rotate(180deg);
+      }
+
+      .layout-menu-toggle i {
+        color: var(--text-secondary);
+        font-size: 1.5rem;
+        transition: color 0.3s ease;
+      }
+
+      /* Menu Container */
+      #layout-menu .menu-inner {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 16px 12px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+      }
+
+      #layout-menu .menu-inner::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      #layout-menu .menu-inner::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      #layout-menu .menu-inner::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+      }
+
+      #layout-menu .menu-inner::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 111, 15, 0.3);
+      }
+
       /* Menu Sections */
+      #layout-menu .menu-header {
+        padding: 0;
+        margin: 24px 20px 12px;
+      }
+
       #layout-menu .menu-header-text {
         color: var(--text-secondary) !important;
         font-weight: 700;
         font-size: 10px;
         letter-spacing: 0.1em;
         text-transform: uppercase;
-        margin: 24px 20px 12px;
         padding-left: 16px;
         position: relative;
+        display: block;
+        transition: opacity var(--transition-speed);
       }
 
       #layout-menu .menu-header-text::before {
@@ -134,10 +252,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
       }
 
       /* Menu Items */
-      #layout-menu .menu-inner {
-        padding: 16px 12px;
-      }
-
       #layout-menu .menu-item {
         margin: 4px 0;
       }
@@ -151,6 +265,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
         position: relative;
         overflow: hidden;
         font-weight: 500;
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
       }
 
       #layout-menu .menu-item > .menu-link::before {
@@ -167,6 +284,11 @@ $current_page = basename($_SERVER['PHP_SELF']);
         font-size: 1.3rem;
         margin-right: 14px;
         transition: all 0.3s ease;
+        flex-shrink: 0;
+      }
+
+      #layout-menu .menu-item > .menu-link div {
+        transition: opacity var(--transition-speed);
       }
 
       /* Hover State */
@@ -210,48 +332,23 @@ $current_page = basename($_SERVER['PHP_SELF']);
         filter: drop-shadow(0 0 8px rgba(255, 111, 15, 0.4));
       }
 
-      /* Scrollbar - Removido efeito ao scroll */
-      #layout-menu .ps__rail-y {
-        display: none !important;
-      }
-
-      #layout-menu .ps__thumb-y {
-        display: none !important;
-      }
-
-      /* Scrollbar nativa customizada */
-      #layout-menu .menu-inner::-webkit-scrollbar {
-        width: 6px;
-      }
-
-      #layout-menu .menu-inner::-webkit-scrollbar-track {
-        background: transparent;
-      }
-
-      #layout-menu .menu-inner::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.15);
-        border-radius: 10px;
-      }
-
-      #layout-menu .menu-inner::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 111, 15, 0.3);
-      }
-      
-      /* Shadow ao fazer scroll - removida */
+      /* Remove sombra ao fazer scroll */
       #layout-menu .menu-inner-shadow {
         display: none !important;
       }
 
-      /* ========== NAVBAR MODERN ========== */
+      /* ========== NAVBAR MODERN RESPONSIVE ========== */
       .layout-navbar {
+        position: sticky;
+        top: 0;
+        height: var(--navbar-height);
         background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%) !important;
         backdrop-filter: blur(10px);
         box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
         border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        padding: 1rem 0;
-        position: sticky;
-        top: 0;
-        z-index: 1000;
+        padding: 0 1.5rem;
+        z-index: 1050;
+        transition: all var(--transition-speed);
       }
 
       .navbar-content {
@@ -259,16 +356,18 @@ $current_page = basename($_SERVER['PHP_SELF']);
         align-items: center;
         justify-content: space-between;
         width: 100%;
-        gap: 2rem;
+        height: 100%;
+        gap: 1.5rem;
       }
 
       /* Welcome Section */
       .welcome-section {
         flex: 1;
+        min-width: 0;
       }
 
       .welcome-text {
-        font-size: 1.5rem;
+        font-size: clamp(1.1rem, 2.5vw, 1.5rem);
         font-weight: 700;
         color: #1a1a1a;
         margin: 0;
@@ -276,27 +375,57 @@ $current_page = basename($_SERVER['PHP_SELF']);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .welcome-name {
         color: var(--primary-red);
         -webkit-text-fill-color: var(--primary-red);
         font-weight: 800;
-        position: relative;
       }
 
       .welcome-subtitle {
-        font-size: 0.875rem;
+        font-size: clamp(0.75rem, 1.5vw, 0.875rem);
         color: #666;
-        margin-top: 4px;
+        margin-top: 2px;
         font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       /* User Section */
       .user-section {
         display: flex;
         align-items: center;
-        gap: 1.5rem;
+        gap: 1rem;
+        flex-shrink: 0;
+      }
+
+      /* Mobile Menu Toggle */
+      .mobile-menu-toggle {
+        display: none;
+        background: #f5f5f5;
+        border: none;
+        border-radius: 12px;
+        width: 44px;
+        height: 44px;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .mobile-menu-toggle:hover {
+        background: linear-gradient(135deg, rgba(255, 111, 15, 0.1) 0%, rgba(255, 111, 15, 0.05) 100%);
+        transform: scale(1.05);
+      }
+
+      .mobile-menu-toggle i {
+        color: var(--primary-red);
+        font-size: 1.5rem;
       }
 
       /* Notification Bell */
@@ -312,17 +441,30 @@ $current_page = basename($_SERVER['PHP_SELF']);
         transition: all 0.3s ease;
         cursor: pointer;
         border: 2px solid transparent;
+        flex-shrink: 0;
       }
 
       .notification-bell:hover {
-        background: linear-gradient(135deg, rgba(251, 10, 10, 0.1) 0%, rgba(251, 10, 10, 0.05) 100%);
-        border-color: rgba(251, 10, 10, 0.2);
+        background: linear-gradient(135deg, rgba(255, 111, 15, 0.1) 0%, rgba(255, 111, 15, 0.05) 100%);
+        border-color: rgba(255, 111, 15, 0.2);
         transform: translateY(-2px);
       }
 
       .notification-bell i {
         font-size: 1.4rem;
         color: #333;
+        transition: transform 0.3s ease;
+      }
+
+      .notification-bell:hover i {
+        animation: bellRing 0.5s ease;
+      }
+
+      @keyframes bellRing {
+        0%, 100% { transform: rotate(0); }
+        25% { transform: rotate(-15deg); }
+        50% { transform: rotate(15deg); }
+        75% { transform: rotate(-10deg); }
       }
 
       .notification-badge {
@@ -340,13 +482,19 @@ $current_page = basename($_SERVER['PHP_SELF']);
         align-items: center;
         justify-content: center;
         border: 2px solid #ffffff;
-        box-shadow: 0 2px 8px rgba(251, 10, 10, 0.4);
-        animation: pulse 2s infinite;
+        box-shadow: 0 2px 8px rgba(255, 111, 15, 0.4);
+        animation: badgePulse 2s infinite;
       }
 
-      @keyframes pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.1); }
+      @keyframes badgePulse {
+        0%, 100% { 
+          transform: scale(1);
+          box-shadow: 0 2px 8px rgba(255, 111, 15, 0.4);
+        }
+        50% { 
+          transform: scale(1.1);
+          box-shadow: 0 4px 12px rgba(255, 111, 15, 0.6);
+        }
       }
 
       /* User Avatar */
@@ -357,10 +505,11 @@ $current_page = basename($_SERVER['PHP_SELF']);
         border-radius: 16px;
         background: linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%);
         transition: all 0.3s ease;
+        flex-shrink: 0;
       }
 
       .user-avatar:hover {
-        background: linear-gradient(135deg, rgba(251, 10, 10, 0.1) 0%, rgba(251, 10, 10, 0.05) 100%);
+        background: linear-gradient(135deg, rgba(255, 111, 15, 0.1) 0%, rgba(255, 111, 15, 0.05) 100%);
         transform: translateY(-2px);
         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
       }
@@ -405,6 +554,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         margin-top: 12px;
         min-width: 280px;
         animation: dropdownSlide 0.3s ease;
+        max-width: 90vw;
       }
 
       @keyframes dropdownSlide {
@@ -429,6 +579,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
         font-weight: 700;
         font-size: 1rem;
         margin-bottom: 0.25rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .dropdown-header small {
@@ -444,16 +597,18 @@ $current_page = basename($_SERVER['PHP_SELF']);
         gap: 0.75rem;
         font-weight: 500;
         color: #333;
+        white-space: nowrap;
       }
 
       .dropdown-item i {
         font-size: 1.25rem;
         color: #666;
         transition: color 0.2s ease;
+        flex-shrink: 0;
       }
 
       .dropdown-item:hover {
-        background: linear-gradient(90deg, rgba(251, 10, 10, 0.08) 0%, transparent 100%);
+        background: linear-gradient(90deg, rgba(255, 111, 15, 0.08) 0%, transparent 100%);
         color: var(--primary-red);
         padding-left: 1.5rem;
       }
@@ -467,51 +622,329 @@ $current_page = basename($_SERVER['PHP_SELF']);
         opacity: 0.1;
       }
 
-      /* Mobile Toggle */
-      .layout-menu-toggle i {
-        color: var(--primary-red) !important;
-        font-size: 1.75rem;
+      /* Notification Dropdown Specific Styles */
+      .notification-dropdown {
+        max-height: 400px;
+        overflow-y: auto;
       }
 
-      /* Responsive */
-      @media (max-width: 1199.98px) {
-        .navbar-content {
-          flex-direction: column;
-          gap: 1rem;
-        }
+      .notification-dropdown .dropdown-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      }
 
-        .welcome-section {
-          text-align: center;
+      .notification-dropdown .dropdown-item:last-child {
+        border-bottom: none;
+      }
+
+      .notification-dropdown .dropdown-item span {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        width: 100%;
+      }
+
+      .notification-dropdown .dropdown-item small {
+        color: #999;
+        font-size: 0.75rem;
+        margin-top: 0.25rem;
+      }
+
+      /* Backdrop para mobile */
+      .sidebar-backdrop {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1099;
+        opacity: 0;
+        transition: opacity var(--transition-speed);
+      }
+
+      .sidebar-backdrop.show {
+        display: block;
+        opacity: 1;
+      }
+
+      /* ========== RESPONSIVE BREAKPOINTS ========== */
+      
+      /* Large Desktop (>1400px) */
+      @media (min-width: 1400px) {
+        :root {
+          --sidebar-width: 300px;
+        }
+      }
+
+      /* Desktop (992px - 1199px) */
+      @media (max-width: 1199.98px) {
+        :root {
+          --sidebar-width: 260px;
         }
 
         .welcome-text {
           font-size: 1.25rem;
         }
 
-        #layout-menu.layout-menu {
-          width: 260px;
+        .welcome-subtitle {
+          font-size: 0.8rem;
         }
       }
 
-      @media (max-width: 767.98px) {
-        .welcome-text {
-          font-size: 1.1rem;
+      /* Tablet (768px - 991px) */
+      @media (max-width: 991.98px) {
+        #layout-menu.layout-menu {
+          transform: translateX(-100%);
+        }
+
+        #layout-menu.layout-menu.show {
+          transform: translateX(0);
+        }
+
+        .layout-page {
+          margin-left: 0 !important;
+        }
+
+        .welcome-section {
+          max-width: 60%;
         }
 
         .user-section {
-          gap: 1rem;
+          gap: 0.75rem;
+        }
+
+        .mobile-menu-toggle {
+          display: flex;
+        }
+
+        .layout-menu-toggle.d-xl-none {
+          display: none !important;
+        }
+      }
+
+      /* Mobile (576px - 767px) */
+      @media (max-width: 767.98px) {
+        :root {
+          --navbar-height: 65px;
+        }
+
+        .layout-navbar {
+          padding: 0 1rem;
+        }
+
+        .navbar-content {
+          gap: 0.75rem;
+        }
+
+        .welcome-section {
+          max-width: 50%;
+        }
+
+        .welcome-subtitle {
+          display: none;
         }
 
         .notification-bell,
+        .user-avatar {
+          width: 40px;
+          height: 40px;
+        }
+
+        .notification-bell {
+          padding: 0;
+        }
+
+        .notification-bell i {
+          font-size: 1.25rem;
+        }
+
         .user-avatar img {
           width: 40px;
           height: 40px;
         }
+
+        .status-indicator {
+          width: 12px;
+          height: 12px;
+          border-width: 2px;
+        }
+
+        .dropdown-menu {
+          min-width: 260px;
+          max-width: calc(100vw - 2rem);
+        }
+
+        .mobile-menu-toggle {
+          width: 40px;
+          height: 40px;
+        }
+
+        .mobile-menu-toggle i {
+          font-size: 1.35rem;
+        }
+      }
+
+      /* Small Mobile (<576px) */
+      @media (max-width: 575.98px) {
+        :root {
+          --sidebar-width: 280px;
+          --navbar-height: 60px;
+        }
+
+        .layout-navbar {
+          padding: 0 0.75rem;
+        }
+
+        .navbar-content {
+          gap: 0.5rem;
+        }
+
+        .welcome-text {
+          font-size: 1rem;
+        }
+
+        .welcome-section {
+          max-width: 45%;
+        }
+
+        .user-section {
+          gap: 0.5rem;
+        }
+
+        .notification-bell,
+        .user-avatar,
+        .mobile-menu-toggle {
+          width: 38px;
+          height: 38px;
+        }
+
+        .notification-bell i {
+          font-size: 1.15rem;
+        }
+
+        .user-avatar img {
+          width: 38px;
+          height: 38px;
+        }
+
+        .notification-badge {
+          min-width: 18px;
+          height: 18px;
+          font-size: 10px;
+        }
+
+        .dropdown-menu {
+          min-width: 240px;
+        }
+
+        .dropdown-header {
+          padding: 1.25rem 1rem;
+        }
+
+        .dropdown-item {
+          padding: 0.75rem 1rem;
+          font-size: 0.9rem;
+        }
+
+        #layout-menu .menu-item > .menu-link {
+          padding: 12px 14px;
+        }
+
+        #layout-menu .menu-header-text {
+          font-size: 9px;
+        }
+      }
+
+      /* Extra Small Mobile (<400px) */
+      @media (max-width: 399.98px) {
+        .welcome-text {
+          font-size: 0.9rem;
+        }
+
+        .welcome-section {
+          max-width: 40%;
+        }
+
+        .notification-bell,
+        .user-avatar,
+        .mobile-menu-toggle {
+          width: 36px;
+          height: 36px;
+        }
+
+        .user-avatar img {
+          width: 36px;
+          height: 36px;
+        }
+
+        .dropdown-menu {
+          min-width: 220px;
+        }
+      }
+
+      /* Landscape Mobile */
+      @media (max-height: 500px) and (orientation: landscape) {
+        :root {
+          --navbar-height: 55px;
+        }
+
+        .dropdown-menu {
+          max-height: 70vh;
+          overflow-y: auto;
+        }
+      }
+
+      /* Print Styles */
+      @media print {
+        #layout-menu,
+        .layout-navbar {
+          display: none;
+        }
+
+        .layout-page {
+          margin-left: 0 !important;
+        }
+      }
+
+      /* Touch Device Optimizations */
+      @media (hover: none) and (pointer: coarse) {
+        #layout-menu .menu-item > .menu-link {
+          min-height: 48px;
+        }
+
+        .notification-bell,
+        .user-avatar,
+        .mobile-menu-toggle {
+          min-width: 44px;
+          min-height: 44px;
+        }
+      }
+
+      /* Accessibility - Reduced Motion */
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+
+      /* Dark Mode Support (opcional) */
+      @media (prefers-color-scheme: dark) {
+        /* Manter cores atuais ou adaptar se necessário */
       }
     </style>
 </head>
 
 <body>
+    <!-- Backdrop para mobile -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
     <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
@@ -522,7 +955,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         <img src="assets/pircom.png" width="170" style="height:auto; width: 85px;" alt="PIRCOM Logo">
                     </a>
 
-                    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
+                    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none" id="menuToggleBtn">
                         <i class="bx bx-chevron-left bx-sm align-middle"></i>
                     </a>
                 </div>
@@ -644,13 +1077,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <div class="layout-page">
                 <!-- Navbar -->
                 <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
-                    <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
-                        <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
-                            <i class="bx bx-menu bx-sm"></i>
-                        </a>
-                    </div>
-
                     <div class="navbar-content">
+                        <!-- Mobile Menu Toggle -->
+                        <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button">
+                            <i class="bx bx-menu"></i>
+                        </button>
+
                         <!-- Welcome Section -->
                         <div class="welcome-section">
                             <h5 class="welcome-text">
@@ -663,33 +1095,55 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         <div class="user-section">
                             <!-- Notifications -->
                             <div class="nav-item dropdown">
-                                <a class="nav-link notification-bell" href="javascript:void(0);" data-bs-toggle="dropdown">
+                                <a class="nav-link notification-bell" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="bx bx-bell"></i>
-                                    <span class="notification-badge">3</span>
+                                    <?php if ($total_notificacoes > 0): ?>
+                                    <span class="notification-badge" id="notificationBadge"><?php echo $total_notificacoes; ?></span>
+                                    <?php endif; ?>
                                 </a>
-                                <div class="dropdown-menu dropdown-menu-end">
-                                    <div class="dropdown-header">
-                                        <h6>Notificações</h6>
-                                        <small>Você tem 3 novas notificações</small>
+                                <div class="dropdown-menu dropdown-menu-end notification-dropdown" id="notificationDropdown" style="min-width: 350px; max-width: 400px;">
+                                    <div class="dropdown-header d-flex justify-content-between align-items-center">
+                                        <h6 style="margin: 0;">Notificações</h6>
+                                        <?php if ($total_notificacoes > 0): ?>
+                                        <small style="cursor: pointer; color: var(--primary-red); font-weight: 600;" onclick="marcarTodasComoLidas()">Marcar todas</small>
+                                        <?php endif; ?>
                                     </div>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="bx bx-user-plus"></i>
-                                        <span>Novo doador registrado</span>
-                                    </a>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="bx bx-calendar"></i>
-                                        <span>Evento próximo amanhã</span>
-                                    </a>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="bx bx-message-dots"></i>
-                                        <span>3 novas mensagens</span>
-                                    </a>
+                                    <div id="notificationsList" style="max-height: 400px; overflow-y: auto;">
+                                        <?php if ($total_notificacoes > 0): ?>
+                                            <?php foreach ($notificacoes_nao_lidas as $notif): ?>
+                                            <a class="dropdown-item notification-item" data-id="<?php echo $notif['id']; ?>" href="javascript:void(0);" onclick="marcarNotificacao(<?php echo $notif['id']; ?>)">
+                                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                                    <div style="flex: 1;">
+                                                        <strong style="color: #333; display: block;"><?php echo htmlspecialchars($notif['titulo']); ?></strong>
+                                                        <small style="color: #666; display: block; margin-top: 4px;"><?php echo htmlspecialchars($notif['mensagem']); ?></small>
+                                                        <small style="color: #999; display: block; margin-top: 6px;">
+                                                            <?php 
+                                                                $time = strtotime($notif['criada_em']);
+                                                                $diff = time() - $time;
+                                                                if ($diff < 60) echo 'Há alguns segundos';
+                                                                elseif ($diff < 3600) echo 'Há ' . floor($diff/60) . ' minutos';
+                                                                elseif ($diff < 86400) echo 'Há ' . floor($diff/3600) . ' horas';
+                                                                else echo 'Há ' . floor($diff/86400) . ' dias';
+                                                            ?>
+                                                        </small>
+                                                    </div>
+                                                    <i class="bx bx-x" style="cursor: pointer; margin-left: 8px; color: #999;" onclick="event.stopPropagation(); deletarNotificacao(<?php echo $notif['id']; ?>)"></i>
+                                                </div>
+                                            </a>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <div style="padding: 20px; text-align: center; color: #999;">
+                                                <i class="bx bx-info-circle" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
+                                                <small>Nenhuma notificação no momento</small>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- User Menu -->
                             <div class="nav-item dropdown">
-                                <a class="nav-link user-avatar" href="javascript:void(0);" data-bs-toggle="dropdown">
+                                <a class="nav-link user-avatar" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false">
                                     <img src="https://static.vecteezy.com/system/resources/previews/007/296/443/large_2x/user-icon-person-icon-client-symbol-profile-icon-vector.jpg" alt="Avatar" />
                                     <span class="status-indicator"></span>
                                 </a>
@@ -697,31 +1151,36 @@ $current_page = basename($_SERVER['PHP_SELF']);
                                     <li>
                                         <div class="dropdown-header">
                                             <h6><?php echo htmlspecialchars($_SESSION["usuario_nome"]); ?></h6>
-                                            <small>Administrador</small>
+                                            <small><?php 
+                                                $role = getUserRole();
+                                                echo ($role === 'admin') ? 'Administrador' : 'Gerenciador de Conteúdo';
+                                            ?></small>
                                         </div>
                                     </li>
                                     <li><div class="dropdown-divider"></div></li>
                                     <li>
-                                        <a class="dropdown-item" href="#">
+                                        <a class="dropdown-item" href="editar-perfil.php">
                                             <i class="bx bx-user"></i>
                                             <span>Meu Perfil</span>
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="#">
-                                            <i class="bx bx-cog"></i>
-                                            <span>Configurações</span>
+                                        <a class="dropdown-item" href="editar-perfil.php?tab=password">
+                                            <i class="bx bx-lock"></i>
+                                            <span>Alterar Senha</span>
                                         </a>
                                     </li>
+                                    <?php if (isAdmin()): ?>
                                     <li>
-                                        <a class="dropdown-item" href="#">
-                                            <i class="bx bx-help-circle"></i>
-                                            <span>Ajuda & Suporte</span>
+                                        <a class="dropdown-item" href="configuracoes.php">
+                                            <i class="bx bx-cog"></i>
+                                            <span>Configurações do Sistema</span>
                                         </a>
                                     </li>
+                                    <?php endif; ?>
                                     <li><div class="dropdown-divider"></div></li>
                                     <li>
-                                        <a class="dropdown-item" href="logout.php">
+                                        <a class="dropdown-item" href="actions/logoutAction.php">
                                             <i class="bx bx-power-off"></i>
                                             <span>Sair do Sistema</span>
                                         </a>
@@ -732,3 +1191,231 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     </div>
                 </nav>
                 <!-- / Navbar -->
+
+    <script>
+        // Mobile Menu Toggle Script
+        (function() {
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const layoutMenu = document.getElementById('layout-menu');
+            const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+            const menuToggleBtn = document.getElementById('menuToggleBtn');
+
+            // Toggle menu em mobile
+            if (mobileMenuToggle) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    layoutMenu.classList.toggle('show');
+                    sidebarBackdrop.classList.toggle('show');
+                    document.body.style.overflow = layoutMenu.classList.contains('show') ? 'hidden' : '';
+                });
+            }
+
+            // Fechar menu ao clicar no backdrop
+            if (sidebarBackdrop) {
+                sidebarBackdrop.addEventListener('click', function() {
+                    layoutMenu.classList.remove('show');
+                    sidebarBackdrop.classList.remove('show');
+                    document.body.style.overflow = '';
+                });
+            }
+
+            // Fechar menu ao clicar no botão de fechar
+            if (menuToggleBtn) {
+                menuToggleBtn.addEventListener('click', function() {
+                    layoutMenu.classList.remove('show');
+                    sidebarBackdrop.classList.remove('show');
+                    document.body.style.overflow = '';
+                });
+            }
+
+            // Fechar menu ao clicar em um link (mobile)
+            const menuLinks = document.querySelectorAll('#layout-menu .menu-link');
+            menuLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth < 992) {
+                        setTimeout(() => {
+                            layoutMenu.classList.remove('show');
+                            sidebarBackdrop.classList.remove('show');
+                            document.body.style.overflow = '';
+                        }, 200);
+                    }
+                });
+            });
+
+            // Fechar menu ao redimensionar para desktop
+            let resizeTimer;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function() {
+                    if (window.innerWidth >= 992) {
+                        layoutMenu.classList.remove('show');
+                        sidebarBackdrop.classList.remove('show');
+                        document.body.style.overflow = '';
+                    }
+                }, 250);
+            });
+
+            // Prevenir scroll do body quando menu está aberto em mobile
+            const preventScroll = (e) => {
+                if (layoutMenu.classList.contains('show') && window.innerWidth < 992) {
+                    e.preventDefault();
+                }
+            };
+
+            document.addEventListener('touchmove', preventScroll, { passive: false });
+
+            // Accessibility: ESC para fechar menu
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && layoutMenu.classList.contains('show')) {
+                    layoutMenu.classList.remove('show');
+                    sidebarBackdrop.classList.remove('show');
+                    document.body.style.overflow = '';
+                }
+            });
+        })();
+
+        // ========== SISTEMA DE NOTIFICAÇÕES ==========
+        
+        /**
+         * Marcar uma notificação como lida
+         */
+        function marcarNotificacao(id) {
+            const formData = new FormData();
+            formData.append('id', id);
+            formData.append('action', 'marcar-lida');
+            
+            fetch('actions/notificacoesAction.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.sucesso) {
+                    document.querySelector(`[data-id="${id}"]`).style.opacity = '0.5';
+                    atualizarContagemNotificacoes();
+                }
+            })
+            .catch(error => console.error('Erro:', error));
+        }
+
+        /**
+         * Marcar todas as notificações como lidas
+         */
+        function marcarTodasComoLidas() {
+            const formData = new FormData();
+            formData.append('action', 'marcar-todas');
+            
+            fetch('actions/notificacoesAction.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.sucesso) {
+                    carregarNotificacoes();
+                    atualizarContagemNotificacoes();
+                }
+            })
+            .catch(error => console.error('Erro:', error));
+        }
+
+        /**
+         * Deletar uma notificação
+         */
+        function deletarNotificacao(id) {
+            const formData = new FormData();
+            formData.append('id', id);
+            formData.append('action', 'deletar');
+            
+            fetch('actions/notificacoesAction.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.sucesso) {
+                    const elem = document.querySelector(`[data-id="${id}"]`);
+                    if (elem) {
+                        elem.remove();
+                    }
+                    atualizarContagemNotificacoes();
+                    carregarNotificacoes();
+                }
+            })
+            .catch(error => console.error('Erro:', error));
+        }
+
+        /**
+         * Carregar notificações via AJAX
+         */
+        function carregarNotificacoes() {
+            fetch('actions/notificacoesAction.php?action=listar')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('notificationsList');
+                if (data.total > 0) {
+                    let html = '';
+                    data.notificacoes.forEach(notif => {
+                        const time = new Date(notif.criada_em);
+                        const agora = new Date();
+                        const diff = Math.floor((agora - time) / 1000);
+                        let timeText = 'Há alguns segundos';
+                        if (diff > 60) timeText = 'Há ' + Math.floor(diff/60) + ' minutos';
+                        if (diff > 3600) timeText = 'Há ' + Math.floor(diff/3600) + ' horas';
+                        if (diff > 86400) timeText = 'Há ' + Math.floor(diff/86400) + ' dias';
+                        
+                        html += `
+                        <a class="dropdown-item notification-item" data-id="${notif.id}" href="javascript:void(0);" onclick="marcarNotificacao(${notif.id})">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <div style="flex: 1;">
+                                    <strong style="color: #333; display: block;">${notif.titulo}</strong>
+                                    <small style="color: #666; display: block; margin-top: 4px;">${notif.mensagem}</small>
+                                    <small style="color: #999; display: block; margin-top: 6px;">${timeText}</small>
+                                </div>
+                                <i class="bx bx-x" style="cursor: pointer; margin-left: 8px; color: #999;" onclick="event.stopPropagation(); deletarNotificacao(${notif.id})"></i>
+                            </div>
+                        </a>
+                        `;
+                    });
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = `
+                    <div style="padding: 20px; text-align: center; color: #999;">
+                        <i class="bx bx-info-circle" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
+                        <small>Nenhuma notificação no momento</small>
+                    </div>
+                    `;
+                }
+            })
+            .catch(error => console.error('Erro ao carregar notificações:', error));
+        }
+
+        /**
+         * Atualizar contagem de notificações
+         */
+        function atualizarContagemNotificacoes() {
+            fetch('actions/notificacoesAction.php?action=contar')
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.getElementById('notificationBadge');
+                if (data.total > 0) {
+                    if (!badge) {
+                        const bell = document.querySelector('.notification-bell');
+                        const newBadge = document.createElement('span');
+                        newBadge.className = 'notification-badge';
+                        newBadge.id = 'notificationBadge';
+                        newBadge.textContent = data.total;
+                        bell.appendChild(newBadge);
+                    } else {
+                        badge.textContent = data.total;
+                    }
+                } else if (badge) {
+                    badge.remove();
+                }
+            })
+            .catch(error => console.error('Erro ao atualizar contagem:', error));
+        }
+
+        // Atualizar notificações a cada 30 segundos
+        setInterval(atualizarContagemNotificacoes, 30000);
+        setInterval(carregarNotificacoes, 30000);
+    </script>

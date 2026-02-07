@@ -6,8 +6,13 @@
 // Incluir helper de autenticação
 require_once(__DIR__ . '/helpers/auth.php');
 
+header('Content-Type: application/json; charset=utf-8');
+
 // Verificar se usuário está autenticado
 requireAuth();
+
+// Validar permissão DELETE (apenas admin)
+requireDeletePermission();
 
 include('../config/conexao.php');
 
@@ -29,23 +34,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remover']) && isset($
         $stmt->bind_param("i", $provincia_id);
         
         if ($stmt->execute()) {
-            // Redirecionar com mensagem de sucesso
-            header('Location: provincias.php?msg=success&action=removed&nome=' . urlencode($nome_provincia));
+            logAdminActivity('DELETE_PROVINCIA', 'Província: ' . $nome_provincia);
+            echo json_encode(['success' => true, 'message' => 'Província removida com sucesso.']);
         } else {
-            // Redirecionar com mensagem de erro
-            header('Location: provincias.php?msg=error&action=removed');
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Erro ao remover província.']);
         }
     } else {
-        // Província não encontrada
-        header('Location: provincias.php?msg=notfound');
+        http_response_code(404);
+        echo json_encode(['success' => false, 'message' => 'Província não encontrada.']);
     }
     
     $stmt->close();
 } else {
-    // Requisição inválida
-    header('Location: provincias.php?msg=invalid');
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Parâmetros inválidos.']);
 }
 
 $conn->close();
-exit();
 ?>

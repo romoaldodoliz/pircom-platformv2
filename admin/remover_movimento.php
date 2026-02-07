@@ -1,6 +1,14 @@
 <?php
+session_start();
+require_once(__DIR__ . '/helpers/auth.php');
+
+header('Content-Type: application/json; charset=utf-8');
+
 include('config/conexao.php');
 require_once('helpers/upload.php');
+
+requireAuth();
+requireDeletePermission();
 
 if (isset($_POST['movimento_id'])) {
     $movimento_id = intval($_POST['movimento_id']);
@@ -36,14 +44,18 @@ if (isset($_POST['movimento_id'])) {
     $stmt->bind_param("i", $movimento_id);
     
     if ($stmt->execute()) {
-        echo "<script>alert('Movimento removido com sucesso!');</script>";
+        logAdminActivity('DELETE_MOVIMENTO', 'Movimento ID: ' . $movimento_id);
+        echo json_encode(['success' => true, 'message' => 'Movimento removido com sucesso.']);
     } else {
-        echo "<script>alert('Erro ao remover movimento: " . $conn->error . "');</script>";
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Erro ao remover movimento: ' . $conn->error]);
     }
     
     $stmt->close();
+} else {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Parâmetros inválidos.']);
 }
 
 $conn->close();
-echo "<script>window.location.href='movimentos.php';</script>";
 ?>

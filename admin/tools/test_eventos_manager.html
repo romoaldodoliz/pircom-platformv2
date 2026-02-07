@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Teste - Manager view (simulado)</title>
+  <link rel="stylesheet" href="../assets/css/notifications.css">
+  <style>
+    body { font-family: Inter, Arial, sans-serif; padding: 40px; background:#f6f7fb }
+    .card { max-width:420px; margin:40px auto; background:#fff;padding:20px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.06)}
+    button.disabled-delete { width:100%; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h3>Simulação: Manager não-admin</h3>
+  <p>Botão "Remover" aqui deve disparar o toast de permissão negada.</p>
+  <button class="btn btn-danger disabled-delete" data-item-name="Evento de Teste">Remover</button>
+</div>
+
+<script>window.__isAdmin = false;</script>
+<script src="../assets/js/notifications.js"></script>
+
+<!-- small helper to auto-click after load for automated tests -->
+<script>
+  window.addEventListener('load', function(){
+    setTimeout(()=>{
+      const btn = document.querySelector('.disabled-delete');
+      if (btn) btn.click();
+    }, 400);
+  });
+</script>
+
+</body>
+</html>

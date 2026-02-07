@@ -1,20 +1,29 @@
 <?php
+session_start();
+require_once(__DIR__ . '/helpers/auth.php');
+
+header('Content-Type: application/json; charset=utf-8');
+
 include('config/conexao.php');
 
-if (isset($_POST['homepagehero_id'])) {
-    $homepagehero_id = $_POST['homepagehero_id'];
+requireAuth();
+requireDeletePermission();
 
-    // Execute a consulta DELETE para remover o registro da base de dados
+if (isset($_POST['homepagehero_id'])) {
+    $homepagehero_id = intval($_POST['homepagehero_id']);
+
     $sql = "DELETE FROM homepagehero WHERE id = $homepagehero_id";
 
     if ($conn->query($sql) === TRUE) {
-        // Redirecione de volta para a página de listagem após a remoção bem-sucedida
-        header('Location: homepagehero.php');
+        logAdminActivity('DELETE_HOMEPAGEHERO', 'HomePage Hero ID: ' . $homepagehero_id);
+        echo json_encode(['success' => true, 'message' => 'Item removido com sucesso.']);
     } else {
-        echo "Erro ao remover o registro: " . $conn->error;
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Erro ao remover: ' . $conn->error]);
     }
 } else {
-    echo "Parâmetros inválidos.";
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Parâmetros inválidos.']);
 }
 
 $conn->close();

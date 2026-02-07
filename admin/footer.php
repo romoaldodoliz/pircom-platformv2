@@ -43,6 +43,21 @@ $(document).ready(function() {
             }
         });
     }
+    
+    // Detectar JSON de erro na página e mostrar pop-up
+    const bodyText = document.body.innerText;
+    if (bodyText.includes('"success":false') || bodyText.includes('success": false')) {
+        try {
+            // Tentar extrair JSON do body
+            const jsonMatch = document.body.innerHTML.match(/\{"success"\s*:\s*false[^}]*\}/);
+            if (jsonMatch && typeof showError === 'function') {
+                const data = JSON.parse(jsonMatch[0]);
+                setTimeout(() => showError(data.message || 'Erro ao processar requisição', 7000), 800);
+            }
+        } catch(e) {
+            console.log('Erro ao processar resposta:', e);
+        }
+    }
 });
 </script>
 

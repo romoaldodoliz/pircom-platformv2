@@ -40,10 +40,10 @@ if (isset($_POST['update'])) {
     
     if (hasConfig($conn)) {
         // Atualizar
-        $sql = "UPDATE config SET missao = '$missao', valores = '$valores', visao = '$visao' ORDER BY id LIMIT 1";
+        $sql = "UPDATE config SET missao = '$missao', valores = '$valores', visao = '$visao', updated_at = NOW() ORDER BY id LIMIT 1";
     } else {
         // Inserir (primeira vez)
-        $sql = "INSERT INTO config (missao, valores, visao) VALUES ('$missao', '$valores', '$visao')";
+        $sql = "INSERT INTO config (missao, valores, visao, created_at, updated_at) VALUES ('$missao', '$valores', '$visao', NOW(), NOW())";
     }
     
     if (mysqli_query($conn, $sql)) {
@@ -65,6 +65,13 @@ if ($result && mysqli_num_rows($result) > 0) {
     $has_config = true;
 }
 
+// Calcular estatísticas
+if ($has_config) {
+    $total_chars = strlen($config['missao']) + strlen($config['valores']) + strlen($config['visao']);
+    $last_update = isset($config['updated_at']) ? $config['updated_at'] : $config['created_at'];
+    $created_at = $config['created_at'];
+}
+
 mysqli_close($conn);
 ob_end_flush(); // Limpar buffer e enviar output
 ?>
@@ -75,154 +82,6 @@ ob_end_flush(); // Limpar buffer e enviar output
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configurações - Missão, Visão e Valores</title>
     <?php include('header.php'); ?>
-    <style>
-        .status-badge {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
-        }
-        .config-card {
-            border-left: 4px solid;
-            transition: all 0.3s ease;
-        }
-        .config-card.view-mode {
-            border-left-color: #28a745;
-        }
-        .config-card.edit-mode {
-            border-left-color: #ffc107;
-            box-shadow: 0 0 20px rgba(255, 193, 7, 0.15);
-        }
-        .config-card.empty-mode {
-            border-left-color: #6c757d;
-        }
-        .edit-indicator {
-            position: absolute;
-            top: -10px;
-            right: 20px;
-            background: #ffc107;
-            color: #212529;
-            padding: 5px 15px;
-            border-radius: 0 0 10px 10px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-        }
-        .content-box {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            border: 1px solid #e9ecef;
-            position: relative;
-        }
-        .content-box h6 {
-            color: #495057;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #dee2e6;
-        }
-        .content-box.view-mode {
-            background: white;
-        }
-        .content-box.edit-mode textarea {
-            background: white;
-            border: 2px solid #e9ecef;
-            transition: border-color 0.3s;
-        }
-        .content-box.edit-mode textarea:focus {
-            border-color: #86b7fe;
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
-        }
-        .action-buttons {
-            position: sticky;
-            bottom: 0;
-            background: white;
-            padding: 1rem;
-            margin: 1rem -1rem -1rem -1rem;
-            border-top: 1px solid #e9ecef;
-            border-radius: 0 0 10px 10px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-        }
-        .view-content {
-            line-height: 1.8;
-            color: #495057;
-            white-space: pre-wrap;
-            font-size: 1rem;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 3rem 1rem;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border: 2px dashed #dee2e6;
-        }
-        .empty-state i {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            color: #6c757d;
-        }
-        .form-label {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: #495057;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .form-label i {
-            color: #6c757d;
-        }
-        .textarea-counter {
-            font-size: 0.75rem;
-            color: #6c757d;
-            text-align: right;
-            margin-top: 0.25rem;
-        }
-        .mode-switch {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            background: #e9ecef;
-            color: #495057;
-        }
-        .mode-switch i {
-            font-size: 1.1rem;
-        }
-        .config-summary {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        .config-summary .stat {
-            text-align: center;
-            padding: 0.5rem;
-        }
-        .config-summary .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #28a745;
-            line-height: 1;
-        }
-        .config-summary .stat-label {
-            font-size: 0.875rem;
-            color: #6c757d;
-            margin-top: 0.25rem;
-        }
-        .char-count {
-            position: absolute;
-            right: 15px;
-            bottom: 10px;
-            font-size: 0.75rem;
-            color: #6c757d;
-            background: rgba(255,255,255,0.9);
-            padding: 2px 5px;
-            border-radius: 3px;
-        }
-    </style>
 </head>
 <body>
     <!-- Content wrapper -->
@@ -230,37 +89,40 @@ ob_end_flush(); // Limpar buffer e enviar output
         <!-- Content -->
         <div class="container-xxl flex-grow-1 container-p-y">
             
-            <!-- Cabeçalho -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h4 class="fw-bold py-3 mb-0">
-                        <span class="text-muted fw-light">Configurações / </span>Missão, Visão e Valores
-                    </h4>
-                    <p class="text-muted mb-0">Gerencie os textos institucionais da organização</p>
+            <!-- Page Header -->
+            <div class="row mb-4">
+                <div class="col-12 col-md-6">
+                    <h4 class="fw-bold py-3 mb-2">Configurações Institucionais</h4>
+                    <p class="text-muted mb-0">Gerencie os textos de Missão, Visão e Valores da organização</p>
                 </div>
-                
-                <div>
-                    <?php if ($has_config): ?>
-                        <?php if ($edit_mode): ?>
-                            <div class="badge bg-warning text-dark status-badge">
-                                <i class="bx bx-edit me-1"></i>
-                                Modo Edição
-                            </div>
+                <div class="col-12 col-md-6">
+                    <div class="d-flex flex-column flex-md-row justify-content-md-end gap-2">
+                        <?php if ($has_config): ?>
+                            <?php if (!$edit_mode): ?>
+                                <!-- Botão para entrar no modo edição -->
+                                <a href="?edit=true" class="btn btn-warning">
+                                    <i class="bx bx-edit me-1"></i> Editar Configuração
+                                </a>
+                                <!-- Botão remover -->
+                                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                    <i class="bx bx-trash me-1"></i> Remover
+                                </button>
+                            <?php else: ?>
+                                <!-- Botão para sair do modo edição -->
+                                <a href="configuracoes.php" class="btn btn-outline-secondary">
+                                    <i class="bx bx-x me-1"></i> Cancelar Edição
+                                </a>
+                            <?php endif; ?>
                         <?php else: ?>
-                            <div class="badge bg-success status-badge">
-                                <i class="bx bx-check-circle me-1"></i>
-                                Configuração Ativa
-                            </div>
+                            <!-- Botão criar configuração -->
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+                                <i class="bx bx-plus me-1"></i> Criar Configuração
+                            </button>
                         <?php endif; ?>
-                    <?php else: ?>
-                        <div class="badge bg-secondary status-badge">
-                            <i class="bx bx-info-circle me-1"></i>
-                            Não Configurado
-                        </div>
-                    <?php endif; ?>
+                    </div>
                 </div>
             </div>
-            
+
             <!-- Mensagens -->
             <?php if (isset($_SESSION['success_message'])): ?>
                 <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
@@ -284,186 +146,383 @@ ob_end_flush(); // Limpar buffer e enviar output
                 <?php unset($_SESSION['error_message']); ?>
             <?php endif; ?>
             
-            <!-- Resumo da Configuração -->
+            <!-- Status Banner -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card status-card <?php echo $has_config ? ($edit_mode ? 'border-warning' : 'border-success') : 'border-secondary'; ?>">
+                        <div class="card-body py-3">
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="status-indicator <?php echo $has_config ? ($edit_mode ? 'bg-warning' : 'bg-success') : 'bg-secondary'; ?>">
+                                        <i class="bx <?php echo $has_config ? ($edit_mode ? 'bx-edit' : 'bx-check-circle') : 'bx-info-circle'; ?>"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">
+                                            <?php echo $has_config ? 'Configuração Ativa' : 'Configuração Não Definida'; ?>
+                                        </h6>
+                                        <p class="text-muted mb-0 small">
+                                            <?php if ($has_config && $edit_mode): ?>
+                                                <span class="text-warning">Modo de edição ativo - Faça suas alterações</span>
+                                            <?php elseif ($has_config): ?>
+                                                Configuração publicada e visível no site
+                                            <?php else: ?>
+                                                Nenhuma configuração definida. Clique em "Criar Configuração" para começar.
+                                            <?php endif; ?>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="text-md-end">
+                                    <?php if ($has_config && !$edit_mode): ?>
+                                        <small class="text-muted">
+                                            <i class="bx bx-calendar me-1"></i>
+                                            Última atualização: <?php echo date('d/m/Y H:i', strtotime($last_update)); ?>
+                                        </small>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <?php if ($has_config): ?>
-            <div class="config-summary">
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="stat">
-                            <div class="stat-value">3</div>
-                            <div class="stat-label">Seções Configuradas</div>
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-sm-6 col-lg-3 mb-4">
+                    <div class="card card-border-shadow-primary h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-2 pb-1">
+                                <div class="avatar me-2">
+                                    <span class="avatar-initial rounded bg-label-primary">
+                                        <i class="bx bx-bullseye"></i>
+                                    </span>
+                                </div>
+                                <div>
+                                    <h4 class="ms-1 mb-0">Missão</h4>
+                                    <p class="mb-0 text-muted small">Texto definido</p>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-label-primary">
+                                    <?php echo strlen($config['missao']); ?> caracteres
+                                </span>
+                                <i class="bx bx-check text-success"></i>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="stat">
-                            <div class="stat-value">
-                                <?php echo strlen($config['missao']) + strlen($config['valores']) + strlen($config['visao']); ?>
+                </div>
+                <div class="col-sm-6 col-lg-3 mb-4">
+                    <div class="card card-border-shadow-info h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-2 pb-1">
+                                <div class="avatar me-2">
+                                    <span class="avatar-initial rounded bg-label-info">
+                                        <i class="bx bx-heart"></i>
+                                    </span>
+                                </div>
+                                <div>
+                                    <h4 class="ms-1 mb-0">Valores</h4>
+                                    <p class="mb-0 text-muted small">Texto definido</p>
+                                </div>
                             </div>
-                            <div class="stat-label">Caracteres Totais</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-label-info">
+                                    <?php echo strlen($config['valores']); ?> caracteres
+                                </span>
+                                <i class="bx bx-check text-success"></i>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="stat">
-                            <div class="stat-value">
-                                <?php 
-                                $last_update = isset($config['updated_at']) ? $config['updated_at'] : date('Y-m-d H:i:s');
-                                echo date('d/m/Y', strtotime($last_update)); 
-                                ?>
+                </div>
+                <div class="col-sm-6 col-lg-3 mb-4">
+                    <div class="card card-border-shadow-warning h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-2 pb-1">
+                                <div class="avatar me-2">
+                                    <span class="avatar-initial rounded bg-label-warning">
+                                        <i class="bx bx-show-alt"></i>
+                                    </span>
+                                </div>
+                                <div>
+                                    <h4 class="ms-1 mb-0">Visão</h4>
+                                    <p class="mb-0 text-muted small">Texto definido</p>
+                                </div>
                             </div>
-                            <div class="stat-label">Última Atualização</div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-label-warning">
+                                    <?php echo strlen($config['visao']); ?> caracteres
+                                </span>
+                                <i class="bx bx-check text-success"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3 mb-4">
+                    <div class="card card-border-shadow-success h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-2 pb-1">
+                                <div class="avatar me-2">
+                                    <span class="avatar-initial rounded bg-label-success">
+                                        <i class="bx bx-stats"></i>
+                                    </span>
+                                </div>
+                                <div>
+                                    <h4 class="ms-1 mb-0">Total</h4>
+                                    <p class="mb-0 text-muted small">Todos os textos</p>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-label-success">
+                                    <?php echo $total_chars; ?> caracteres
+                                </span>
+                                <span class="badge bg-label-primary">3 seções</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             <?php endif; ?>
-            
-            <!-- Card Principal -->
+
+            <!-- Main Content -->
             <div class="row">
-                <div class="col-md-12">
-                    <div class="card mb-4 config-card <?php echo $has_config ? ($edit_mode ? 'edit-mode' : 'view-mode') : 'empty-mode'; ?>">
-                        <div class="card-header">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h5 class="card-title mb-0">
-                                        <?php if ($has_config): ?>
-                                            <?php if ($edit_mode): ?>
-                                                <i class="bx bx-edit text-warning me-2"></i>Editando Configuração
-                                            <?php else: ?>
-                                                <i class="bx bx-show text-success me-2"></i>Visualizando Configuração
-                                            <?php endif; ?>
-                                        <?php else: ?>
-                                            <i class="bx bx-plus-circle text-secondary me-2"></i>Criar Nova Configuração
-                                        <?php endif; ?>
-                                    </h5>
-                                    <?php if ($has_config && !$edit_mode): ?>
-                                        <p class="text-muted mb-0 small">Clique no botão "Editar" para modificar os textos</p>
-                                    <?php endif; ?>
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                            <h5 class="card-title mb-0">
+                                <i class="bx bx-file-text me-2"></i>
+                                <?php echo $has_config ? ($edit_mode ? 'Editando Configuração' : 'Visualização da Configuração') : 'Configuração Institucional'; ?>
+                            </h5>
+                            <?php if ($has_config && $edit_mode): ?>
+                                <div class="mt-2 mt-md-0">
+                                    <span class="badge bg-warning">
+                                        <i class="bx bx-edit"></i> Modo de Edição Ativo
+                                    </span>
                                 </div>
-                                
-                                <div class="d-flex align-items-center gap-2">
-                                    <?php if ($has_config): ?>
-                                        <?php if (!$edit_mode): ?>
-                                            <!-- Botão para entrar no modo edição -->
-                                            <a href="?edit=true" class="btn btn-warning">
-                                                <i class="bx bx-edit me-1"></i> Editar
-                                            </a>
-                                        <?php else: ?>
-                                            <!-- Botão para sair do modo edição -->
-                                            <a href="configuracoes.php" class="btn btn-outline-secondary">
-                                                <i class="bx bx-x me-1"></i> Cancelar
-                                            </a>
-                                        <?php endif; ?>
-                                        
-                                        <?php if (!$edit_mode): ?>
-                                            <!-- Botão remover (só no modo visualização) -->
-                                            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                                                <i class="bx bx-trash me-1"></i> Remover
-                                            </button>
-                                        <?php endif; ?>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                            
-                            <?php if ($edit_mode): ?>
-                                <div class="edit-indicator">MODO EDIÇÃO ATIVO</div>
                             <?php endif; ?>
                         </div>
                         
                         <div class="card-body">
                             <?php if ($has_config): ?>
-                                <!-- CONFIGURAÇÃO EXISTENTE -->
                                 <?php if (!$edit_mode): ?>
-                                    <!-- MODO VISUALIZAÇÃO -->
-                                    <div class="content-box view-mode">
-                                        <h6><i class="bx bx-bullseye me-2"></i>Missão</h6>
-                                        <div class="view-content"><?php echo nl2br(htmlspecialchars($config['missao'])); ?></div>
-                                    </div>
-                                    
-                                    <div class="content-box view-mode">
-                                        <h6><i class="bx bx-heart me-2"></i>Valores</h6>
-                                        <div class="view-content"><?php echo nl2br(htmlspecialchars($config['valores'])); ?></div>
-                                    </div>
-                                    
-                                    <div class="content-box view-mode">
-                                        <h6><i class="bx bx-show-alt me-2"></i>Visão</h6>
-                                        <div class="view-content"><?php echo nl2br(htmlspecialchars($config['visao'])); ?></div>
-                                    </div>
-                                    
-                                    <div class="alert alert-info mt-3">
-                                        <i class="bx bx-info-circle me-2"></i>
-                                        <strong>Informação:</strong> Para editar os textos, clique no botão "Editar" acima.
-                                    </div>
-                                    
-                                <?php else: ?>
-                                    <!-- MODO EDIÇÃO -->
-                                    <form method="POST" action="" id="configForm">
-                                        <div class="content-box edit-mode">
-                                            <label for="missao" class="form-label">
-                                                <i class="bx bx-bullseye"></i>Missão
-                                            </label>
-                                            <textarea class="form-control" id="missao" name="missao" rows="6" required 
-                                                      placeholder="Descreva a missão principal da organização..."
-                                                      oninput="updateCharCount('missao')"><?php echo htmlspecialchars($config['missao']); ?></textarea>
-                                            <div class="textarea-counter" id="missao-counter">
-                                                Caracteres: <span id="missao-chars"><?php echo strlen($config['missao']); ?></span>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="content-box edit-mode">
-                                            <label for="valores" class="form-label">
-                                                <i class="bx bx-heart"></i>Valores
-                                            </label>
-                                            <textarea class="form-control" id="valores" name="valores" rows="6" required 
-                                                      placeholder="Liste os valores fundamentais da organização (separados por vírgula ou ponto)..."
-                                                      oninput="updateCharCount('valores')"><?php echo htmlspecialchars($config['valores']); ?></textarea>
-                                            <div class="textarea-counter" id="valores-counter">
-                                                Caracteres: <span id="valores-chars"><?php echo strlen($config['valores']); ?></span>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="content-box edit-mode">
-                                            <label for="visao" class="form-label">
-                                                <i class="bx bx-show-alt"></i>Visão
-                                            </label>
-                                            <textarea class="form-control" id="visao" name="visao" rows="6" required 
-                                                      placeholder="Descreva a visão futura e objetivos da organização..."
-                                                      oninput="updateCharCount('visao')"><?php echo htmlspecialchars($config['visao']); ?></textarea>
-                                            <div class="textarea-counter" id="visao-counter">
-                                                Caracteres: <span id="visao-chars"><?php echo strlen($config['visao']); ?></span>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Botões de ação no modo edição -->
-                                        <div class="action-buttons">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <span class="text-muted small">
-                                                        <i class="bx bx-info-circle me-1"></i>
-                                                        Todos os campos são obrigatórios
-                                                    </span>
+                                    <!-- MODE VIEW -->
+                                    <div class="config-view-mode">
+                                        <div class="row">
+                                            <div class="col-lg-4 mb-4">
+                                                <div class="card config-section h-100">
+                                                    <div class="card-header bg-primary text-white">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="section-icon me-2">
+                                                                <i class="bx bx-bullseye"></i>
+                                                            </div>
+                                                            <h6 class="mb-0">Missão</h6>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="config-content">
+                                                            <?php echo nl2br(htmlspecialchars($config['missao'])); ?>
+                                                        </div>
+                                                        <div class="mt-3 pt-3 border-top">
+                                                            <small class="text-muted">
+                                                                <i class="bx bx-text"></i> 
+                                                                <?php echo strlen($config['missao']); ?> caracteres
+                                                            </small>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                <div class="d-flex gap-2">
-                                                    <a href="configuracoes.php" class="btn btn-outline-secondary">
-                                                        <i class="bx bx-x me-1"></i> Cancelar
-                                                    </a>
-                                                    <button type="submit" name="update" class="btn btn-primary">
-                                                        <i class="bx bx-save me-1"></i> Salvar Alterações
-                                                    </button>
+                                            </div>
+                                            
+                                            <div class="col-lg-4 mb-4">
+                                                <div class="card config-section h-100">
+                                                    <div class="card-header bg-info text-white">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="section-icon me-2">
+                                                                <i class="bx bx-heart"></i>
+                                                            </div>
+                                                            <h6 class="mb-0">Valores</h6>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="config-content">
+                                                            <?php echo nl2br(htmlspecialchars($config['valores'])); ?>
+                                                        </div>
+                                                        <div class="mt-3 pt-3 border-top">
+                                                            <small class="text-muted">
+                                                                <i class="bx bx-text"></i> 
+                                                                <?php echo strlen($config['valores']); ?> caracteres
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-lg-4 mb-4">
+                                                <div class="card config-section h-100">
+                                                    <div class="card-header bg-warning">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="section-icon me-2">
+                                                                <i class="bx bx-show-alt"></i>
+                                                            </div>
+                                                            <h6 class="mb-0">Visão</h6>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="config-content">
+                                                            <?php echo nl2br(htmlspecialchars($config['visao'])); ?>
+                                                        </div>
+                                                        <div class="mt-3 pt-3 border-top">
+                                                            <small class="text-muted">
+                                                                <i class="bx bx-text"></i> 
+                                                                <?php echo strlen($config['visao']); ?> caracteres
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row mt-4">
+                                            <div class="col-12">
+                                                <div class="alert alert-info">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="bx bx-info-circle me-3 fs-4"></i>
+                                                        <div>
+                                                            <strong>Informação:</strong> Para editar os textos, clique no botão "Editar Configuração" no topo da página.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php else: ?>
+                                    <!-- MODE EDIT -->
+                                    <form method="POST" action="" id="configForm" class="edit-mode-form">
+                                        <div class="row">
+                                            <div class="col-lg-4 mb-4">
+                                                <div class="card h-100">
+                                                    <div class="card-header bg-primary text-white">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="section-icon me-2">
+                                                                <i class="bx bx-bullseye"></i>
+                                                            </div>
+                                                            <h6 class="mb-0">Missão</h6>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Descrição da Missão:</label>
+                                                            <textarea class="form-control" 
+                                                                      name="missao" 
+                                                                      rows="8"
+                                                                      required
+                                                                      placeholder="Descreva a missão principal da organização..."
+                                                                      oninput="updateCharCount(this, 'missao-count')"><?php echo htmlspecialchars($config['missao']); ?></textarea>
+                                                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                                                <small class="text-muted">Campo obrigatório</small>
+                                                                <small class="char-counter">
+                                                                    <span id="missao-count"><?php echo strlen($config['missao']); ?></span> caracteres
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-lg-4 mb-4">
+                                                <div class="card h-100">
+                                                    <div class="card-header bg-info text-white">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="section-icon me-2">
+                                                                <i class="bx bx-heart"></i>
+                                                            </div>
+                                                            <h6 class="mb-0">Valores</h6>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Lista de Valores:</label>
+                                                            <textarea class="form-control" 
+                                                                      name="valores" 
+                                                                      rows="8"
+                                                                      required
+                                                                      placeholder="Liste os valores fundamentais da organização..."
+                                                                      oninput="updateCharCount(this, 'valores-count')"><?php echo htmlspecialchars($config['valores']); ?></textarea>
+                                                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                                                <small class="text-muted">Campo obrigatório</small>
+                                                                <small class="char-counter">
+                                                                    <span id="valores-count"><?php echo strlen($config['valores']); ?></span> caracteres
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-lg-4 mb-4">
+                                                <div class="card h-100">
+                                                    <div class="card-header bg-warning">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="section-icon me-2">
+                                                                <i class="bx bx-show-alt"></i>
+                                                            </div>
+                                                            <h6 class="mb-0">Visão</h6>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Descrição da Visão:</label>
+                                                            <textarea class="form-control" 
+                                                                      name="visao" 
+                                                                      rows="8"
+                                                                      required
+                                                                      placeholder="Descreva a visão futura da organização..."
+                                                                      oninput="updateCharCount(this, 'visao-count')"><?php echo htmlspecialchars($config['visao']); ?></textarea>
+                                                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                                                <small class="text-muted">Campo obrigatório</small>
+                                                                <small class="char-counter">
+                                                                    <span id="visao-count"><?php echo strlen($config['visao']); ?></span> caracteres
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Action Buttons -->
+                                        <div class="row mt-4">
+                                            <div class="col-12">
+                                                <div class="action-buttons">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <div class="form-text">
+                                                                <i class="bx bx-info-circle me-1"></i>
+                                                                Todos os campos são obrigatórios. Mínimo recomendado: 50 caracteres por seção.
+                                                            </div>
+                                                        </div>
+                                                        <div class="d-flex gap-2">
+                                                            <a href="configuracoes.php" class="btn btn-outline-secondary">
+                                                                <i class="bx bx-x me-1"></i> Cancelar
+                                                            </a>
+                                                            <button type="submit" name="update" class="btn btn-primary">
+                                                                <i class="bx bx-save me-1"></i> Salvar Alterações
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </form>
-                                    
                                 <?php endif; ?>
-                                
                             <?php else: ?>
-                                <!-- SEM CONFIGURAÇÃO - CRIAR PELA PRIMEIRA VEZ -->
-                                <div class="empty-state">
-                                    <i class="bx bx-file-blank"></i>
+                                <!-- NO CONFIGURATION -->
+                                <div class="empty-state text-center py-5">
+                                    <div class="empty-state-icon mb-4">
+                                        <i class="bx bx-file-text display-1 text-muted"></i>
+                                    </div>
                                     <h4 class="mb-3">Nenhuma Configuração Encontrada</h4>
                                     <p class="text-muted mb-4">
-                                        Você ainda não configurou a Missão, Visão e Valores da organização.<br>
-                                        Clique no botão abaixo para criar a primeira configuração.
+                                        Você ainda não configurou os textos institucionais da organização.<br>
+                                        Estes textos serão exibidos publicamente no site.
                                     </p>
                                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
                                         <i class="bx bx-plus me-1"></i> Criar Primeira Configuração
@@ -474,6 +533,43 @@ ob_end_flush(); // Limpar buffer e enviar output
                     </div>
                 </div>
             </div>
+
+            <!-- Info Card -->
+            <?php if ($has_config && !$edit_mode): ?>
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar me-3">
+                                    <span class="avatar-initial rounded bg-label-info">
+                                        <i class="bx bx-info-circle"></i>
+                                    </span>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Sobre as Configurações Institucionais</h6>
+                                    <p class="mb-2 text-muted">
+                                        Os textos de Missão, Visão e Valores são fundamentais para comunicar a identidade e propósito da organização.
+                                        Eles são exibidos publicamente no site e devem refletir os princípios e objetivos da empresa.
+                                    </p>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <span class="badge bg-label-primary">
+                                            <i class="bx bx-globe"></i> Visível publicamente
+                                        </span>
+                                        <span class="badge bg-label-success">
+                                            <i class="bx bx-time"></i> Última atualização: <?php echo date('d/m/Y', strtotime($last_update)); ?>
+                                        </span>
+                                        <span class="badge bg-label-warning">
+                                            <i class="bx bx-calendar-plus"></i> Criado em: <?php echo date('d/m/Y', strtotime($created_at)); ?>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
         <!-- / Content -->
 
@@ -487,35 +583,34 @@ ob_end_flush(); // Limpar buffer e enviar output
                         </h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form method="POST" action="">
+                    <form method="POST" action="" id="createForm">
                         <div class="modal-body">
                             <div class="alert alert-info">
                                 <i class="bx bx-info-circle me-2"></i>
-                                <strong>Atenção:</strong> Esta configuração só pode ser criada uma vez. Após criar, você poderá apenas editar ou remover.
+                                <strong>Atenção:</strong> Esta configuração define a identidade institucional da organização e será exibida publicamente.
                             </div>
                             
-                            <div class="mb-3">
-                                <label for="modal-missao" class="form-label">
-                                    <i class="bx bx-bullseye me-1"></i>Missão
-                                </label>
-                                <textarea class="form-control" id="modal-missao" name="missao" rows="4" required 
-                                          placeholder="Descreva a missão principal da organização..."></textarea>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="modal-valores" class="form-label">
-                                    <i class="bx bx-heart me-1"></i>Valores
-                                </label>
-                                <textarea class="form-control" id="modal-valores" name="valores" rows="4" required 
-                                          placeholder="Liste os valores fundamentais da organização..."></textarea>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="modal-visao" class="form-label">
-                                    <i class="bx bx-show-alt me-1"></i>Visão
-                                </label>
-                                <textarea class="form-control" id="modal-visao" name="visao" rows="4" required 
-                                          placeholder="Descreva a visão futura da organização..."></textarea>
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label">Missão</label>
+                                    <textarea class="form-control" name="missao" rows="4" required 
+                                              placeholder="Descreva a missão principal da organização..."></textarea>
+                                    <div class="form-text">Qual é o propósito principal da organização?</div>
+                                </div>
+                                
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label">Valores</label>
+                                    <textarea class="form-control" name="valores" rows="4" required 
+                                              placeholder="Liste os valores fundamentais da organização..."></textarea>
+                                    <div class="form-text">Quais são os princípios e valores que guiam a organização?</div>
+                                </div>
+                                
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label">Visão</label>
+                                    <textarea class="form-control" name="visao" rows="4" required 
+                                              placeholder="Descreva a visão futura da organização..."></textarea>
+                                    <div class="form-text">Qual é o objetivo de longo prazo da organização?</div>
+                                </div>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -544,15 +639,17 @@ ob_end_flush(); // Limpar buffer e enviar output
                     </div>
                     <div class="modal-body text-center">
                         <div class="mb-4">
-                            <i class="bx bx-error-circle text-danger display-4"></i>
-                        </div>
-                        <h6 class="mb-3">Tem certeza que deseja remover esta configuração?</h6>
-                        <p class="text-muted small mb-0">
-                            Todos os textos de Missão, Visão e Valores serão permanentemente excluídos.
-                        </p>
-                        <div class="alert alert-warning mt-3">
-                            <i class="bx bx-error me-2"></i>
-                            <small>Esta ação não pode ser desfeita!</small>
+                            <div class="avatar avatar-xl bg-label-danger mb-3">
+                                <i class="bx bx-error-circle fs-1"></i>
+                            </div>
+                            <h6 class="mb-3">Remover Configuração?</h6>
+                            <p class="text-muted small mb-0">
+                                Esta ação irá remover permanentemente todos os textos de Missão, Visão e Valores.
+                            </p>
+                            <div class="alert alert-warning mt-3">
+                                <i class="bx bx-error me-2"></i>
+                                <small>Esta ação não pode ser desfeita!</small>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -561,7 +658,7 @@ ob_end_flush(); // Limpar buffer e enviar output
                         </button>
                         <form method="POST" action="" style="display: inline;">
                             <button type="submit" name="delete" class="btn btn-danger">
-                                <i class="bx bx-trash me-1"></i> Sim, Remover
+                                <i class="bx bx-trash me-1"></i> Confirmar Remoção
                             </button>
                         </form>
                     </div>
@@ -580,25 +677,179 @@ ob_end_flush(); // Limpar buffer e enviar output
 
     <?php include('footer.php'); ?>
     
+    <style>
+        .card {
+            border: none;
+            box-shadow: 0 2px 6px 0 rgba(67, 89, 113, 0.12);
+            border-radius: 10px;
+        }
+        
+        .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 1.5rem;
+        }
+        
+        .status-card {
+            border-width: 2px !important;
+        }
+        
+        .status-indicator {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        .bg-warning {
+            background-color: #ffab00 !important;
+        }
+        
+        .bg-success {
+            background-color: #71dd37 !important;
+        }
+        
+        .bg-secondary {
+            background-color: #8592a3 !important;
+        }
+        
+        .config-section .card-header {
+            color: white;
+            border-radius: 8px 8px 0 0 !important;
+        }
+        
+        .config-section .section-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .config-content {
+            line-height: 1.8;
+            color: #566a7f;
+            white-space: pre-wrap;
+            font-size: 1rem;
+        }
+        
+        .empty-state {
+            padding: 3rem 1rem;
+        }
+        
+        .empty-state-icon {
+            color: #b4bdc6;
+        }
+        
+        .avatar-initial {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        
+        .card-border-shadow-primary {
+            border: 1px solid;
+            border-color: #696cff;
+        }
+        
+        .card-border-shadow-info {
+            border: 1px solid;
+            border-color: #17c1e8;
+        }
+        
+        .card-border-shadow-warning {
+            border: 1px solid;
+            border-color: #ffab00;
+        }
+        
+        .card-border-shadow-success {
+            border: 1px solid;
+            border-color: #71dd37;
+        }
+        
+        .action-buttons {
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .char-counter {
+            font-size: 0.875rem;
+            color: #8592a3;
+        }
+        
+        textarea.form-control {
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        textarea.form-control:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+        }
+        
+        .edit-mode-form .card {
+            box-shadow: 0 4px 20px rgba(255, 193, 7, 0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .status-indicator {
+                width: 40px;
+                height: 40px;
+                font-size: 1.25rem;
+            }
+            
+            .card-header {
+                padding: 1rem;
+            }
+            
+            .config-content {
+                font-size: 0.875rem;
+            }
+            
+            textarea.form-control {
+                font-size: 0.875rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .d-flex.gap-2 {
+                gap: 0.5rem !important;
+            }
+            
+            .empty-state {
+                padding: 2rem 1rem;
+            }
+            
+            .action-buttons {
+                padding: 1rem;
+            }
+        }
+    </style>
+    
     <script>
         // Atualizar contador de caracteres
-        function updateCharCount(fieldId) {
-            const textarea = document.getElementById(fieldId);
-            const counter = document.getElementById(fieldId + '-chars');
-            if (textarea && counter) {
-                counter.textContent = textarea.value.length;
+        function updateCharCount(textarea, counterId) {
+            const counter = document.getElementById(counterId);
+            if (counter) {
+                const charCount = textarea.value.length;
+                counter.textContent = charCount;
                 
                 // Mudar cor conforme tamanho
-                const charCount = textarea.value.length;
-                if (charCount < 50) {
+                if (charCount < 20) {
                     counter.style.color = '#dc3545';
-                    counter.parentElement.style.color = '#dc3545';
-                } else if (charCount < 100) {
-                    counter.style.color = '#ffc107';
-                    counter.parentElement.style.color = '#ffc107';
+                } else if (charCount < 50) {
+                    counter.style.color = '#ffab00';
                 } else {
-                    counter.style.color = '#28a745';
-                    counter.parentElement.style.color = '#28a745';
+                    counter.style.color = '#71dd37';
                 }
             }
         }
@@ -606,134 +857,195 @@ ob_end_flush(); // Limpar buffer e enviar output
         // Inicializar contadores
         document.addEventListener('DOMContentLoaded', function() {
             // Atualizar contadores se estiver em modo edição
-            if (document.getElementById('missao')) {
-                updateCharCount('missao');
-                updateCharCount('valores');
-                updateCharCount('visao');
+            const missaoField = document.querySelector('textarea[name="missao"]');
+            const valoresField = document.querySelector('textarea[name="valores"]');
+            const visaoField = document.querySelector('textarea[name="visao"]');
+            
+            if (missaoField) {
+                updateCharCount(missaoField, 'missao-count');
+                missaoField.addEventListener('input', function() {
+                    updateCharCount(this, 'missao-count');
+                });
             }
             
-            // Validação do formulário
-            const form = document.getElementById('configForm');
-            if (form) {
-                form.addEventListener('submit', function(e) {
-                    const missao = document.getElementById('missao').value.trim();
-                    const valores = document.getElementById('valores').value.trim();
-                    const visao = document.getElementById('visao').value.trim();
+            if (valoresField) {
+                updateCharCount(valoresField, 'valores-count');
+                valoresField.addEventListener('input', function() {
+                    updateCharCount(this, 'valores-count');
+                });
+            }
+            
+            if (visaoField) {
+                updateCharCount(visaoField, 'visao-count');
+                visaoField.addEventListener('input', function() {
+                    updateCharCount(this, 'visao-count');
+                });
+            }
+            
+            // Validação do formulário de edição
+            const editForm = document.getElementById('configForm');
+            if (editForm) {
+                editForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
                     
                     let errors = [];
+                    const submitBtn = this.querySelector('button[type="submit"]');
                     
-                    if (!missao) {
-                        errors.push('O campo Missão é obrigatório');
-                    } else if (missao.length < 20) {
-                        errors.push('A Missão deve ter pelo menos 20 caracteres');
-                    }
+                    // Validar cada campo
+                    const fields = [
+                        { name: 'missao', label: 'Missão', min: 20 },
+                        { name: 'valores', label: 'Valores', min: 20 },
+                        { name: 'visao', label: 'Visão', min: 20 }
+                    ];
                     
-                    if (!valores) {
-                        errors.push('O campo Valores é obrigatório');
-                    } else if (valores.length < 20) {
-                        errors.push('Os Valores devem ter pelo menos 20 caracteres');
-                    }
-                    
-                    if (!visao) {
-                        errors.push('O campo Visão é obrigatório');
-                    } else if (visao.length < 20) {
-                        errors.push('A Visão deve ter pelo menos 20 caracteres');
-                    }
+                    fields.forEach(field => {
+                        const textarea = this.querySelector(`textarea[name="${field.name}"]`);
+                        const value = textarea.value.trim();
+                        
+                        if (!value) {
+                            errors.push(`O campo "${field.label}" é obrigatório`);
+                            textarea.classList.add('is-invalid');
+                        } else if (value.length < field.min) {
+                            errors.push(`O campo "${field.label}" deve ter pelo menos ${field.min} caracteres`);
+                            textarea.classList.add('is-invalid');
+                        } else {
+                            textarea.classList.remove('is-invalid');
+                        }
+                    });
                     
                     if (errors.length > 0) {
-                        e.preventDefault();
-                        showErrors(errors);
+                        showFormErrors(errors);
                         return false;
                     }
                     
                     // Confirmar antes de salvar
-                    if (!confirm('Deseja salvar as alterações na configuração?')) {
-                        e.preventDefault();
-                        return false;
+                    if (confirm('Deseja salvar as alterações na configuração?')) {
+                        // Mostrar indicador de carregamento
+                        submitBtn.innerHTML = '<i class="bx bx-loader bx-spin me-1"></i> Salvando...';
+                        submitBtn.disabled = true;
+                        
+                        // Enviar formulário
+                        this.submit();
                     }
-                    
-                    // Mostrar indicador de carregamento
-                    const submitBtn = form.querySelector('button[type="submit"]');
-                    submitBtn.innerHTML = '<i class="bx bx-loader bx-spin me-1"></i> Salvando...';
-                    submitBtn.disabled = true;
                 });
             }
             
-            // Validação do modal de criação
-            const createForm = document.querySelector('#createModal form');
+            // Validação do formulário de criação
+            const createForm = document.getElementById('createForm');
             if (createForm) {
                 createForm.addEventListener('submit', function(e) {
-                    const missao = document.getElementById('modal-missao').value.trim();
-                    const valores = document.getElementById('modal-valores').value.trim();
-                    const visao = document.getElementById('modal-visao').value.trim();
+                    e.preventDefault();
                     
                     let errors = [];
+                    const fields = [
+                        { name: 'missao', label: 'Missão', min: 20 },
+                        { name: 'valores', label: 'Valores', min: 20 },
+                        { name: 'visao', label: 'Visão', min: 20 }
+                    ];
                     
-                    if (!missao || missao.length < 20) {
-                        errors.push('A Missão deve ter pelo menos 20 caracteres');
-                    }
-                    
-                    if (!valores || valores.length < 20) {
-                        errors.push('Os Valores devem ter pelo menos 20 caracteres');
-                    }
-                    
-                    if (!visao || visao.length < 20) {
-                        errors.push('A Visão deve ter pelo menos 20 caracteres');
-                    }
+                    fields.forEach(field => {
+                        const textarea = this.querySelector(`textarea[name="${field.name}"]`);
+                        const value = textarea.value.trim();
+                        
+                        if (!value || value.length < field.min) {
+                            errors.push(`O campo "${field.label}" deve ter pelo menos ${field.min} caracteres`);
+                            textarea.classList.add('is-invalid');
+                        } else {
+                            textarea.classList.remove('is-invalid');
+                        }
+                    });
                     
                     if (errors.length > 0) {
-                        e.preventDefault();
-                        showErrors(errors);
+                        showFormErrors(errors);
                         return false;
                     }
                     
                     // Confirmar criação
-                    if (!confirm('Deseja criar a configuração de Missão, Visão e Valores?')) {
-                        e.preventDefault();
-                        return false;
+                    if (confirm('Deseja criar a configuração institucional?')) {
+                        this.submit();
                     }
                 });
             }
+            
+            // Remover classes de erro ao digitar
+            document.querySelectorAll('textarea').forEach(textarea => {
+                textarea.addEventListener('input', function() {
+                    this.classList.remove('is-invalid');
+                });
+            });
         });
         
-        function showErrors(errors) {
-            let errorHtml = '<div class="alert alert-danger"><h6 class="alert-heading">Erros de Validação:</h6><ul class="mb-0">';
+        function showFormErrors(errors) {
+            // Remover erros anteriores
+            const existingErrors = document.querySelectorAll('.form-errors');
+            existingErrors.forEach(error => error.remove());
+            
+            // Criar container de erros
+            const errorContainer = document.createElement('div');
+            errorContainer.className = 'form-errors';
+            
+            // Criar alerta de erros
+            let errorHtml = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bx bx-error-circle me-2 fs-4"></i>
+                        <div>
+                            <h6 class="alert-heading mb-2">Erros de Validação</h6>
+                            <ul class="mb-0 ps-3">
+            `;
+            
             errors.forEach(error => {
-                errorHtml += '<li>' + error + '</li>';
+                errorHtml += `<li>${error}</li>`;
             });
-            errorHtml += '</ul></div>';
             
-            // Mostrar erro no topo da página
-            const alertContainer = document.createElement('div');
-            alertContainer.innerHTML = errorHtml;
-            document.querySelector('.container-p-y').prepend(alertContainer);
+            errorHtml += `
+                            </ul>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
             
-            // Rolar para o topo
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            errorContainer.innerHTML = errorHtml;
             
-            // Remover após 5 segundos
-            setTimeout(() => {
-                alertContainer.remove();
-            }, 5000);
+            // Inserir no topo do conteúdo
+            const content = document.querySelector('.container-p-y');
+            if (content) {
+                content.insertBefore(errorContainer, content.firstChild);
+                
+                // Rolar para o topo
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }
         
-        // Destacar modo edição
+        // Efeito de destaque para modo de edição
         if (window.location.search.includes('edit=true')) {
-            // Adicionar efeito visual
-            const editIndicator = document.querySelector('.edit-indicator');
-            if (editIndicator) {
-                setInterval(() => {
-                    editIndicator.style.opacity = editIndicator.style.opacity === '0.7' ? '1' : '0.7';
-                }, 1000);
-            }
-            
-            // Focar no primeiro campo
-            setTimeout(() => {
-                const firstField = document.getElementById('missao');
-                if (firstField) {
-                    firstField.focus();
-                }
-            }, 300);
+            document.addEventListener('DOMContentLoaded', function() {
+                const editCards = document.querySelectorAll('.edit-mode-form .card');
+                editCards.forEach(card => {
+                    card.style.animation = 'pulse 2s infinite';
+                });
+                
+                // Adicionar estilo de animação
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes pulse {
+                        0% { box-shadow: 0 4px 20px rgba(255, 193, 7, 0.1); }
+                        50% { box-shadow: 0 4px 30px rgba(255, 193, 7, 0.2); }
+                        100% { box-shadow: 0 4px 20px rgba(255, 193, 7, 0.1); }
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                // Focar no primeiro campo
+                setTimeout(() => {
+                    const firstField = document.querySelector('textarea[name="missao"]');
+                    if (firstField) {
+                        firstField.focus();
+                        firstField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 500);
+            });
         }
     </script>
 </body>

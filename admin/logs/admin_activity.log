@@ -40,5 +40,81 @@
 [2026-01-11 09:41:50] User: Romoaldo Doliz (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
 [2026-01-11 10:13:33] User: Romoaldo Doliz (ID: 1) | Action: LOGOUT | Details: Usuário fez logout | IP: ::1
 [2026-01-11 10:13:45] User: Romoaldo Doliz (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
-[2026-01-14 15:57:03] User: Romoaldo Doliz (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
-[2026-01-14 15:57:31] User: Romoaldo Doliz (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-01-11 10:19:36] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.116.24
+[2026-01-11 17:21:17] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.118.66
+[2026-01-11 17:23:03] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.118.66
+[2026-01-12 17:20:21] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.54.126
+[2026-01-12 21:32:50] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.62.218
+[2026-01-13 15:36:28] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.100.24
+[2026-01-13 15:38:27] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.100.24
+[2026-01-13 16:45:28] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.100.24
+[2026-01-14 15:28:25] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.81.80
+[2026-01-14 15:41:18] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.123.21
+[2026-01-29 14:04:31] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.90.125
+[2026-02-01 13:35:50] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 216.234.211.28
+[2026-02-02 14:07:41] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.96.135
+[2026-02-02 14:21:29] User: mahumane sergio (ID: 1) | Action: LOGOUT | Details: Usuário fez logout | IP: 197.235.96.135
+[2026-02-02 14:22:35] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.96.135
+[2026-02-02 14:22:57] User: mahumane sergio (ID: 1) | Action: LOGOUT | Details: Usuário fez logout | IP: 197.235.96.135
+[2026-02-02 14:23:17] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.96.135
+[2026-02-02 18:28:23] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 216.234.211.28
+[2026-02-03 14:04:39] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.93.163
+[2026-02-03 14:04:47] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.93.163
+[2026-02-03 14:05:00] User: mahumane sergio (ID: 1) | Action: LOGOUT | Details: Usuário fez logout | IP: 197.235.93.163
+[2026-02-03 14:05:02] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.93.163
+[2026-02-03 14:06:42] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.93.163
+[2026-02-03 14:06:58] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.93.163
+[2026-02-03 14:18:09] User: mahumane sergio (ID: 1) | Action: LOGOUT | Details: Usuário fez logout | IP: 197.235.93.163
+[2026-02-03 14:18:25] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.93.163
+[2026-02-03 14:20:01] User: mahumane sergio (ID: 1) | Action: LOGOUT | Details: Usuário fez logout | IP: 197.235.93.163
+[2026-02-03 14:20:41] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.93.163
+[2026-02-03 14:22:07] User: mahumane sergio (ID: 1) | Action: LOGOUT | Details: Usuário fez logout | IP: 197.235.93.163
+[2026-02-03 14:22:40] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.93.163
+[2026-02-03 14:23:14] User: mahumane sergio (ID: 1) | Action: LOGOUT | Details: Usuário fez logout | IP: 197.235.93.163
+[2026-02-03 14:23:40] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.93.163
+[2026-02-03 14:23:44] User: mahumane sergio (ID: 1) | Action: LOGOUT | Details: Usuário fez logout | IP: 197.235.93.163
+[2026-02-03 14:23:51] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.93.163
+[2026-02-03 14:24:35] User: mahumane sergio (ID: 1) | Action: LOGOUT | Details: Usuário fez logout | IP: 197.235.93.163
+[2026-02-03 14:24:59] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.93.163
+[2026-02-03 14:30:21] User: mahumane sergio (ID: 1) | Action: LOGOUT | Details: Usuário fez logout | IP: 197.235.93.163
+[2026-02-03 14:42:28] User: mahumane sergio (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.93.163
+[2026-02-03 14:56:08] User: mahumane sergio (ID: 1) | Action: LOGOUT | Details: Usuário fez logout | IP: 197.235.93.163
+[2026-02-03 15:00:43] User: Yuri Parruque  (ID: 6) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.93.163
+[2026-02-03 15:03:21] User: Yuri Parruque  (ID: 6) | Action: LOGOUT | Details: Usuário fez logout | IP: 197.235.93.163
+[2026-02-03 15:03:25] User: Sergio Mahumane (ID: 7) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.93.163
+[2026-02-03 15:17:22] User: Sergio Mahumane (ID: 7) | Action: LOGOUT | Details: Usuário fez logout | IP: 197.235.93.163
+[2026-02-03 15:17:33] User: Mariano Come  (ID: 8) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.93.163
+[2026-02-03 16:31:07] User: Sergio Mahumane (ID: 7) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.122.167
+[2026-02-03 16:40:40] User: Sergio Mahumane (ID: 7) | Action: LOGOUT | Details: Usuário fez logout | IP: 197.218.122.167
+[2026-02-03 16:40:51] User: Mussagy Remane (ID: 9) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.122.167
+[2026-02-03 16:41:07] User: Mussagy Remane (ID: 9) | Action: LOGOUT | Details: Usuário fez logout | IP: 197.218.122.167
+[2026-02-03 16:41:20] User: Mussagy Remane (ID: 9) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.122.167
+[2026-02-03 16:51:34] User: Sergio Mahumane (ID: 7) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.93.163
+[2026-02-03 23:13:59] User: Sergio Mahumane (ID: 7) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.106.214
+[2026-02-04 13:21:01] User: Sergio Mahumane (ID: 7) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 41.220.201.193
+[2026-02-04 20:58:12] User: Sergio Mahumane (ID: 7) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.107.71
+[2026-02-04 23:52:30] User: Sergio Mahumane (ID: 7) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.58.125
+[2026-02-06 05:48:00] User: Mussagy Remane (ID: 9) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.58.182
+[2026-02-06 05:58:13] User: Mussagy Remane (ID: 9) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.58.182
+[2026-02-06 05:58:48] User: Mussagy Remane (ID: 9) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.58.182
+[2026-02-06 05:59:16] User: Mussagy Remane (ID: 9) | Action: LOGOUT | Details: Usuário fez logout | IP: 197.218.58.182
+[2026-02-06 05:59:18] User: Mussagy Remane (ID: 9) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.58.182
+[2026-02-06 06:00:24] User: Mussagy Remane (ID: 9) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.58.182
+[2026-02-06 11:11:28] User: Mussagy Remane (ID: 9) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.58.182
+[2026-02-06 11:17:17] User: Sergio Mahumane (ID: 7) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.58.182
+[2026-02-06 11:17:38] User: Sergio Mahumane (ID: 7) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.58.182
+[2026-02-06 11:19:34] User: Sergio Mahumane (ID: 7) | Action: LOGOUT | Details: Usuário fez logout | IP: 197.218.58.182
+[2026-02-06 11:19:39] User: Mussagy Remane (ID: 10) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.58.182
+[2026-02-06 11:19:57] User: Sergio Mahumane (ID: 7) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.58.182
+[2026-02-06 11:22:47] User: Mussagy Remane (ID: 10) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.58.182
+[2026-02-06 11:23:57] User: Sergio Mahumane (ID: 7) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.58.182
+[2026-02-06 11:24:05] User: Mussagy Remane (ID: 10) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.218.58.182
+[2026-02-06 14:18:50] User: Sergio Mahumane (ID: 7) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.106.171
+[2026-02-06 14:19:02] User: Sergio Mahumane (ID: 7) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: 197.235.106.171
+[2026-02-07 07:45:41] User: Administrador PIRCOM (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 07:45:44] User: Administrador PIRCOM (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 08:46:06] User: Gestor de Conteúdo (ID: 2) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 09:40:09] User: Gestor de Conteúdo (ID: 2) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 09:50:09] User: Gestor de Conteúdo (ID: 2) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 10:40:51] User: Gestor de Conteúdo (ID: 2) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 10:46:06] User: Gestor de Conteúdo (ID: 2) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1

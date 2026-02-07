@@ -35,11 +35,13 @@ function requireAuth() {
  * @param int $id
  * @param string $nome
  * @param string $email
+ * @param string $role (admin ou manager)
  */
-function login($id, $nome, $email) {
+function login($id, $nome, $email, $role = 'manager') {
     $_SESSION['usuario_id'] = $id;
     $_SESSION['usuario_nome'] = $nome;
     $_SESSION['usuario_email'] = $email;
+    $_SESSION['usuario_role'] = $role;
     $_SESSION['last_activity'] = time();
     
     // Regenerar ID de sessão para prevenir session fixation
@@ -87,6 +89,42 @@ function getUserName() {
  */
 function getUserEmail() {
     return $_SESSION['usuario_email'] ?? null;
+}
+
+/**
+ * Obter role do usuário logado
+ * @return string|null (admin ou manager)
+ */
+function getUserRole() {
+    return $_SESSION['usuario_role'] ?? null;
+}
+
+/**
+ * Verificar se usuário é admin
+ * @return bool
+ */
+function isAdmin() {
+    return (getUserRole() === 'admin');
+}
+
+/**
+ * Verificar se usuário é manager
+ * @return bool
+ */
+function isManager() {
+    return (getUserRole() === 'manager');
+}
+
+/**
+ * Requer que o usuário seja admin
+ * Redireciona para dashboard se não for admin
+ */
+function requireAdmin() {
+    if (!isAdmin()) {
+        $_SESSION['error_message'] = 'Acesso negado. Esta funcionalidade está disponível apenas para administradores.';
+        header('Location: dashboard.php');
+        exit;
+    }
 }
 
 /**
@@ -179,6 +217,21 @@ function checkLoginRateLimit($identifier) {
 function clearLoginAttempts($identifier) {
     $key = 'login_attempts_' . md5($identifier);
     unset($_SESSION[$key]);
+}
+
+/**
+ * Requer permissão para deletar (apenas admin)
+ * Retorna erro JSON se for manager
+ */
+function requireDeletePermission() {
+    if (!isAdmin()) {
+        http_response_code(403);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Apenas administradores podem deletar conteúdo. Manager tem acesso limitado a edição e adição.'
+        ]);
+        exit;
+    }
 }
 
 /**

@@ -1,20 +1,29 @@
 <?php
+session_start();
+require_once(__DIR__ . '/helpers/auth.php');
+
+header('Content-Type: application/json; charset=utf-8');
+
 include('config/conexao.php');
 
-if (isset($_POST['comunitarias_id'])) {
-    $comunitarias_id = $_POST['comunitarias_id'];
+requireAuth();
+requireDeletePermission();
 
-    // Execute a consulta DELETE para remover o registro da base de dados
+if (isset($_POST['comunitarias_id'])) {
+    $comunitarias_id = intval($_POST['comunitarias_id']);
+
     $sql = "DELETE FROM comunitarias WHERE id = $comunitarias_id";
 
     if ($conn->query($sql) === TRUE) {
-        // Redirecione de volta para a página de listagem após a remoção bem-sucedida
-        header('Location: comunitarias.php');
+        logAdminActivity('DELETE_COMUNITARIA', 'Comunitária ID: ' . $comunitarias_id);
+        echo json_encode(['success' => true, 'message' => 'Item removido com sucesso.']);
     } else {
-        echo "Erro ao remover o registro: " . $conn->error;
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Erro ao remover: ' . $conn->error]);
     }
 } else {
-    echo "Parâmetros inválidos.";
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Parâmetros inválidos.']);
 }
 
 $conn->close();

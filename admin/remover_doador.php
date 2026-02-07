@@ -1,6 +1,14 @@
 <?php
+session_start();
+require_once(__DIR__ . '/helpers/auth.php');
+
+header('Content-Type: application/json; charset=utf-8');
+
 include('config/conexao.php');
 require_once('helpers/upload.php');
+
+requireAuth();
+requireDeletePermission();
 
 if (isset($_POST['doador_id'])) {
     $doador_id = intval($_POST['doador_id']);
@@ -24,14 +32,18 @@ if (isset($_POST['doador_id'])) {
     $stmt->bind_param("i", $doador_id);
     
     if ($stmt->execute()) {
-        echo "<script>alert('Doador removido com sucesso!');</script>";
+        logAdminActivity('DELETE_DOADOR', 'Doador ID: ' . $doador_id);
+        echo json_encode(['success' => true, 'message' => 'Doador removido com sucesso.']);
     } else {
-        echo "<script>alert('Erro ao remover doador: " . $conn->error . "');</script>";
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Erro ao remover doador: ' . $conn->error]);
     }
     
     $stmt->close();
+} else {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Parâmetros inválidos.']);
 }
 
 $conn->close();
-echo "<script>window.location.href='doadores.php';</script>";
 ?>

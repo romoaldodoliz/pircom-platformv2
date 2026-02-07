@@ -22,6 +22,8 @@
         :root {
             --primary-color: #FF6F0F;
             --secondary-color: #000000;
+            --dark-bg: #0a1929;
+            --light-bg: #f8f9fa;
         }
 
         * {
@@ -43,38 +45,70 @@
             flex: 1;
         }
 
-        /* Footer Styles */
+        /* Footer Styles - Redesenhado */
         footer {
-            background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #000000 100%);
             color: white;
             margin-top: auto;
-            border-top: 4px solid var(--primary-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color) 0%, #ff8c00 50%, var(--primary-color) 100%);
         }
 
         .footer-top {
-            padding: 60px 0 30px;
-            background: rgba(0, 0, 0, 0.2);
+            padding: 70px 0 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-top::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="none"/><path d="M0,50 Q25,25 50,50 T100,50" stroke="rgba(255,111,15,0.05)" stroke-width="2" fill="none"/></svg>');
+            opacity: 0.3;
+            z-index: -1;
         }
 
         .footer-bottom {
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.8);
             padding: 25px 0;
+            position: relative;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .footer-logo {
             max-width: 200px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             filter: brightness(0) invert(1);
+            transition: transform 0.3s ease;
+        }
+
+        .footer-logo:hover {
+            transform: scale(1.05);
         }
 
         .footer-title {
             color: var(--primary-color);
             font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 20px;
+            font-weight: 700;
+            margin-bottom: 25px;
             position: relative;
-            padding-bottom: 10px;
+            padding-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .footer-title::after {
@@ -84,7 +118,20 @@
             left: 0;
             width: 50px;
             height: 3px;
-            background: var(--primary-color);
+            background: linear-gradient(90deg, var(--primary-color), #ff8c00);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .footer-col:hover .footer-title::after {
+            width: 80px;
+        }
+
+        .footer-about p {
+            color: #b0b0b0;
+            line-height: 1.8;
+            font-size: 0.95rem;
+            margin-bottom: 25px;
         }
 
         .footer-links {
@@ -93,157 +140,409 @@
         }
 
         .footer-links li {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            position: relative;
         }
 
         .footer-links a {
-            color: #ddd;
+            color: #d1d1d1;
             text-decoration: none;
             transition: all 0.3s ease;
-            display: inline-flex;
+            display: flex;
             align-items: center;
+            font-size: 0.95rem;
+            padding: 5px 0;
+        }
+
+        .footer-links a::before {
+            content: '›';
+            color: var(--primary-color);
+            margin-right: 10px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
         }
 
         .footer-links a:hover {
             color: var(--primary-color);
-            transform: translateX(5px);
+            transform: translateX(8px);
         }
 
-        .footer-links a i {
-            margin-right: 8px;
-            font-size: 0.9rem;
+        .footer-links a:hover::before {
+            transform: translateX(3px);
         }
 
         .contact-info {
-            color: #ddd;
+            color: #d1d1d1;
         }
 
         .contact-info p {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             display: flex;
             align-items: flex-start;
+            line-height: 1.6;
+            font-size: 0.95rem;
         }
 
         .contact-info i {
             color: var(--primary-color);
-            margin-right: 10px;
+            margin-right: 15px;
             margin-top: 3px;
             min-width: 20px;
+            font-size: 1.1rem;
         }
 
         .social-links {
             display: flex;
-            gap: 15px;
-            margin-top: 20px;
+            gap: 12px;
+            margin-top: 25px;
         }
 
         .social-links a {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
             color: white;
             font-size: 18px;
             transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #ff8c00 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .social-links a i {
+            position: relative;
+            z-index: 1;
         }
 
         .social-links a:hover {
-            background: var(--primary-color);
-            transform: translateY(-3px);
+            transform: translateY(-3px) rotate(5deg);
+            box-shadow: 0 10px 20px rgba(255, 111, 15, 0.3);
         }
 
-        /* Developer Credit */
-        .developer-credit {
+        .social-links a:hover::before {
+            opacity: 1;
+        }
+
+        .social-links a:hover i {
+            color: white;
+        }
+
+        /* Developer Section - Melhorado */
+        .developer-section {
+            background: linear-gradient(135deg, rgba(255, 111, 15, 0.1) 0%, rgba(0, 0, 0, 0.3) 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 40px;
+            border: 1px solid rgba(255, 111, 15, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .developer-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="rgba(255,111,15,0.05)" d="M50,0 L100,50 L50,100 L0,50 Z"/></svg>');
+            opacity: 0.5;
+        }
+
+        .developer-header {
             text-align: center;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 25px;
         }
 
-        .developer-credit p {
-            color: #aaa;
+        .developer-header h5 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .developer-header p {
+            color: #b0b0b0;
             font-size: 0.9rem;
-            margin-bottom: 5px;
+            margin-bottom: 0;
         }
 
-        .developer-link {
-            color: var(--primary-color) !important;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: inline-flex;
+        .developer-content {
+            display: flex;
             align-items: center;
+            justify-content: center;
+            gap: 25px;
+            flex-wrap: wrap;
         }
 
-        .developer-link:hover {
-            color: #ff8c00 !important;
-            text-decoration: underline;
+        .conexar-logo {
+            width: 180px;
+            height: auto;
+            filter: brightness(0) invert(1);
+            transition: all 0.3s ease;
         }
 
-        .developer-link i {
-            margin-right: 5px;
+        .conexar-logo:hover {
+            transform: scale(1.05);
+            filter: brightness(0) invert(1) drop-shadow(0 0 10px rgba(255, 111, 15, 0.3));
         }
 
-        .developer-company {
+        .developer-info {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .developer-info h6 {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .developer-info p {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .developer-btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: rgba(255, 111, 15, 0.1);
-            padding: 8px 15px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 111, 15, 0.3);
+            background: linear-gradient(135deg, var(--primary-color) 0%, #ff8c00 100%);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border: none;
         }
 
-        /* Back to Top Button */
+        .developer-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 111, 15, 0.4);
+            color: white;
+            gap: 12px;
+        }
+
+        .developer-btn i {
+            transition: transform 0.3s ease;
+        }
+
+        .developer-btn:hover i {
+            transform: translateX(3px);
+        }
+
+        /* Copyright */
+        .copyright {
+            text-align: center;
+            padding-top: 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 30px;
+        }
+
+        .copyright p {
+            color: #8a8a8a;
+            font-size: 0.9rem;
+            margin-bottom: 0;
+        }
+
+        .copyright a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .copyright a:hover {
+            color: #ff8c00;
+            text-decoration: underline;
+        }
+
+        /* Back to Top Button - Melhorado */
         .back-to-top {
             position: fixed;
             bottom: 30px;
             right: 30px;
-            width: 50px;
-            height: 50px;
-            background: var(--primary-color);
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #ff8c00 100%);
             color: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             text-decoration: none;
-            font-size: 20px;
+            font-size: 22px;
             opacity: 0;
             visibility: hidden;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1000;
-            box-shadow: 0 4px 15px rgba(255, 111, 15, 0.3);
+            box-shadow: 0 5px 20px rgba(255, 111, 15, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.1);
         }
 
         .back-to-top.show {
             opacity: 1;
             visibility: visible;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 5px 20px rgba(255, 111, 15, 0.3);
+            }
+            50% {
+                box-shadow: 0 5px 25px rgba(255, 111, 15, 0.5);
+            }
+            100% {
+                box-shadow: 0 5px 20px rgba(255, 111, 15, 0.3);
+            }
         }
 
         .back-to-top:hover {
-            background: #e05a00;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(255, 111, 15, 0.4);
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 10px 30px rgba(255, 111, 15, 0.5);
+            animation: none;
+        }
+
+        /* Newsletter Section */
+        .newsletter-section {
+            background: linear-gradient(135deg, rgba(255, 111, 15, 0.15) 0%, rgba(0, 0, 0, 0.2) 100%);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 111, 15, 0.2);
+        }
+
+        .newsletter-title {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .newsletter-title i {
+            color: var(--primary-color);
+        }
+
+        .newsletter-form {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .newsletter-form input {
+            flex: 1;
+            min-width: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .newsletter-form input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 111, 15, 0.2);
+        }
+
+        .newsletter-form input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .newsletter-form button {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #ff8c00 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .newsletter-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 111, 15, 0.4);
         }
 
         /* Responsive Footer */
+        @media (max-width: 992px) {
+            .footer-top {
+                padding: 50px 0 30px;
+            }
+            
+            .developer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .developer-info {
+                text-align: center;
+            }
+            
+            .newsletter-form {
+                flex-direction: column;
+            }
+            
+            .newsletter-form input {
+                min-width: 100%;
+            }
+        }
+
         @media (max-width: 768px) {
             .footer-top {
                 padding: 40px 0 20px;
             }
             
             .footer-title {
-                margin-top: 20px;
+                margin-top: 30px;
             }
             
-            .developer-company {
-                flex-direction: column;
-                padding: 10px;
-                text-align: center;
+            .social-links {
+                justify-content: center;
+            }
+            
+            .back-to-top {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+                bottom: 20px;
+                right: 20px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .developer-section {
+                padding: 20px;
+            }
+            
+            .conexar-logo {
+                width: 150px;
             }
         }
 
@@ -550,13 +849,13 @@
                     <div class="col-lg-4 col-md-6 mb-4">
                         <div class="footer-about">
                             <img src="assets/pircom.png" alt="PIRCOM Logo" class="footer-logo">
-                            <p class="mt-3">A Plataforma Inter-Religiosa de Comunicação para a Saúde (PIRCOM) é uma organização baseada na fé, empenhada e comprometida com a melhoria da qualidade de vida das comunidades.</p>
+                            <p>A Plataforma Inter-Religiosa de Comunicação para a Saúde (PIRCOM) é uma organização baseada na fé, empenhada e comprometida com a melhoria da qualidade de vida das comunidades através de ações integradas de saúde, educação e desenvolvimento social.</p>
                             <div class="social-links">
-                                <a href="#" title="Facebook"><i class="bi bi-facebook"></i></a>
-                                <a href="#" title="Twitter"><i class="bi bi-twitter"></i></a>
-                                <a href="#" title="Instagram"><i class="bi bi-instagram"></i></a>
-                                <a href="#" title="YouTube"><i class="bi bi-youtube"></i></a>
-                                <a href="#" title="LinkedIn"><i class="bi bi-linkedin"></i></a>
+                                <a href="#" title="Facebook" target="_blank"><i class="bi bi-facebook"></i></a>
+                                <a href="#" title="Twitter" target="_blank"><i class="bi bi-twitter-x"></i></a>
+                                <a href="#" title="Instagram" target="_blank"><i class="bi bi-instagram"></i></a>
+                                <a href="#" title="YouTube" target="_blank"><i class="bi bi-youtube"></i></a>
+                                <a href="#" title="LinkedIn" target="_blank"><i class="bi bi-linkedin"></i></a>
                             </div>
                         </div>
                     </div>
@@ -564,54 +863,83 @@
                     <div class="col-lg-2 col-md-6 mb-4">
                         <h4 class="footer-title">Links Rápidos</h4>
                         <ul class="footer-links">
-                            <li><a href="index.php"><i class="bi bi-chevron-right"></i> Início</a></li>
-                            <li><a href="quem-somos.php"><i class="bi bi-chevron-right"></i> Quem Somos</a></li>
-                            <li><a href="noticias.php"><i class="bi bi-chevron-right"></i> Notícias</a></li>
-                            <li><a href="eventos.php"><i class="bi bi-chevron-right"></i> Eventos</a></li>
-                            <li><a href="doacoes.php"><i class="bi bi-chevron-right"></i> Doações</a></li>
+                            <li><a href="index.php">Início</a></li>
+                            <li><a href="quem-somos.php">Quem Somos</a></li>
+                            <li><a href="noticias.php">Notícias</a></li>
+                            <li><a href="eventos.php">Eventos</a></li>
+                            <li><a href="doacoes.php">Doações</a></li>
+                            <li><a href="contacto.php">Contactos</a></li>
                         </ul>
                     </div>
                     
                     <div class="col-lg-3 col-md-6 mb-4">
-                        <h4 class="footer-title">Multimédia</h4>
+                        <h4 class="footer-title">Recursos</h4>
                         <ul class="footer-links">
-                            <li><a href="galeria.php"><i class="bi bi-images"></i> Galeria</a></li>
-                            <li><a href="documentos.php"><i class="bi bi-file-earmark-text"></i> Documentos</a></li>
-                            <li><a href="mapa-cobertura.php"><i class="bi bi-map"></i> Cobertura</a></li>
-                            <li><a href="movimentos.php"><i class="bi bi-people"></i> Movimentos</a></li>
+                            <li><a href="galeria.php">Galeria Multimédia</a></li>
+                            <li><a href="documentos.php">Documentos</a></li>
+                            <li><a href="mapa-cobertura.php">Áreas de Cobertura</a></li>
+                            <li><a href="movimentos.php">Nossos Movimentos</a></li>
+                            <li><a href="#">Relatórios Anuais</a></li>
+                            <li><a href="#">Política de Privacidade</a></li>
                         </ul>
                     </div>
                     
                     <div class="col-lg-3 col-md-6 mb-4">
-                        <h4 class="footer-title">Contactos</h4>
+                        <h4 class="footer-title">Contacte-nos</h4>
                         <div class="contact-info">
                             <p><i class="bi bi-geo-alt"></i> Av. 24 de Julho, nº 345<br>Maputo - Moçambique</p>
                             <p><i class="bi bi-telephone"></i> +258 84 123 4567</p>
+                            <p><i class="bi bi-whatsapp"></i> +258 84 987 6543</p>
                             <p><i class="bi bi-envelope"></i> info@pircom.org</p>
                             <p><i class="bi bi-clock"></i> Seg - Sex: 8:00 - 17:00</p>
                         </div>
+                        
+                        <!-- Newsletter -->
+                        <div class="newsletter-section">
+                            <div class="newsletter-title">
+                                <i class="bi bi-envelope-paper"></i>
+                                <span>Receba as nossas novidades</span>
+                            </div>
+                            <form class="newsletter-form">
+                                <input type="email" placeholder="Seu email" required>
+                                <button type="submit">Subscrever</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        
-        <div class="footer-bottom">
-            <div class="container">
-                <div class="row align-items-center">
-                    <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                        <p class="mb-0">&copy; <?php echo date('Y'); ?> PIRCOM - Plataforma Inter-Religiosa de Comunicação para a Saúde. Todos os direitos reservados.</p>
+                
+                <!-- Developer Section -->
+                <div class="developer-section">
+                    <div class="developer-header">
+                        <h5>Desenvolvimento Tecnológico</h5>
+                        <p>Este projeto foi desenvolvido com expertise técnica por:</p>
                     </div>
-                    <div class="col-md-6 text-center text-md-end">
-                        <div class="developer-credit">
-                            <p>Desenvolvido por</p>
-                            <a href="https://pircom.org.mz/index.php" target="_blank" class="developer-link">
-                                <span class="developer-company">
-                                    <i class="bi bi-code-slash"></i>
-                                    <span>PIRCOM</span>
-                                </span>
+                    
+                    <div class="developer-content">
+                        <img src="https://www.conexarmanagement.com/assets/logo-conexar-DR0P-qf3.png" 
+                             alt="Conexar Management - Digital Solutions Lda" 
+                             class="conexar-logo"
+                             onerror="this.onerror=null; this.src='https://via.placeholder.com/180x60/FF6F0F/FFFFFF?text=Conexar+Management'">
+                        
+                        <div class="developer-info">
+                            <h6>Conexar Management - Digital Solutions Lda</h6>
+                            <p>Especialistas em soluções digitais inovadoras, desenvolvimento web e gestão de projetos tecnológicos. Transformamos ideias em soluções digitais eficientes e escaláveis.</p>
+                            <a href="https://www.conexarmanagement.com/" target="_blank" class="developer-btn">
+                                <span>Visitar Website</span>
+                                <i class="bi bi-arrow-up-right"></i>
                             </a>
                         </div>
                     </div>
+                </div>
+                
+                <!-- Copyright -->
+                <div class="copyright">
+                    <p>&copy; <?php echo date('Y'); ?> <strong>PIRCOM</strong> - Plataforma Inter-Religiosa de Comunicação para a Saúde. Todos os direitos reservados.</p>
+                    <p class="mt-2">
+                        <a href="#">Política de Privacidade</a> | 
+                        <a href="#">Termos de Uso</a> | 
+                        <a href="#">Mapa do Site</a>
+                    </p>
                 </div>
             </div>
         </div>
@@ -659,6 +987,42 @@
                         behavior: 'smooth'
                     });
                 }
+            });
+        });
+
+        // Newsletter form submission
+        document.querySelector('.newsletter-form')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = this.querySelector('input[type="email"]').value;
+            
+            // Simulate submission
+            const button = this.querySelector('button');
+            const originalText = button.innerHTML;
+            
+            button.innerHTML = '<i class="bi bi-check-circle"></i> Inscrito!';
+            button.disabled = true;
+            button.style.background = '#28a745';
+            
+            // Reset after 3 seconds
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+                button.style.background = '';
+                this.reset();
+            }, 3000);
+            
+            // Here you would typically send the email to your server
+            console.log('Newsletter subscription:', email);
+        });
+
+        // Add hover effects to footer sections
+        document.querySelectorAll('.footer-col').forEach(col => {
+            col.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            
+            col.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
             });
         });
     </script>

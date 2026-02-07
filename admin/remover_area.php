@@ -1,20 +1,29 @@
 <?php
+session_start();
+require_once(__DIR__ . '/helpers/auth.php');
+
+header('Content-Type: application/json; charset=utf-8');
+
 include('config/conexao.php');
 
-if (isset($_POST['area_id'])) {
-    $area_id = $_POST['area_id'];
+requireAuth();
+requireDeletePermission();
 
-    // Execute a consulta DELETE para remover o registro da base de dados
+if (isset($_POST['area_id'])) {
+    $area_id = intval($_POST['area_id']);
+
     $sql = "DELETE FROM areas WHERE id = $area_id";
 
     if ($conn->query($sql) === TRUE) {
-        // Redirecione de volta para a página de listagem após a remoção bem-sucedida
-        header('Location: areas.php');
+        logAdminActivity('DELETE_AREA', 'Área ID: ' . $area_id);
+        echo json_encode(['success' => true, 'message' => 'Área removida com sucesso.']);
     } else {
-        echo "Erro ao remover o registro: " . $conn->error;
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Erro ao remover: ' . $conn->error]);
     }
 } else {
-    echo "Parâmetros inválidos.";
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Parâmetros inválidos.']);
 }
 
 $conn->close();

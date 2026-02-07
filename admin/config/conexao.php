@@ -1,8 +1,8 @@
 <?php
 
-$hostname = "localhost";
-$port = "8889"; // Substitua pelo nome do host do seu banco de dados
-$username = "root"; // Substitua pelo nome de usu���rio do seu banco de dados
+$hostname = "localhost"; // Substitua pelo nome do host do seu banco de dados
+$port = 8889; // Porta do MySQL no MAMP
+$username = "root"; // Substitua pelo nome de usuário do seu banco de dados
 $password = "root"; // Substitua pela senha do seu banco de dados
 $database = "pircom"; // Substitua pelo nome do seu banco de dados
 
