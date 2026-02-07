@@ -8,6 +8,10 @@ yarn-error.log*
 playwright-report/
 test-results/
 
+# Ignore specific vendor package
+admin/vendor/graham-campbell/result-type/
+
+
 # OS, editors
 .DS_Store
 Thumbs.db
