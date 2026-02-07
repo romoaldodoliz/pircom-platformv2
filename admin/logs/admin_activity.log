@@ -118,3 +118,23 @@
 [2026-02-07 09:50:09] User: Gestor de Conteúdo (ID: 2) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
 [2026-02-07 10:40:51] User: Gestor de Conteúdo (ID: 2) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
 [2026-02-07 10:46:06] User: Gestor de Conteúdo (ID: 2) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 15:05:31] User: Administrador PIRCOM (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 15:05:41] User: Administrador PIRCOM (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 15:08:58] User: Gestor de Conteúdo (ID: 2) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 15:09:15] User: Gestor de Conteúdo (ID: 2) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 15:09:24] User: Gestor de Conteúdo (ID: 2) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 15:10:52] User: Gestor de Conteúdo (ID: 2) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 15:21:32] User: Administrador PIRCOM (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 15:22:34] User: Gestor de Conteúdo (ID: 2) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 15:23:14] User: Administrador PIRCOM (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 15:23:26] User: Gestor de Conteúdo (ID: 2) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 15:24:33] User: Administrador PIRCOM (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 15:24:48] User: Gestor de Conteúdo (ID: 2) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 15:27:10] User: Administrador PIRCOM (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 15:27:25] User: Gestor de Conteúdo (ID: 2) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 15:28:02] User: Administrador PIRCOM (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 15:29:06] User: Gestor de Conteúdo (ID: 2) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 15:29:39] User: Administrador PIRCOM (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 15:29:47] User: Administrador PIRCOM (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-07 15:29:53] User: Administrador PIRCOM (ID: 1) | Action: DELETE_EVENTO | Details: Evento ID: 5 | IP: ::1
+[2026-02-07 15:29:58] User: Gestor de Conteúdo (ID: 2) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1

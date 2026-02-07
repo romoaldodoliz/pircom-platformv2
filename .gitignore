@@ -7,8 +7,6 @@ yarn-error.log*
 # Playwright / Tests
 playwright-report/
 test-results/
-e2e/evidence/
-tests/evidence/
 
 # OS, editors
 .DS_Store
