@@ -86,142 +86,143 @@ $eventos_valores = array_map(function($m) use ($eventos_por_mes) {
     return $eventos_por_mes[$m] ?? 0; 
 }, $meses);
 ?>
-    <!-- Content wrapper -->
-    <div class="content-wrapper">
-        <!-- Content -->
-        <div class="container-xxl flex-grow-1 container-p-y">
-            
-            <!-- Header -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <h4 class="mb-0">Dashboard PIRCOM</h4>
-                    <p class="text-muted">Resumo de conteúdo e atividades</p>
-                </div>
+
+<!-- Content wrapper ORIGINAL - com padding do tema antigo -->
+<div class="content-wrapper">
+    <!-- Content -->
+    <div class="container-xxl flex-grow-1 container-p-y">
+        
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h4 class="mb-0">Dashboard PIRCOM</h4>
+                <p class="text-muted">Resumo de conteúdo e atividades</p>
             </div>
-
-            <!-- Stats Cards -->
-            <div class="row">
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="card h-100" style="border-left: 4px solid #FF6F0F;">
-                        <div class="card-body">
-                            <span class="text-muted d-block mb-2" style="font-size: 0.85rem;">Notícias</span>
-                            <h3 class="card-title mb-0"><?php echo $stats['noticias']; ?></h3>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="card h-100" style="border-left: 4px solid #28a745;">
-                        <div class="card-body">
-                            <span class="text-muted d-block mb-2" style="font-size: 0.85rem;">Eventos</span>
-                            <h3 class="card-title mb-0"><?php echo $stats['eventos']; ?></h3>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="card h-100" style="border-left: 4px solid #007bff;">
-                        <div class="card-body">
-                            <span class="text-muted d-block mb-2" style="font-size: 0.85rem;">Documentos</span>
-                            <h3 class="card-title mb-0"><?php echo $stats['documentos']; ?></h3>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="card h-100" style="border-left: 4px solid #6c757d;">
-                        <div class="card-body">
-                            <span class="text-muted d-block mb-2" style="font-size: 0.85rem;">Utilizadores</span>
-                            <h3 class="card-title mb-0"><?php echo $stats['usuarios']; ?></h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Charts Row -->
-            <div class="row mt-4">
-                <!-- Pie Chart - Distribuição de Conteúdo -->
-                <div class="col-lg-6 mb-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">Distribuição de Conteúdo</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="contentChart" style="max-height: 300px;"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Bar Chart - Conteúdo por Tipo -->
-                <div class="col-lg-6 mb-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">Resumo por Tipo</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="barChart" style="max-height: 300px;"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Line Chart - Crescimento -->
-            <div class="row">
-                <div class="col-12 mb-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">Crescimento (Últimos 6 Meses)</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="growthChart" style="max-height: 300px;"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Additional Stats -->
-            <div class="row mt-4">
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="card">
-                        <div class="card-body text-center">
-                            <h5 class="text-muted mb-2">Áreas de Intervenção</h5>
-                            <h3 class="mb-0"><?php echo $stats['areas']; ?></h3>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="card">
-                        <div class="card-body text-center">
-                            <h5 class="text-muted mb-2">Galeria</h5>
-                            <h3 class="mb-0"><?php echo $stats['galeria']; ?></h3>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="card">
-                        <div class="card-body text-center">
-                            <h5 class="text-muted mb-2">Doadores</h5>
-                            <h3 class="mb-0"><?php echo $stats['doadores']; ?></h3>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="card">
-                        <div class="card-body text-center">
-                            <h5 class="text-muted mb-2">Total de Usuários</h5>
-                            <h3 class="mb-0"><?php echo $stats['usuarios']; ?></h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div>
-        <!-- / Content -->
 
-        <!-- Footer -->
-        <?php include('footerprincipal.php'); ?>
-        <!-- / Footer -->
+        <!-- Stats Cards -->
+        <div class="row">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card h-100" style="border-left: 4px solid #FF6F0F;">
+                    <div class="card-body">
+                        <span class="text-muted d-block mb-2" style="font-size: 0.85rem;">Notícias</span>
+                        <h3 class="card-title mb-0"><?php echo $stats['noticias']; ?></h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card h-100" style="border-left: 4px solid #28a745;">
+                    <div class="card-body">
+                        <span class="text-muted d-block mb-2" style="font-size: 0.85rem;">Eventos</span>
+                        <h3 class="card-title mb-0"><?php echo $stats['eventos']; ?></h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card h-100" style="border-left: 4px solid #007bff;">
+                    <div class="card-body">
+                        <span class="text-muted d-block mb-2" style="font-size: 0.85rem;">Documentos</span>
+                        <h3 class="card-title mb-0"><?php echo $stats['documentos']; ?></h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card h-100" style="border-left: 4px solid #6c757d;">
+                    <div class="card-body">
+                        <span class="text-muted d-block mb-2" style="font-size: 0.85rem;">Utilizadores</span>
+                        <h3 class="card-title mb-0"><?php echo $stats['usuarios']; ?></h3>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <div class="content-backdrop fade"></div>
+        <!-- Charts Row -->
+        <div class="row mt-4">
+            <!-- Pie Chart - Distribuição de Conteúdo -->
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Distribuição de Conteúdo</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="contentChart" style="max-height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bar Chart - Conteúdo por Tipo -->
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Resumo por Tipo</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="barChart" style="max-height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Line Chart - Crescimento -->
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Crescimento (Últimos 6 Meses)</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="growthChart" style="max-height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Stats -->
+        <div class="row mt-4">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="text-muted mb-2">Áreas de Intervenção</h5>
+                        <h3 class="mb-0"><?php echo $stats['areas']; ?></h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="text-muted mb-2">Galeria</h5>
+                        <h3 class="mb-0"><?php echo $stats['galeria']; ?></h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="text-muted mb-2">Doadores</h5>
+                        <h3 class="mb-0"><?php echo $stats['doadores']; ?></h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="text-muted mb-2">Total de Usuários</h5>
+                        <h3 class="mb-0"><?php echo $stats['usuarios']; ?></h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
-    <!-- Content wrapper -->
+    <!-- / Content -->
+
+    <!-- Footer -->
+    <?php include('footerprincipal.php'); ?>
+    <!-- / Footer -->
+
+    <div class="content-backdrop fade"></div>
+</div>
+<!-- Content wrapper -->
 
 <!-- Chart.js Library -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
