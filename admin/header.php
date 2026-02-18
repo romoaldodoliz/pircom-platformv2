@@ -17,22 +17,35 @@ if (function_exists('obterNotificacoesNaoLidas') && isset($_SESSION['user_id']))
     $notificacoes_nao_lidas = obterNotificacoesNaoLidas($_SESSION['user_id']);
 }
 $total_notificacoes = count($notificacoes_nao_lidas);
+
+// Determinar título da página
+$page_titles = [
+    'dashboard.php' => 'Dashboard',
+    'configuracoes.php' => 'Configurações da Missão',
+    'homepagehero.php' => 'Banner Principal',
+    'noticias.php' => 'Gestão de Notícias',
+    'eventos.php' => 'Eventos',
+    'utilizadores.php' => 'Utilizadores',
+    'comunitarias.php' => 'Ações Comunitárias',
+    'provincias.php' => 'Cobertura Geográfica',
+    'documentos.php' => 'Documentos',
+    'galeria.php' => 'Galeria',
+    'movimentos.php' => 'Nossos Movimentos',
+    'configuracoes-doacoes.php' => 'Configurações de Doações',
+    'doadores.php' => 'Doadores'
+];
+$current_title = $page_titles[$current_page] ?? 'Painel Administrativo';
 ?>
 <!DOCTYPE html>
-<html lang="pt" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="assets/" data-template="vertical-menu-template-free">
-
+<html lang="pt">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-
-    <title>PIRCOM - Painel Administrativo</title>
-
-    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PIRCOM · <?php echo $current_title; ?></title>
+    <meta name="description" content="Plataforma de Gestão PIRCOM - Administração Enterprise" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="assets/pircom.png" />
-    <link rel="shortcut icon" href="assets/pircom.png" />
-    <link rel="apple-touch-icon" href="assets/pircom.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/pircom.png" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -40,1382 +53,1624 @@ $total_notificacoes = count($notificacoes_nao_lidas);
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 
     <!-- Icons -->
-    <link rel="stylesheet" href="assets/vendor/fonts/boxicons.css" />
-
-    <!-- Core CSS -->
-    <link rel="stylesheet" href="assets/vendor/css/core.css" class="template-customizer-core-css" />
-    <link rel="stylesheet" href="assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
-    <link rel="stylesheet" href="assets/css/demo.css" />
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     
-    <!-- Notification Styles -->
+    <!-- Core CSS (mantido para compatibilidade) -->
+    <link rel="stylesheet" href="assets/vendor/css/core.css" />
+    <link rel="stylesheet" href="assets/vendor/css/theme-default.css" />
+    <link rel="stylesheet" href="assets/css/demo.css" />
     <link rel="stylesheet" href="assets/css/notifications.css" />
-
-    <!-- Vendors CSS -->
     <link rel="stylesheet" href="assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
-    <link rel="stylesheet" href="assets/vendor/libs/apex-charts/apex-charts.css" />
 
-    <!-- Helpers -->
+    <!-- Scripts -->
     <script src="assets/vendor/js/helpers.js"></script>
     <script src="assets/js/config.js"></script>
-    
-    <!-- Notification System JS - Carregar antes de usar -->
     <script src="assets/js/notifications.js"></script>
-
+    
     <script>
-      // Disponibiliza flag de role para o JS (true se admin)
       window.__isAdmin = <?php echo isAdmin() ? 'true' : 'false'; ?>;
+      window.__userName = '<?php echo htmlspecialchars($_SESSION["usuario_nome"]); ?>';
     </script>
 
-    <!-- Modern Responsive Styles -->
+    <!-- PIRCOM Design System - Classes Exclusivas -->
     <style>
-      * {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        box-sizing: border-box;
-      }
-      
-      :root {
-        --primary-red: #FF6F0F;
-        --primary-hover: #E05A00;
-        --dark-bg: #0f0f0f;
-        --darker-bg: #080808;
-        --card-bg: #1a1a1a;
-        --border-color: rgba(255, 255, 255, 0.08);
-        --text-primary: #ffffff;
-        --text-secondary: #a0a0a0;
-        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
-        --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
-        --sidebar-width: 280px;
-        --sidebar-collapsed-width: 80px;
-        --navbar-height: 70px;
-        --transition-speed: 0.3s;
-      }
-
-      /* ========== LAYOUT BASE ========== */
-      .layout-wrapper {
-        min-height: 100vh;
-        overflow-x: hidden;
-      }
-
-      .layout-container {
-        display: flex;
-        min-height: 100vh;
-      }
-
-      .layout-page {
-        flex: 1;
-        min-width: 0;
-        display: flex;
-        flex-direction: column;
-        transition: margin-left var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      /* ========== SIDEBAR MODERN RESPONSIVE ========== */
-      #layout-menu.layout-menu {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100vh;
-        width: var(--sidebar-width);
-        background: linear-gradient(180deg, var(--darker-bg) 0%, var(--dark-bg) 100%);
-        border-right: 1px solid var(--border-color);
-        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
-        transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 1100;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-      }
-
-      /* Logo Area */
-      #layout-menu .app-brand {
-        padding: 20px;
-        background: linear-gradient(135deg, rgba(255, 111, 15, 0.1) 0%, transparent 100%);
-        border-bottom: 1px solid var(--border-color);
-        position: relative;
-        overflow: hidden;
-        min-height: var(--navbar-height);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-shrink: 0;
-      }
-
-      #layout-menu .app-brand::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: linear-gradient(90deg, transparent, var(--primary-red), transparent);
-      }
-
-      #layout-menu .app-brand-link {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: opacity var(--transition-speed);
-      }
-
-      #layout-menu .app-brand-link img {
-        max-width: 85px;
-        height: auto;
-        filter: brightness(1.1) drop-shadow(0 4px 12px rgba(255, 111, 15, 0.3));
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      #layout-menu .app-brand-link:hover img {
-        transform: scale(1.05);
-        filter: brightness(1.2) drop-shadow(0 6px 20px rgba(255, 111, 15, 0.5));
-      }
-
-      /* Menu Toggle Button - Desktop */
-      .layout-menu-toggle {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 8px;
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        border: none;
-      }
-
-      .layout-menu-toggle:hover {
-        background: rgba(255, 111, 15, 0.2);
-        transform: rotate(180deg);
-      }
-
-      .layout-menu-toggle i {
-        color: var(--text-secondary);
-        font-size: 1.5rem;
-        transition: color 0.3s ease;
-      }
-
-      /* Menu Container */
-      #layout-menu .menu-inner {
-        flex: 1;
-        overflow-y: auto;
-        overflow-x: hidden;
-        padding: 16px 12px;
-        scrollbar-width: thin;
-        scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
-      }
-
-      #layout-menu .menu-inner::-webkit-scrollbar {
-        width: 6px;
-      }
-
-      #layout-menu .menu-inner::-webkit-scrollbar-track {
-        background: transparent;
-      }
-
-      #layout-menu .menu-inner::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.15);
-        border-radius: 10px;
-      }
-
-      #layout-menu .menu-inner::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 111, 15, 0.3);
-      }
-
-      /* Menu Sections */
-      #layout-menu .menu-header {
-        padding: 0;
-        margin: 24px 20px 12px;
-      }
-
-      #layout-menu .menu-header-text {
-        color: var(--text-secondary) !important;
-        font-weight: 700;
-        font-size: 10px;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        padding-left: 16px;
-        position: relative;
-        display: block;
-        transition: opacity var(--transition-speed);
-      }
-
-      #layout-menu .menu-header-text::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 8px;
-        height: 2px;
-        background: linear-gradient(90deg, var(--primary-red), transparent);
-        border-radius: 2px;
-      }
-
-      /* Menu Items */
-      #layout-menu .menu-item {
-        margin: 4px 0;
-      }
-
-      #layout-menu .menu-item > .menu-link {
-        border-radius: 12px;
-        padding: 14px 16px;
-        margin: 0 8px;
-        color: var(--text-secondary) !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        overflow: hidden;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        white-space: nowrap;
-      }
-
-      #layout-menu .menu-item > .menu-link::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(90deg, rgba(255, 111, 15, 0.1), transparent);
-        opacity: 0;
-        transition: opacity 0.3s ease;
-      }
-
-      #layout-menu .menu-item > .menu-link .menu-icon {
-        color: var(--text-secondary);
-        font-size: 1.3rem;
-        margin-right: 14px;
-        transition: all 0.3s ease;
-        flex-shrink: 0;
-      }
-
-      #layout-menu .menu-item > .menu-link div {
-        transition: opacity var(--transition-speed);
-      }
-
-      /* Hover State */
-      #layout-menu .menu-item:hover > .menu-link {
-        background: rgba(255, 255, 255, 0.06);
-        color: var(--text-primary) !important;
-        transform: translateX(4px);
-      }
-
-      #layout-menu .menu-item:hover > .menu-link::before {
-        opacity: 1;
-      }
-
-      #layout-menu .menu-item:hover > .menu-link .menu-icon {
-        color: var(--primary-red);
-        transform: scale(1.1);
-      }
-
-      /* Active State */
-      #layout-menu .menu-item.active > .menu-link {
-        background: linear-gradient(135deg, rgba(255, 111, 15, 0.15) 0%, rgba(255, 111, 15, 0.05) 100%);
-        color: var(--text-primary) !important;
-        box-shadow: inset 0 0 0 1px rgba(255, 111, 15, 0.3), var(--shadow-sm);
-        font-weight: 600;
-      }
-
-      #layout-menu .menu-item.active > .menu-link::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 20%;
-        bottom: 20%;
-        width: 4px;
-        background: linear-gradient(180deg, var(--primary-red), rgba(255, 111, 15, 0.4));
-        border-radius: 0 4px 4px 0;
-        box-shadow: 0 0 12px rgba(255, 111, 15, 0.6);
-      }
-
-      #layout-menu .menu-item.active > .menu-link .menu-icon {
-        color: var(--primary-red);
-        filter: drop-shadow(0 0 8px rgba(255, 111, 15, 0.4));
-      }
-
-      /* Remove sombra ao fazer scroll */
-      #layout-menu .menu-inner-shadow {
-        display: none !important;
-      }
-
-      /* ========== NAVBAR MODERN RESPONSIVE ========== */
-      .layout-navbar {
-        position: sticky;
-        top: 0;
-        height: var(--navbar-height);
-        background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%) !important;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        padding: 0 1.5rem;
-        z-index: 1050;
-        transition: all var(--transition-speed);
-      }
-
-      .navbar-content {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 100%;
-        height: 100%;
-        gap: 1.5rem;
-      }
-
-      /* Welcome Section */
-      .welcome-section {
-        flex: 1;
-        min-width: 0;
-      }
-
-      .welcome-text {
-        font-size: clamp(1.1rem, 2.5vw, 1.5rem);
-        font-weight: 700;
-        color: #1a1a1a;
-        margin: 0;
-        background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .welcome-name {
-        color: var(--primary-red);
-        -webkit-text-fill-color: var(--primary-red);
-        font-weight: 800;
-      }
-
-      .welcome-subtitle {
-        font-size: clamp(0.75rem, 1.5vw, 0.875rem);
-        color: #666;
-        margin-top: 2px;
-        font-weight: 500;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      /* User Section */
-      .user-section {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        flex-shrink: 0;
-      }
-
-      /* Mobile Menu Toggle */
-      .mobile-menu-toggle {
-        display: none;
-        background: #f5f5f5;
-        border: none;
-        border-radius: 12px;
-        width: 44px;
-        height: 44px;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-      }
-
-      .mobile-menu-toggle:hover {
-        background: linear-gradient(135deg, rgba(255, 111, 15, 0.1) 0%, rgba(255, 111, 15, 0.05) 100%);
-        transform: scale(1.05);
-      }
-
-      .mobile-menu-toggle i {
-        color: var(--primary-red);
-        font-size: 1.5rem;
-      }
-
-      /* Notification Bell */
-      .notification-bell {
-        position: relative;
-        width: 44px;
-        height: 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 12px;
-        background: #f5f5f5;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        border: 2px solid transparent;
-        flex-shrink: 0;
-      }
-
-      .notification-bell:hover {
-        background: linear-gradient(135deg, rgba(255, 111, 15, 0.1) 0%, rgba(255, 111, 15, 0.05) 100%);
-        border-color: rgba(255, 111, 15, 0.2);
-        transform: translateY(-2px);
-      }
-
-      .notification-bell i {
-        font-size: 1.4rem;
-        color: #333;
-        transition: transform 0.3s ease;
-      }
-
-      .notification-bell:hover i {
-        animation: bellRing 0.5s ease;
-      }
-
-      @keyframes bellRing {
-        0%, 100% { transform: rotate(0); }
-        25% { transform: rotate(-15deg); }
-        50% { transform: rotate(15deg); }
-        75% { transform: rotate(-10deg); }
-      }
-
-      .notification-badge {
-        position: absolute;
-        top: -4px;
-        right: -4px;
-        background: linear-gradient(135deg, var(--primary-red) 0%, #ff3333 100%);
-        color: white;
-        border-radius: 10px;
-        min-width: 20px;
-        height: 20px;
-        font-size: 11px;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 2px solid #ffffff;
-        box-shadow: 0 2px 8px rgba(255, 111, 15, 0.4);
-        animation: badgePulse 2s infinite;
-      }
-
-      @keyframes badgePulse {
-        0%, 100% { 
-          transform: scale(1);
-          box-shadow: 0 2px 8px rgba(255, 111, 15, 0.4);
-        }
-        50% { 
-          transform: scale(1.1);
-          box-shadow: 0 4px 12px rgba(255, 111, 15, 0.6);
-        }
-      }
-
-      /* User Avatar */
-      .user-avatar {
-        position: relative;
-        cursor: pointer;
-        padding: 4px;
-        border-radius: 16px;
-        background: linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%);
-        transition: all 0.3s ease;
-        flex-shrink: 0;
-      }
-
-      .user-avatar:hover {
-        background: linear-gradient(135deg, rgba(255, 111, 15, 0.1) 0%, rgba(255, 111, 15, 0.05) 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-      }
-
-      .user-avatar img {
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        border: 2px solid #ffffff;
-        transition: all 0.3s ease;
-        object-fit: cover;
-      }
-
-      .user-avatar:hover img {
-        border-color: var(--primary-red);
-      }
-
-      .status-indicator {
-        position: absolute;
-        bottom: 4px;
-        right: 4px;
-        width: 14px;
-        height: 14px;
-        background: #10b981;
-        border: 3px solid #ffffff;
-        border-radius: 50%;
-        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
-        animation: statusPulse 2s infinite;
-      }
-
-      @keyframes statusPulse {
-        0%, 100% { box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2); }
-        50% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.4); }
-      }
-
-      /* Dropdown Menu */
-      .dropdown-menu {
-        border: none;
-        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
-        border-radius: 16px;
-        overflow: hidden;
-        margin-top: 12px;
-        min-width: 280px;
-        animation: dropdownSlide 0.3s ease;
-        max-width: 90vw;
-      }
-
-      @keyframes dropdownSlide {
-        from {
-          opacity: 0;
-          transform: translateY(-10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .dropdown-header {
-        background: linear-gradient(135deg, var(--primary-red) 0%, #ff3333 100%);
-        padding: 1.5rem;
-        text-align: left;
-      }
-
-      .dropdown-header h6 {
-        color: white;
-        font-weight: 700;
-        font-size: 1rem;
-        margin-bottom: 0.25rem;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .dropdown-header small {
-        color: rgba(255, 255, 255, 0.9);
-        font-size: 0.75rem;
-      }
-
-      .dropdown-item {
-        padding: 0.875rem 1.25rem;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        font-weight: 500;
-        color: #333;
-        white-space: nowrap;
-      }
-
-      .dropdown-item i {
-        font-size: 1.25rem;
-        color: #666;
-        transition: color 0.2s ease;
-        flex-shrink: 0;
-      }
-
-      .dropdown-item:hover {
-        background: linear-gradient(90deg, rgba(255, 111, 15, 0.08) 0%, transparent 100%);
-        color: var(--primary-red);
-        padding-left: 1.5rem;
-      }
-
-      .dropdown-item:hover i {
-        color: var(--primary-red);
-      }
-
-      .dropdown-divider {
-        margin: 0.5rem 0;
-        opacity: 0.1;
-      }
-
-      /* Notification Dropdown Specific Styles */
-      .notification-dropdown {
-        max-height: 400px;
-        overflow-y: auto;
-      }
-
-      .notification-dropdown .dropdown-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-        padding: 1rem 1.25rem;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-      }
-
-      .notification-dropdown .dropdown-item:last-child {
-        border-bottom: none;
-      }
-
-      .notification-dropdown .dropdown-item span {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        width: 100%;
-      }
-
-      .notification-dropdown .dropdown-item small {
-        color: #999;
-        font-size: 0.75rem;
-        margin-top: 0.25rem;
-      }
-
-      /* Backdrop para mobile */
-      .sidebar-backdrop {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1099;
-        opacity: 0;
-        transition: opacity var(--transition-speed);
-      }
-
-      .sidebar-backdrop.show {
-        display: block;
-        opacity: 1;
-      }
-
-      /* ========== RESPONSIVE BREAKPOINTS ========== */
-      
-      /* Large Desktop (>1400px) */
-      @media (min-width: 1400px) {
-        :root {
-          --sidebar-width: 300px;
-        }
-      }
-
-      /* Desktop (992px - 1199px) */
-      @media (max-width: 1199.98px) {
-        :root {
-          --sidebar-width: 260px;
-        }
-
-        .welcome-text {
-          font-size: 1.25rem;
-        }
-
-        .welcome-subtitle {
-          font-size: 0.8rem;
-        }
-      }
-
-      /* Tablet (768px - 991px) */
-      @media (max-width: 991.98px) {
-        #layout-menu.layout-menu {
-          transform: translateX(-100%);
-        }
-
-        #layout-menu.layout-menu.show {
-          transform: translateX(0);
-        }
-
-        .layout-page {
-          margin-left: 0 !important;
-        }
-
-        .welcome-section {
-          max-width: 60%;
-        }
-
-        .user-section {
-          gap: 0.75rem;
-        }
-
-        .mobile-menu-toggle {
-          display: flex;
-        }
-
-        .layout-menu-toggle.d-xl-none {
-          display: none !important;
-        }
-      }
-
-      /* Mobile (576px - 767px) */
-      @media (max-width: 767.98px) {
-        :root {
-          --navbar-height: 65px;
-        }
-
-        .layout-navbar {
-          padding: 0 1rem;
-        }
-
-        .navbar-content {
-          gap: 0.75rem;
-        }
-
-        .welcome-section {
-          max-width: 50%;
-        }
-
-        .welcome-subtitle {
-          display: none;
-        }
-
-        .notification-bell,
-        .user-avatar {
-          width: 40px;
-          height: 40px;
-        }
-
-        .notification-bell {
-          padding: 0;
-        }
-
-        .notification-bell i {
-          font-size: 1.25rem;
-        }
-
-        .user-avatar img {
-          width: 40px;
-          height: 40px;
-        }
-
-        .status-indicator {
-          width: 12px;
-          height: 12px;
-          border-width: 2px;
-        }
-
-        .dropdown-menu {
-          min-width: 260px;
-          max-width: calc(100vw - 2rem);
-        }
-
-        .mobile-menu-toggle {
-          width: 40px;
-          height: 40px;
-        }
-
-        .mobile-menu-toggle i {
-          font-size: 1.35rem;
-        }
-      }
-
-      /* Small Mobile (<576px) */
-      @media (max-width: 575.98px) {
-        :root {
-          --sidebar-width: 280px;
-          --navbar-height: 60px;
-        }
-
-        .layout-navbar {
-          padding: 0 0.75rem;
-        }
-
-        .navbar-content {
-          gap: 0.5rem;
-        }
-
-        .welcome-text {
-          font-size: 1rem;
-        }
-
-        .welcome-section {
-          max-width: 45%;
-        }
-
-        .user-section {
-          gap: 0.5rem;
-        }
-
-        .notification-bell,
-        .user-avatar,
-        .mobile-menu-toggle {
-          width: 38px;
-          height: 38px;
-        }
-
-        .notification-bell i {
-          font-size: 1.15rem;
-        }
-
-        .user-avatar img {
-          width: 38px;
-          height: 38px;
-        }
-
-        .notification-badge {
-          min-width: 18px;
-          height: 18px;
-          font-size: 10px;
-        }
-
-        .dropdown-menu {
-          min-width: 240px;
-        }
-
-        .dropdown-header {
-          padding: 1.25rem 1rem;
-        }
-
-        .dropdown-item {
-          padding: 0.75rem 1rem;
-          font-size: 0.9rem;
-        }
-
-        #layout-menu .menu-item > .menu-link {
-          padding: 12px 14px;
-        }
-
-        #layout-menu .menu-header-text {
-          font-size: 9px;
-        }
-      }
-
-      /* Extra Small Mobile (<400px) */
-      @media (max-width: 399.98px) {
-        .welcome-text {
-          font-size: 0.9rem;
-        }
-
-        .welcome-section {
-          max-width: 40%;
-        }
-
-        .notification-bell,
-        .user-avatar,
-        .mobile-menu-toggle {
-          width: 36px;
-          height: 36px;
-        }
-
-        .user-avatar img {
-          width: 36px;
-          height: 36px;
-        }
-
-        .dropdown-menu {
-          min-width: 220px;
-        }
-      }
-
-      /* Landscape Mobile */
-      @media (max-height: 500px) and (orientation: landscape) {
-        :root {
-          --navbar-height: 55px;
-        }
-
-        .dropdown-menu {
-          max-height: 70vh;
-          overflow-y: auto;
-        }
-      }
-
-      /* Print Styles */
-      @media print {
-        #layout-menu,
-        .layout-navbar {
-          display: none;
-        }
-
-        .layout-page {
-          margin-left: 0 !important;
-        }
-      }
-
-      /* Touch Device Optimizations */
-      @media (hover: none) and (pointer: coarse) {
-        #layout-menu .menu-item > .menu-link {
-          min-height: 48px;
-        }
-
-        .notification-bell,
-        .user-avatar,
-        .mobile-menu-toggle {
-          min-width: 44px;
-          min-height: 44px;
-        }
-      }
-
-      /* Accessibility - Reduced Motion */
-      @media (prefers-reduced-motion: reduce) {
+        /* ===== RESET E VARIÁVEIS ===== */
         * {
-          animation-duration: 0.01ms !important;
-          animation-iteration-count: 1 !important;
-          transition-duration: 0.01ms !important;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-      }
 
-      /* Dark Mode Support (opcional) */
-      @media (prefers-color-scheme: dark) {
-        /* Manter cores atuais ou adaptar se necessário */
-      }
+        :root {
+            --pircom-primary: #FF6F0F;
+            --pircom-primary-dark: #E05A00;
+            --pircom-primary-light: #FFF1E6;
+            --pircom-primary-gradient: linear-gradient(135deg, #FF6F0F, #FF8A3F);
+            
+            --pircom-dark: #0A0C14;
+            --pircom-dark-light: #1E1F2E;
+            --pircom-gray-900: #1A1F2C;
+            --pircom-gray-800: #2D3748;
+            --pircom-gray-700: #4A5568;
+            --pircom-gray-600: #718096;
+            --pircom-gray-500: #A0AEC0;
+            --pircom-gray-400: #CBD5E0;
+            --pircom-gray-300: #E2E8F0;
+            --pircom-gray-200: #EDF2F7;
+            --pircom-gray-100: #F7FAFC;
+            --pircom-white: #FFFFFF;
+            
+            --pircom-success: #10B981;
+            --pircom-warning: #F59E0B;
+            --pircom-danger: #EF4444;
+            --pircom-info: #3B82F6;
+            
+            --pircom-sidebar-width: 280px;
+            --pircom-sidebar-collapsed: 80px;
+            --pircom-navbar-height: 60px;
+            --pircom-border-radius: 10px;
+            --pircom-border-radius-sm: 6px;
+            
+            --pircom-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+            --pircom-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --pircom-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+            --pircom-shadow-primary: 0 4px 16px rgba(255, 111, 15, 0.2);
+            
+            --pircom-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* Espaçamentos */
+            --pircom-spacing-xs: 4px;
+            --pircom-spacing-sm: 8px;
+            --pircom-spacing-md: 12px;
+            --pircom-spacing-lg: 16px;
+            --pircom-spacing-xl: 20px;
+            --pircom-spacing-xxl: 24px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--pircom-gray-100);
+            color: var(--pircom-dark);
+            line-height: 1.5;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* ===== LAYOUT PRINCIPAL ===== */
+        .pircom-layout-wrapper {
+            min-height: 100vh;
+            display: flex;
+            background: var(--pircom-gray-100);
+        }
+
+        .pircom-main-content {
+            flex: 1;
+            margin-left: var(--pircom-sidebar-width);
+            transition: var(--pircom-transition);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--pircom-gray-100);
+        }
+
+        .pircom-main-content.pircom-expanded {
+            margin-left: var(--pircom-sidebar-collapsed);
+        }
+
+        /* ===== SIDEBAR ===== */
+        .pircom-sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--pircom-sidebar-width);
+            background: linear-gradient(180deg, var(--pircom-dark) 0%, #0F1320 100%);
+            box-shadow: var(--pircom-shadow-lg);
+            transition: var(--pircom-transition);
+            z-index: 1100;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .pircom-sidebar.pircom-collapsed {
+            width: var(--pircom-sidebar-collapsed);
+        }
+
+        .pircom-sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: var(--pircom-spacing-lg) var(--pircom-spacing-sm);
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+
+        .pircom-sidebar-nav::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .pircom-sidebar-nav::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .pircom-sidebar-nav::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .pircom-sidebar-nav::-webkit-scrollbar-thumb:hover {
+            background: var(--pircom-primary);
+        }
+
+        .pircom-sidebar-logo {
+            padding: 0 var(--pircom-spacing-lg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
+            height: var(--pircom-navbar-height);
+        }
+
+        .pircom-logo-wrapper {
+            display: flex;
+            align-items: center;
+            gap: var(--pircom-spacing-sm);
+            overflow: hidden;
+        }
+
+        .pircom-logo-img {
+            height: 32px;
+            width: auto;
+            filter: brightness(1.1) drop-shadow(0 2px 4px rgba(255, 111, 15, 0.3));
+            transition: var(--pircom-transition);
+            flex-shrink: 0;
+        }
+
+        .pircom-logo-text {
+            color: var(--pircom-white);
+            font-weight: 700;
+            font-size: 16px;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            transition: var(--pircom-transition);
+            opacity: 1;
+        }
+
+        .pircom-sidebar.pircom-collapsed .pircom-logo-text {
+            opacity: 0;
+            width: 0;
+            display: none;
+        }
+
+        .pircom-collapse-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: var(--pircom-border-radius-sm);
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: var(--pircom-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--pircom-transition);
+            flex-shrink: 0;
+        }
+
+        .pircom-collapse-btn:hover {
+            background: var(--pircom-primary);
+        }
+
+        .pircom-sidebar.pircom-collapsed .pircom-collapse-btn i {
+            transform: rotate(180deg);
+        }
+
+        .pircom-nav-section {
+            margin-bottom: var(--pircom-spacing-lg);
+        }
+
+        .pircom-nav-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .pircom-nav-section-title {
+            color: var(--pircom-gray-500);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0 var(--pircom-spacing-md);
+            margin-bottom: var(--pircom-spacing-sm);
+            transition: var(--pircom-transition);
+            white-space: nowrap;
+        }
+
+        .pircom-sidebar.pircom-collapsed .pircom-nav-section-title {
+            opacity: 0;
+            height: 0;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .pircom-nav-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .pircom-nav-item {
+            margin-bottom: 2px;
+            list-style: none;
+        }
+
+        .pircom-nav-link {
+            display: flex;
+            align-items: center;
+            padding: var(--pircom-spacing-sm) var(--pircom-spacing-md);
+            color: var(--pircom-gray-400);
+            text-decoration: none;
+            border-radius: var(--pircom-border-radius-sm);
+            transition: var(--pircom-transition);
+            white-space: nowrap;
+            position: relative;
+            height: 42px;
+        }
+
+        .pircom-nav-link i {
+            font-size: 20px;
+            min-width: 40px;
+            text-align: center;
+            transition: var(--pircom-transition);
+            color: var(--pircom-gray-400);
+        }
+
+        .pircom-nav-link span {
+            opacity: 1;
+            transition: var(--pircom-transition);
+            font-weight: 500;
+            font-size: 13px;
+            margin-left: 0;
+        }
+
+        .pircom-sidebar.pircom-collapsed .pircom-nav-link {
+            justify-content: center;
+            padding: var(--pircom-spacing-sm) 0;
+            height: 46px;
+        }
+
+        .pircom-sidebar.pircom-collapsed .pircom-nav-link i {
+            min-width: auto;
+            font-size: 22px;
+            margin: 0;
+        }
+
+        .pircom-sidebar.pircom-collapsed .pircom-nav-link span {
+            opacity: 0;
+            width: 0;
+            display: none;
+        }
+
+        .pircom-nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--pircom-white);
+        }
+
+        .pircom-nav-link:hover i {
+            color: var(--pircom-primary);
+            transform: scale(1.1);
+        }
+
+        .pircom-nav-item.pircom-active .pircom-nav-link {
+            background: linear-gradient(90deg, rgba(255, 111, 15, 0.15) 0%, transparent 100%);
+            color: var(--pircom-white);
+            border-left: 2px solid var(--pircom-primary);
+        }
+
+        .pircom-nav-item.pircom-active .pircom-nav-link i {
+            color: var(--pircom-primary);
+        }
+
+        .pircom-sidebar.pircom-collapsed .pircom-nav-link:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--pircom-dark);
+            color: var(--pircom-white);
+            padding: 6px 10px;
+            border-radius: var(--pircom-border-radius-sm);
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+            margin-left: 8px;
+            box-shadow: var(--pircom-shadow-md);
+            z-index: 1200;
+            animation: pircom-tooltip-fade 0.15s ease;
+        }
+
+        .pircom-sidebar.pircom-collapsed .pircom-nav-link:hover::before {
+            content: '';
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 5px solid transparent;
+            border-right-color: var(--pircom-dark);
+            margin-left: 0;
+            z-index: 1201;
+        }
+
+        @keyframes pircom-tooltip-fade {
+            from { 
+                opacity: 0; 
+                transform: translateY(-50%) translateX(-5px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(-50%) translateX(0); 
+            }
+        }
+
+        /* ===== NAVBAR ===== */
+        .pircom-navbar {
+            height: var(--pircom-navbar-height);
+            background: var(--pircom-white);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            padding: 0 var(--pircom-spacing-lg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.98);
+            flex-shrink: 0;
+            border-bottom: 1px solid var(--pircom-gray-200);
+        }
+
+        .pircom-navbar-left {
+            display: flex;
+            align-items: center;
+            gap: var(--pircom-spacing-md);
+        }
+
+        .pircom-mobile-btn {
+            display: none;
+            width: 36px;
+            height: 36px;
+            border-radius: var(--pircom-border-radius-sm);
+            background: var(--pircom-gray-100);
+            border: none;
+            color: var(--pircom-gray-700);
+            font-size: 22px;
+            cursor: pointer;
+            transition: var(--pircom-transition);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pircom-mobile-btn:hover {
+            background: var(--pircom-primary-light);
+            color: var(--pircom-primary);
+        }
+
+        .pircom-page-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--pircom-gray-800);
+        }
+
+        .pircom-page-title span {
+            color: var(--pircom-gray-400);
+            font-weight: 400;
+            margin: 0 var(--pircom-spacing-xs);
+        }
+
+        .pircom-navbar-right {
+            display: flex;
+            align-items: center;
+            gap: var(--pircom-spacing-sm);
+        }
+
+        .pircom-notification-wrapper {
+            position: relative;
+        }
+
+        .pircom-notification-btn {
+            position: relative;
+            width: 36px;
+            height: 36px;
+            border-radius: var(--pircom-border-radius-sm);
+            background: var(--pircom-gray-100);
+            border: none;
+            color: var(--pircom-gray-700);
+            font-size: 20px;
+            cursor: pointer;
+            transition: var(--pircom-transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pircom-notification-btn:hover {
+            background: var(--pircom-primary-light);
+            color: var(--pircom-primary);
+        }
+
+        .pircom-notification-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: linear-gradient(135deg, var(--pircom-primary), var(--pircom-danger));
+            color: var(--pircom-white);
+            font-size: 9px;
+            font-weight: 700;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1.5px solid var(--pircom-white);
+        }
+
+        .pircom-user-wrapper {
+            position: relative;
+        }
+
+        .pircom-user-btn {
+            display: flex;
+            align-items: center;
+            gap: var(--pircom-spacing-sm);
+            padding: 2px 2px 2px 2px;
+            border-radius: 30px;
+            background: var(--pircom-gray-100);
+            border: none;
+            cursor: pointer;
+            transition: var(--pircom-transition);
+        }
+
+        .pircom-user-btn:hover {
+            background: var(--pircom-primary-light);
+        }
+
+        .pircom-user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 30px;
+            background: var(--pircom-primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--pircom-white);
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: var(--pircom-shadow-primary);
+            flex-shrink: 0;
+        }
+
+        .pircom-user-info {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+            margin-right: 2px;
+        }
+
+        .pircom-user-name {
+            font-weight: 600;
+            font-size: 12px;
+            color: var(--pircom-gray-800);
+            line-height: 1.3;
+        }
+
+        .pircom-user-role {
+            font-size: 10px;
+            color: var(--pircom-gray-600);
+        }
+
+        .pircom-user-btn i {
+            color: var(--pircom-gray-600);
+            font-size: 16px;
+            transition: var(--pircom-transition);
+            margin-right: 6px;
+        }
+
+        .pircom-user-btn:hover i {
+            color: var(--pircom-primary);
+        }
+
+        .pircom-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            right: 0;
+            background: var(--pircom-white);
+            border-radius: var(--pircom-border-radius);
+            box-shadow: var(--pircom-shadow-lg);
+            min-width: 300px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-5px);
+            transition: var(--pircom-transition);
+            z-index: 1100;
+            border: 1px solid var(--pircom-gray-200);
+        }
+
+        .pircom-dropdown.pircom-show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .pircom-dropdown-header {
+            padding: var(--pircom-spacing-md) var(--pircom-spacing-lg);
+            background: var(--pircom-primary-gradient);
+            color: var(--pircom-white);
+            border-radius: var(--pircom-border-radius) var(--pircom-border-radius) 0 0;
+        }
+
+        .pircom-dropdown-header h6 {
+            font-weight: 600;
+            margin: 0 0 2px 0;
+            color: var(--pircom-white);
+            font-size: 14px;
+        }
+
+        .pircom-dropdown-header small {
+            opacity: 0.9;
+            font-size: 11px;
+        }
+
+        .pircom-dropdown-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .pircom-dropdown-item {
+            padding: var(--pircom-spacing-md) var(--pircom-spacing-lg);
+            display: flex;
+            align-items: flex-start;
+            gap: var(--pircom-spacing-sm);
+            text-decoration: none;
+            color: var(--pircom-gray-700);
+            transition: var(--pircom-transition);
+            border-bottom: 1px solid var(--pircom-gray-200);
+            cursor: pointer;
+        }
+
+        .pircom-dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .pircom-dropdown-item:hover {
+            background: var(--pircom-gray-100);
+        }
+
+        .pircom-dropdown-item i {
+            font-size: 18px;
+            color: var(--pircom-gray-500);
+            margin-top: 2px;
+        }
+
+        .pircom-item-content {
+            flex: 1;
+        }
+
+        .pircom-item-title {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--pircom-gray-800);
+            margin-bottom: 2px;
+        }
+
+        .pircom-item-subtitle {
+            font-size: 11px;
+            color: var(--pircom-gray-600);
+            margin-bottom: 2px;
+            line-height: 1.4;
+        }
+
+        .pircom-item-time {
+            font-size: 10px;
+            color: var(--pircom-gray-500);
+        }
+
+        .pircom-dropdown-footer {
+            padding: var(--pircom-spacing-sm) var(--pircom-spacing-lg);
+            text-align: center;
+            border-top: 1px solid var(--pircom-gray-200);
+            background: var(--pircom-gray-50);
+        }
+
+        .pircom-dropdown-footer button,
+        .pircom-dropdown-footer a {
+            background: none;
+            border: none;
+            color: var(--pircom-primary);
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: var(--pircom-transition);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .pircom-dropdown-footer button:hover,
+        .pircom-dropdown-footer a:hover {
+            color: var(--pircom-primary-dark);
+        }
+
+        .pircom-empty-state {
+            padding: var(--pircom-spacing-xl);
+            text-align: center;
+            color: var(--pircom-gray-500);
+        }
+
+        .pircom-empty-state i {
+            font-size: 36px;
+            margin-bottom: var(--pircom-spacing-sm);
+            display: block;
+            color: var(--pircom-gray-400);
+        }
+
+        .pircom-empty-state p {
+            font-weight: 500;
+            margin-bottom: 2px;
+            color: var(--pircom-gray-700);
+        }
+
+        .pircom-empty-state small {
+            font-size: 11px;
+            color: var(--pircom-gray-500);
+        }
+
+        /* ===== CONTENT AREA - CORRIGIDO: espaçamento mínimo no topo ===== */
+        .pircom-content-wrapper {
+            padding: 12px 16px 16px 16px;
+            flex: 1;
+            background: var(--pircom-gray-100);
+        }
+
+        /* Dashboard Components */
+        .pircom-dashboard-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--pircom-gray-900);
+            margin: 0 0 8px 0;
+            line-height: 1.2;
+        }
+
+        .pircom-dashboard-subtitle {
+            font-size: 14px;
+            color: var(--pircom-gray-600);
+            margin: 0 0 20px 0;
+        }
+
+        .pircom-section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--pircom-gray-800);
+            margin: 24px 0 16px 0;
+        }
+
+        .pircom-section-title:first-of-type {
+            margin-top: 0;
+        }
+
+        .pircom-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .pircom-metric-card {
+            background: var(--pircom-white);
+            border-radius: var(--pircom-border-radius);
+            padding: 16px;
+            box-shadow: var(--pircom-shadow-sm);
+            border: 1px solid var(--pircom-gray-200);
+            transition: var(--pircom-transition);
+        }
+
+        .pircom-metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--pircom-shadow-md);
+            border-color: var(--pircom-primary-light);
+        }
+
+        .pircom-metric-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--pircom-gray-900);
+            line-height: 1.2;
+            margin-bottom: 4px;
+        }
+
+        .pircom-metric-label {
+            font-size: 13px;
+            color: var(--pircom-gray-600);
+            font-weight: 500;
+        }
+
+        .pircom-dashboard-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .pircom-dashboard-card {
+            background: var(--pircom-white);
+            border-radius: var(--pircom-border-radius);
+            padding: 16px;
+            box-shadow: var(--pircom-shadow-sm);
+            border: 1px solid var(--pircom-gray-200);
+        }
+
+        .pircom-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .pircom-card-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--pircom-gray-800);
+            margin: 0;
+        }
+
+        .pircom-card-header .pircom-badge {
+            background: var(--pircom-primary-light);
+            color: var(--pircom-primary);
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .pircom-chart-placeholder {
+            height: 200px;
+            background: var(--pircom-gray-100);
+            border-radius: var(--pircom-border-radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--pircom-gray-500);
+            font-size: 13px;
+            border: 1px dashed var(--pircom-gray-300);
+        }
+
+        .pircom-intervention-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .pircom-intervention-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--pircom-gray-200);
+        }
+
+        .pircom-intervention-item:last-child {
+            border-bottom: none;
+        }
+
+        .pircom-intervention-month {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--pircom-gray-700);
+        }
+
+        .pircom-intervention-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--pircom-primary);
+            background: var(--pircom-primary-light);
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .pircom-progress-bar {
+            height: 8px;
+            background: var(--pircom-gray-200);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .pircom-progress-fill {
+            height: 100%;
+            background: var(--pircom-primary-gradient);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Backdrop mobile */
+        .pircom-sidebar-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1050;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--pircom-transition);
+        }
+
+        .pircom-sidebar-backdrop.pircom-show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* ===== RESPONSIVIDADE ===== */
+        @media (max-width: 1024px) {
+            .pircom-sidebar {
+                transform: translateX(-100%);
+                box-shadow: none;
+            }
+            
+            .pircom-sidebar.pircom-mobile-open {
+                transform: translateX(0);
+                box-shadow: var(--pircom-shadow-lg);
+            }
+            
+            .pircom-main-content {
+                margin-left: 0 !important;
+            }
+            
+            .pircom-mobile-btn {
+                display: flex;
+            }
+            
+            .pircom-page-title {
+                font-size: 15px;
+            }
+            
+            .pircom-metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .pircom-dashboard-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .pircom-navbar {
+                padding: 0 var(--pircom-spacing-md);
+            }
+            
+            .pircom-user-info {
+                display: none;
+            }
+            
+            .pircom-page-title {
+                font-size: 14px;
+            }
+            
+            .pircom-page-title span {
+                margin: 0 2px;
+            }
+            
+            .pircom-content-wrapper {
+                padding: 8px 12px 12px 12px;
+            }
+            
+            .pircom-dashboard-title {
+                font-size: 24px;
+                margin-bottom: 6px;
+            }
+            
+            .pircom-dashboard-subtitle {
+                margin-bottom: 16px;
+            }
+            
+            .pircom-metrics-grid {
+                gap: 12px;
+                margin-bottom: 20px;
+            }
+            
+            .pircom-metric-card {
+                padding: 12px;
+            }
+            
+            .pircom-metric-value {
+                font-size: 28px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .pircom-navbar {
+                padding: 0 var(--pircom-spacing-sm);
+            }
+            
+            .pircom-content-wrapper {
+                padding: 6px 10px 10px 10px;
+            }
+            
+            .pircom-notification-btn {
+                width: 34px;
+                height: 34px;
+                font-size: 18px;
+            }
+            
+            .pircom-user-btn {
+                padding: 0;
+            }
+            
+            .pircom-user-avatar {
+                width: 30px;
+                height: 30px;
+                font-size: 13px;
+            }
+            
+            .pircom-dropdown {
+                min-width: 260px;
+                right: -5px;
+            }
+            
+            .pircom-metrics-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .pircom-dashboard-title {
+                font-size: 22px;
+            }
+            
+            .pircom-section-title {
+                font-size: 16px;
+                margin: 20px 0 12px 0;
+            }
+        }
+
+        @keyframes pircom-slide-in {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pircom-content-wrapper {
+            animation: pircom-slide-in 0.2s ease;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
     </style>
 </head>
-
 <body>
     <!-- Backdrop para mobile -->
-    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
-
-    <!-- Layout wrapper -->
-    <div class="layout-wrapper layout-content-navbar">
-        <div class="layout-container">
-            <!-- Sidebar -->
-            <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-                <div class="app-brand">
-                    <a href="dashboard.php" class="app-brand-link">
-                        <img src="assets/pircom.png" width="170" style="height:auto; width: 85px;" alt="PIRCOM Logo">
-                    </a>
-
-                    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none" id="menuToggleBtn">
-                        <i class="bx bx-chevron-left bx-sm align-middle"></i>
-                    </a>
+    <div class="pircom-sidebar-backdrop" id="pircomSidebarBackdrop"></div>
+    
+    <div class="pircom-layout-wrapper">
+        <!-- Sidebar -->
+        <aside class="pircom-sidebar" id="pircomSidebar">
+            <div class="pircom-sidebar-logo">
+                <div class="pircom-logo-wrapper">
+                    <img src="assets/pircom.png" alt="PIRCOM" class="pircom-logo-img">
+                    <span class="pircom-logo-text">PIRCOM</span>
                 </div>
-
-                <div class="menu-inner-shadow"></div>
-
-                <ul class="menu-inner py-1">
-                    <li class="menu-item <?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>">
-                        <a href="dashboard.php" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                            <div>Dashboard</div>
-                        </a>
-                    </li>
-
-                    <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Página Inicial</span>
-                    </li>
-                    
-                    <li class="menu-item <?php echo ($current_page == 'configuracoes.php') ? 'active' : ''; ?>">
-                        <a href="configuracoes.php" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-bullseye"></i>
-                            <div>Missão</div>
-                        </a>
-                    </li>
-                    
-                    <li class="menu-item <?php echo ($current_page == 'homepagehero.php') ? 'active' : ''; ?>">
-                        <a href="homepagehero.php" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-image-alt"></i>
-                            <div>Banner Principal</div>
-                        </a>
-                    </li>
-                    
-                    <li class="menu-item <?php echo ($current_page == 'noticias.php') ? 'active' : ''; ?>">
-                        <a href="noticias.php" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-news"></i>
-                            <div>Notícias</div>
-                        </a>
-                    </li>
-                    
-                    <li class="menu-item <?php echo ($current_page == 'eventos.php') ? 'active' : ''; ?>">
-                        <a href="eventos.php" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-calendar-event"></i>
-                            <div>Eventos</div>
-                        </a>
-                    </li>
-                    
-                    <li class="menu-item <?php echo ($current_page == 'utilizadores.php') ? 'active' : ''; ?>">
-                        <a href="utilizadores.php" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-user-circle"></i>
-                            <div>Utilizadores</div>
-                        </a>
-                    </li>
-
-                    <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Nossas Abordagens</span>
-                    </li>
-                    
-                    <li class="menu-item <?php echo ($current_page == 'comunitarias.php') ? 'active' : ''; ?>">
-                        <a href="comunitarias.php" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-group"></i>
-                            <div>Comunitárias</div>
-                        </a>
-                    </li>
-                    
-                    <li class="menu-item <?php echo (in_array($current_page, ['provincias.php', 'provinciasform.php'])) ? 'active' : ''; ?>">
-                        <a href="provincias.php" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-map"></i>
-                            <div>Cobertura Geográfica</div>
-                        </a>
-                    </li>
-                    
-                    <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Multimédia</span>
-                    </li>
-
-                    <li class="menu-item <?php echo ($current_page == 'documentos.php') ? 'active' : ''; ?>">
-                        <a href="documentos.php" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-file-blank"></i>
-                            <div>Documentos</div>
-                        </a>
-                    </li>
-                    
-                    <li class="menu-item <?php echo ($current_page == 'galeria.php') ? 'active' : ''; ?>">
-                        <a href="galeria.php" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-photo-album"></i>
-                            <div>Galeria</div>
-                        </a>
-                    </li>
-                    
-                    <li class="menu-header small text-uppercase">
-                        <span class="menu-header-text">Blog & Doações</span>
-                    </li>
-                    
-                    <li class="menu-item <?php echo ($current_page == 'movimentos.php') ? 'active' : ''; ?>">
-                        <a href="movimentos.php" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-chat"></i>
-                            <div>Nossos Movimentos</div>
-                        </a>
-                    </li>
-                    
-                    <li class="menu-item <?php echo ($current_page == 'configuracoes-doacoes.php') ? 'active' : ''; ?>">
-                        <a href="configuracoes-doacoes.php" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-cog"></i>
-                            <div>Configurações de Doação</div>
-                        </a>
-                    </li>
-                    
-                    <li class="menu-item <?php echo ($current_page == 'doadores.php') ? 'active' : ''; ?>">
-                        <a href="doadores.php" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-donate-heart"></i>
-                            <div>Lista de Doadores</div>
-                        </a>
-                    </li>
-                </ul>
-            </aside>
-            <!-- / Sidebar -->
-
-            <!-- Layout container -->
-            <div class="layout-page">
-                <!-- Navbar -->
-                <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
-                    <div class="navbar-content">
-                        <!-- Mobile Menu Toggle -->
-                        <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button">
-                            <i class="bx bx-menu"></i>
+                <button class="pircom-collapse-btn" id="pircomToggleSidebar">
+                    <i class='bx bx-chevron-left'></i>
+                </button>
+            </div>
+            
+            <div class="pircom-sidebar-nav">
+                <!-- Principal -->
+                <div class="pircom-nav-section">
+                    <div class="pircom-nav-section-title">PRINCIPAL</div>
+                    <ul class="pircom-nav-list">
+                        <li class="pircom-nav-item <?php echo ($current_page == 'dashboard.php') ? 'pircom-active' : ''; ?>">
+                            <a href="dashboard.php" class="pircom-nav-link" data-tooltip="Dashboard">
+                                <i class='bx bx-home-circle'></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Página Inicial -->
+                <div class="pircom-nav-section">
+                    <div class="pircom-nav-section-title">PÁGINA INICIAL</div>
+                    <ul class="pircom-nav-list">
+                        <li class="pircom-nav-item <?php echo ($current_page == 'configuracoes.php') ? 'pircom-active' : ''; ?>">
+                            <a href="configuracoes.php" class="pircom-nav-link" data-tooltip="Missão">
+                                <i class='bx bx-target-lock'></i>
+                                <span>Missão</span>
+                            </a>
+                        </li>
+                        <li class="pircom-nav-item <?php echo ($current_page == 'homepagehero.php') ? 'pircom-active' : ''; ?>">
+                            <a href="homepagehero.php" class="pircom-nav-link" data-tooltip="Banner Principal">
+                                <i class='bx bx-slideshow'></i>
+                                <span>Banner Principal</span>
+                            </a>
+                        </li>
+                        <li class="pircom-nav-item <?php echo ($current_page == 'noticias.php') ? 'pircom-active' : ''; ?>">
+                            <a href="noticias.php" class="pircom-nav-link" data-tooltip="Notícias">
+                                <i class='bx bx-news'></i>
+                                <span>Notícias</span>
+                            </a>
+                        </li>
+                        <li class="pircom-nav-item <?php echo ($current_page == 'eventos.php') ? 'pircom-active' : ''; ?>">
+                            <a href="eventos.php" class="pircom-nav-link" data-tooltip="Eventos">
+                                <i class='bx bx-calendar'></i>
+                                <span>Eventos</span>
+                            </a>
+                        </li>
+                        <li class="pircom-nav-item <?php echo ($current_page == 'utilizadores.php') ? 'pircom-active' : ''; ?>">
+                            <a href="utilizadores.php" class="pircom-nav-link" data-tooltip="Utilizadores">
+                                <i class='bx bx-users'></i>
+                                <span>Utilizadores</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Abordagens -->
+                <div class="pircom-nav-section">
+                    <div class="pircom-nav-section-title">ABORDAGENS</div>
+                    <ul class="pircom-nav-list">
+                        <li class="pircom-nav-item <?php echo ($current_page == 'comunitarias.php') ? 'pircom-active' : ''; ?>">
+                            <a href="comunitarias.php" class="pircom-nav-link" data-tooltip="Comunitárias">
+                                <i class='bx bx-heart'></i>
+                                <span>Comunitárias</span>
+                            </a>
+                        </li>
+                        <li class="pircom-nav-item <?php echo (in_array($current_page, ['provincias.php', 'provinciasform.php'])) ? 'pircom-active' : ''; ?>">
+                            <a href="provincias.php" class="pircom-nav-link" data-tooltip="Cobertura Geográfica">
+                                <i class='bx bx-map'></i>
+                                <span>Cobertura Geográfica</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Multimédia -->
+                <div class="pircom-nav-section">
+                    <div class="pircom-nav-section-title">MULTIMÉDIA</div>
+                    <ul class="pircom-nav-list">
+                        <li class="pircom-nav-item <?php echo ($current_page == 'documentos.php') ? 'pircom-active' : ''; ?>">
+                            <a href="documentos.php" class="pircom-nav-link" data-tooltip="Documentos">
+                                <i class='bx bx-file'></i>
+                                <span>Documentos</span>
+                            </a>
+                        </li>
+                        <li class="pircom-nav-item <?php echo ($current_page == 'galeria.php') ? 'pircom-active' : ''; ?>">
+                            <a href="galeria.php" class="pircom-nav-link" data-tooltip="Galeria">
+                                <i class='bx bx-images'></i>
+                                <span>Galeria</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Blog & Doações -->
+                <div class="pircom-nav-section">
+                    <div class="pircom-nav-section-title">BLOG & DOAÇÕES</div>
+                    <ul class="pircom-nav-list">
+                        <li class="pircom-nav-item <?php echo ($current_page == 'movimentos.php') ? 'pircom-active' : ''; ?>">
+                            <a href="movimentos.php" class="pircom-nav-link" data-tooltip="Nossos Movimentos">
+                                <i class='bx bx-chat'></i>
+                                <span>Nossos Movimentos</span>
+                            </a>
+                        </li>
+                        <li class="pircom-nav-item <?php echo ($current_page == 'configuracoes-doacoes.php') ? 'pircom-active' : ''; ?>">
+                            <a href="configuracoes-doacoes.php" class="pircom-nav-link" data-tooltip="Config. Doações">
+                                <i class='bx bx-cog'></i>
+                                <span>Config. Doações</span>
+                            </a>
+                        </li>
+                        <li class="pircom-nav-item <?php echo ($current_page == 'doadores.php') ? 'pircom-active' : ''; ?>">
+                            <a href="doadores.php" class="pircom-nav-link" data-tooltip="Doadores">
+                                <i class='bx bx-donate-heart'></i>
+                                <span>Doadores</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="pircom-main-content" id="pircomMainContent">
+            <!-- Navbar -->
+            <nav class="pircom-navbar">
+                <div class="pircom-navbar-left">
+                    <button class="pircom-mobile-btn" id="pircomMobileBtn">
+                        <i class='bx bx-menu'></i>
+                    </button>
+                    <div class="pircom-page-title">
+                        <span>/</span>
+                        <?php echo $current_title; ?>
+                    </div>
+                </div>
+                
+                <div class="pircom-navbar-right">
+                    <!-- Notifications -->
+                    <div class="pircom-notification-wrapper">
+                        <button class="pircom-notification-btn" id="pircomNotificationBtn">
+                            <i class='bx bx-bell'></i>
+                            <?php if ($total_notificacoes > 0): ?>
+                            <span class="pircom-notification-badge" id="pircomNotificationBadge"><?php echo $total_notificacoes; ?></span>
+                            <?php endif; ?>
                         </button>
-
-                        <!-- Welcome Section -->
-                        <div class="welcome-section">
-                            <h5 class="welcome-text">
-                                Bem-vindo, <span class="welcome-name"><?php echo htmlspecialchars($_SESSION["usuario_nome"]); ?></span>
-                            </h5>
-                            <p class="welcome-subtitle">Gerencie seu painel PIRCOM</p>
-                        </div>
-
-                        <!-- User Section -->
-                        <div class="user-section">
-                            <!-- Notifications -->
-                            <div class="nav-item dropdown">
-                                <a class="nav-link notification-bell" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bx bx-bell"></i>
-                                    <?php if ($total_notificacoes > 0): ?>
-                                    <span class="notification-badge" id="notificationBadge"><?php echo $total_notificacoes; ?></span>
-                                    <?php endif; ?>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-end notification-dropdown" id="notificationDropdown" style="min-width: 350px; max-width: 400px;">
-                                    <div class="dropdown-header d-flex justify-content-between align-items-center">
-                                        <h6 style="margin: 0;">Notificações</h6>
-                                        <?php if ($total_notificacoes > 0): ?>
-                                        <small style="cursor: pointer; color: var(--primary-red); font-weight: 600;" onclick="marcarTodasComoLidas()">Marcar todas</small>
-                                        <?php endif; ?>
-                                    </div>
-                                    <div id="notificationsList" style="max-height: 400px; overflow-y: auto;">
-                                        <?php if ($total_notificacoes > 0): ?>
-                                            <?php foreach ($notificacoes_nao_lidas as $notif): ?>
-                                            <a class="dropdown-item notification-item" data-id="<?php echo $notif['id']; ?>" href="javascript:void(0);" onclick="marcarNotificacao(<?php echo $notif['id']; ?>)">
-                                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                                                    <div style="flex: 1;">
-                                                        <strong style="color: #333; display: block;"><?php echo htmlspecialchars($notif['titulo']); ?></strong>
-                                                        <small style="color: #666; display: block; margin-top: 4px;"><?php echo htmlspecialchars($notif['mensagem']); ?></small>
-                                                        <small style="color: #999; display: block; margin-top: 6px;">
-                                                            <?php 
-                                                                $time = strtotime($notif['criada_em']);
-                                                                $diff = time() - $time;
-                                                                if ($diff < 60) echo 'Há alguns segundos';
-                                                                elseif ($diff < 3600) echo 'Há ' . floor($diff/60) . ' minutos';
-                                                                elseif ($diff < 86400) echo 'Há ' . floor($diff/3600) . ' horas';
-                                                                else echo 'Há ' . floor($diff/86400) . ' dias';
-                                                            ?>
-                                                        </small>
-                                                    </div>
-                                                    <i class="bx bx-x" style="cursor: pointer; margin-left: 8px; color: #999;" onclick="event.stopPropagation(); deletarNotificacao(<?php echo $notif['id']; ?>)"></i>
-                                                </div>
-                                            </a>
-                                            <?php endforeach; ?>
-                                        <?php else: ?>
-                                            <div style="padding: 20px; text-align: center; color: #999;">
-                                                <i class="bx bx-info-circle" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
-                                                <small>Nenhuma notificação no momento</small>
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
+                        
+                        <div class="pircom-dropdown" id="pircomNotificationDropdown">
+                            <div class="pircom-dropdown-header">
+                                <h6>Notificações</h6>
+                                <small><?php echo $total_notificacoes; ?> não lidas</small>
                             </div>
-
-                            <!-- User Menu -->
-                            <div class="nav-item dropdown">
-                                <a class="nav-link user-avatar" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <img src="https://static.vecteezy.com/system/resources/previews/007/296/443/large_2x/user-icon-person-icon-client-symbol-profile-icon-vector.jpg" alt="Avatar" />
-                                    <span class="status-indicator"></span>
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li>
-                                        <div class="dropdown-header">
-                                            <h6><?php echo htmlspecialchars($_SESSION["usuario_nome"]); ?></h6>
-                                            <small><?php 
-                                                $role = getUserRole();
-                                                echo ($role === 'admin') ? 'Administrador' : 'Gerenciador de Conteúdo';
-                                            ?></small>
+                            
+                            <div class="pircom-dropdown-list" id="pircomNotificationsList">
+                                <?php if ($total_notificacoes > 0): ?>
+                                    <?php foreach ($notificacoes_nao_lidas as $notif): ?>
+                                    <div class="pircom-dropdown-item" onclick="marcarNotificacao(<?php echo $notif['id']; ?>)">
+                                        <i class='bx bx-bell'></i>
+                                        <div class="pircom-item-content">
+                                            <div class="pircom-item-title"><?php echo htmlspecialchars($notif['titulo']); ?></div>
+                                            <div class="pircom-item-subtitle"><?php echo htmlspecialchars($notif['mensagem']); ?></div>
+                                            <div class="pircom-item-time">
+                                                <?php 
+                                                    $diff = time() - strtotime($notif['criada_em']);
+                                                    if ($diff < 60) echo 'Agora mesmo';
+                                                    elseif ($diff < 3600) echo 'Há ' . floor($diff/60) . ' min';
+                                                    elseif ($diff < 86400) echo 'Há ' . floor($diff/3600) . ' h';
+                                                    else echo 'Há ' . floor($diff/86400) . ' d';
+                                                ?>
+                                            </div>
                                         </div>
-                                    </li>
-                                    <li><div class="dropdown-divider"></div></li>
-                                    <li>
-                                        <a class="dropdown-item" href="editar-perfil.php">
-                                            <i class="bx bx-user"></i>
-                                            <span>Meu Perfil</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="editar-perfil.php?tab=password">
-                                            <i class="bx bx-lock"></i>
-                                            <span>Alterar Senha</span>
-                                        </a>
-                                    </li>
-                                    <?php if (isAdmin()): ?>
-                                    <li>
-                                        <a class="dropdown-item" href="configuracoes.php">
-                                            <i class="bx bx-cog"></i>
-                                            <span>Configurações do Sistema</span>
-                                        </a>
-                                    </li>
-                                    <?php endif; ?>
-                                    <li><div class="dropdown-divider"></div></li>
-                                    <li>
-                                        <a class="dropdown-item" href="actions/logoutAction.php">
-                                            <i class="bx bx-power-off"></i>
-                                            <span>Sair do Sistema</span>
-                                        </a>
-                                    </li>
-                                </ul>
+                                    </div>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <div class="pircom-empty-state">
+                                        <i class='bx bx-check-circle'></i>
+                                        <p>Tudo em ordem!</p>
+                                        <small>Nenhuma notificação no momento</small>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            
+                            <?php if ($total_notificacoes > 0): ?>
+                            <div class="pircom-dropdown-footer">
+                                <button onclick="marcarTodasComoLidas()">
+                                    <i class='bx bx-check-double'></i>
+                                    Marcar todas como lidas
+                                </button>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    
+                    <!-- User Menu -->
+                    <div class="pircom-user-wrapper">
+                        <button class="pircom-user-btn" id="pircomUserBtn">
+                            <div class="pircom-user-avatar">
+                                <?php echo strtoupper(substr($_SESSION["usuario_nome"], 0, 1)); ?>
+                            </div>
+                            <div class="pircom-user-info">
+                                <span class="pircom-user-name"><?php echo htmlspecialchars($_SESSION["usuario_nome"]); ?></span>
+                                <span class="pircom-user-role"><?php echo (getUserRole() === 'admin') ? 'Administrador' : 'Gerenciador'; ?></span>
+                            </div>
+                            <i class='bx bx-chevron-down'></i>
+                        </button>
+                        
+                        <div class="pircom-dropdown" id="pircomUserDropdown">
+                            <div class="pircom-dropdown-header">
+                                <h6>Minha Conta</h6>
+                                <small><?php echo htmlspecialchars($_SESSION["usuario_email"] ?? ''); ?></small>
+                            </div>
+                            
+                            <div class="pircom-dropdown-list">
+                                <a href="editar-perfil.php" class="pircom-dropdown-item">
+                                    <i class='bx bx-user-circle'></i>
+                                    <div class="pircom-item-content">
+                                        <div class="pircom-item-title">Meu Perfil</div>
+                                        <div class="pircom-item-subtitle">Visualizar e editar informações</div>
+                                    </div>
+                                </a>
+                                
+                                <a href="editar-perfil.php?tab=password" class="pircom-dropdown-item">
+                                    <i class='bx bx-lock-alt'></i>
+                                    <div class="pircom-item-content">
+                                        <div class="pircom-item-title">Alterar Senha</div>
+                                        <div class="pircom-item-subtitle">Atualizar sua senha de acesso</div>
+                                    </div>
+                                </a>
+                                
+                                <?php if (isAdmin()): ?>
+                                <a href="configuracoes.php" class="pircom-dropdown-item">
+                                    <i class='bx bx-cog'></i>
+                                    <div class="pircom-item-content">
+                                        <div class="pircom-item-title">Configurações</div>
+                                        <div class="pircom-item-subtitle">Gerenciar sistema</div>
+                                    </div>
+                                </a>
+                                <?php endif; ?>
+                            </div>
+                            
+                            <div class="pircom-dropdown-footer">
+                                <a href="actions/logoutAction.php" style="color: var(--pircom-danger);">
+                                    <i class='bx bx-log-out'></i> Terminar Sessão
+                                </a>
                             </div>
                         </div>
                     </div>
-                </nav>
-                <!-- / Navbar -->
+                </div>
+            </nav>
+            
+            <!-- Content Area - ESPAÇAMENTO CORRIGIDO -->
+            <div class="pircom-content-wrapper">
+                <!-- DASHBOARD CONTEÚDO -->
+                <div class="pircom-dashboard">
+                    <h1 class="pircom-dashboard-title">Dashboard PIRCOM</h1>
+                    <p class="pircom-dashboard-subtitle">Resumo de conteúdo e atividades</p>
+                    
+                    <!-- Métricas principais -->
+                    <div class="pircom-metrics-grid">
+                        <div class="pircom-metric-card">
+                            <div class="pircom-metric-value">1</div>
+                            <div class="pircom-metric-label">Notícias</div>
+                        </div>
+                        <div class="pircom-metric-card">
+                            <div class="pircom-metric-value">4</div>
+                            <div class="pircom-metric-label">Eventos</div>
+                        </div>
+                        <div class="pircom-metric-card">
+                            <div class="pircom-metric-value">0</div>
+                            <div class="pircom-metric-label">Documentos</div>
+                        </div>
+                        <div class="pircom-metric-card">
+                            <div class="pircom-metric-value">2</div>
+                            <div class="pircom-metric-label">Utilizadores</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Primeira linha de gráficos -->
+                    <div class="pircom-dashboard-row">
+                        <div class="pircom-dashboard-card">
+                            <div class="pircom-card-header">
+                                <h3>Distribuição de Conteúdo</h3>
+                                <span class="pircom-badge">Atualizado</span>
+                            </div>
+                            <div class="pircom-chart-placeholder">
+                                <i class='bx bx-pie-chart-alt' style="font-size: 24px; margin-right: 8px;"></i>
+                                Gráfico de distribuição
+                            </div>
+                        </div>
+                        
+                        <div class="pircom-dashboard-card">
+                            <div class="pircom-card-header">
+                                <h3>Resumo por Tipo</h3>
+                            </div>
+                            <div class="pircom-chart-placeholder">
+                                <i class='bx bx-bar-chart-alt' style="font-size: 24px; margin-right: 8px;"></i>
+                                Gráfico de barras
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Segunda linha -->
+                    <div class="pircom-dashboard-row">
+                        <div class="pircom-dashboard-card">
+                            <div class="pircom-card-header">
+                                <h3>Crescimento (Últimos 6 Meses)</h3>
+                            </div>
+                            <div class="pircom-chart-placeholder">
+                                <i class='bx bx-line-chart' style="font-size: 24px; margin-right: 8px;"></i>
+                                Gráfico de linhas
+                            </div>
+                        </div>
+                        
+                        <div class="pircom-dashboard-card">
+                            <div class="pircom-card-header">
+                                <h3>Áreas de Intervenção</h3>
+                                <span class="pircom-badge">6 meses</span>
+                            </div>
+                            <div class="pircom-intervention-list">
+                                <div class="pircom-intervention-item">
+                                    <span class="pircom-intervention-month">Sep/2025</span>
+                                    <span class="pircom-intervention-value">12</span>
+                                </div>
+                                <div class="pircom-intervention-item">
+                                    <span class="pircom-intervention-month">Oct/2025</span>
+                                    <span class="pircom-intervention-value">15</span>
+                                </div>
+                                <div class="pircom-intervention-item">
+                                    <span class="pircom-intervention-month">Nov/2025</span>
+                                    <span class="pircom-intervention-value">18</span>
+                                </div>
+                                <div class="pircom-intervention-item">
+                                    <span class="pircom-intervention-month">Dez/2025</span>
+                                    <span class="pircom-intervention-value">22</span>
+                                </div>
+                                <div class="pircom-intervention-item">
+                                    <span class="pircom-intervention-month">Jan/2026</span>
+                                    <span class="pircom-intervention-value">25</span>
+                                </div>
+                                <div class="pircom-intervention-item">
+                                    <span class="pircom-intervention-month">Feb/2026</span>
+                                    <span class="pircom-intervention-value">30</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Barra de progresso exemplo -->
+                            <div style="margin-top: 16px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                    <span style="font-size: 12px; color: var(--pircom-gray-600);">Meta anual</span>
+                                    <span style="font-size: 12px; font-weight: 600; color: var(--pircom-primary);">75%</span>
+                                </div>
+                                <div class="pircom-progress-bar">
+                                    <div class="pircom-progress-fill" style="width: 75%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Aqui vai o conteúdo específico de cada página -->
+                <?php
+                // O conteúdo da página específica continua aqui
+                // Exemplo: include('pagina-especifica.php');
+                ?>
+            </div>
+        </main>
+    </div>
 
     <script>
-        // Mobile Menu Toggle Script
         (function() {
-            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-            const layoutMenu = document.getElementById('layout-menu');
-            const sidebarBackdrop = document.getElementById('sidebarBackdrop');
-            const menuToggleBtn = document.getElementById('menuToggleBtn');
-
-            // Toggle menu em mobile
-            if (mobileMenuToggle) {
-                mobileMenuToggle.addEventListener('click', function() {
-                    layoutMenu.classList.toggle('show');
-                    sidebarBackdrop.classList.toggle('show');
-                    document.body.style.overflow = layoutMenu.classList.contains('show') ? 'hidden' : '';
+            'use strict';
+            
+            const sidebar = document.getElementById('pircomSidebar');
+            const mainContent = document.getElementById('pircomMainContent');
+            const toggleBtn = document.getElementById('pircomToggleSidebar');
+            const mobileBtn = document.getElementById('pircomMobileBtn');
+            const backdrop = document.getElementById('pircomSidebarBackdrop');
+            const notificationBtn = document.getElementById('pircomNotificationBtn');
+            const userBtn = document.getElementById('pircomUserBtn');
+            const notificationDropdown = document.getElementById('pircomNotificationDropdown');
+            const userDropdown = document.getElementById('pircomUserDropdown');
+            
+            let sidebarCollapsed = localStorage.getItem('pircomSidebarCollapsed') === 'true';
+            
+            if (sidebarCollapsed && window.innerWidth > 1024) {
+                sidebar.classList.add('pircom-collapsed');
+                mainContent.classList.add('pircom-expanded');
+            }
+            
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    sidebar.classList.toggle('pircom-collapsed');
+                    mainContent.classList.toggle('pircom-expanded');
+                    localStorage.setItem('pircomSidebarCollapsed', sidebar.classList.contains('pircom-collapsed'));
                 });
             }
-
-            // Fechar menu ao clicar no backdrop
-            if (sidebarBackdrop) {
-                sidebarBackdrop.addEventListener('click', function() {
-                    layoutMenu.classList.remove('show');
-                    sidebarBackdrop.classList.remove('show');
+            
+            if (mobileBtn) {
+                mobileBtn.addEventListener('click', () => {
+                    sidebar.classList.add('pircom-mobile-open');
+                    backdrop.classList.add('pircom-show');
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+            
+            if (backdrop) {
+                backdrop.addEventListener('click', () => {
+                    sidebar.classList.remove('pircom-mobile-open');
+                    backdrop.classList.remove('pircom-show');
                     document.body.style.overflow = '';
                 });
             }
-
-            // Fechar menu ao clicar no botão de fechar
-            if (menuToggleBtn) {
-                menuToggleBtn.addEventListener('click', function() {
-                    layoutMenu.classList.remove('show');
-                    sidebarBackdrop.classList.remove('show');
-                    document.body.style.overflow = '';
-                });
-            }
-
-            // Fechar menu ao clicar em um link (mobile)
-            const menuLinks = document.querySelectorAll('#layout-menu .menu-link');
-            menuLinks.forEach(link => {
-                link.addEventListener('click', function() {
-                    if (window.innerWidth < 992) {
-                        setTimeout(() => {
-                            layoutMenu.classList.remove('show');
-                            sidebarBackdrop.classList.remove('show');
-                            document.body.style.overflow = '';
-                        }, 200);
-                    }
-                });
-            });
-
-            // Fechar menu ao redimensionar para desktop
-            let resizeTimer;
-            window.addEventListener('resize', function() {
-                clearTimeout(resizeTimer);
-                resizeTimer = setTimeout(function() {
-                    if (window.innerWidth >= 992) {
-                        layoutMenu.classList.remove('show');
-                        sidebarBackdrop.classList.remove('show');
+            
+            document.querySelectorAll('.pircom-nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth <= 1024) {
+                        sidebar.classList.remove('pircom-mobile-open');
+                        backdrop.classList.remove('pircom-show');
                         document.body.style.overflow = '';
                     }
-                }, 250);
+                });
             });
-
-            // Prevenir scroll do body quando menu está aberto em mobile
-            const preventScroll = (e) => {
-                if (layoutMenu.classList.contains('show') && window.innerWidth < 992) {
+            
+            function toggleDropdown(dropdown, btn) {
+                return function(e) {
+                    e.stopPropagation();
                     e.preventDefault();
+                    
+                    [notificationDropdown, userDropdown].forEach(d => {
+                        if (d && d !== dropdown) {
+                            d.classList.remove('pircom-show');
+                        }
+                    });
+                    
+                    if (dropdown) {
+                        dropdown.classList.toggle('pircom-show');
+                    }
+                };
+            }
+            
+            if (notificationBtn && notificationDropdown) {
+                notificationBtn.addEventListener('click', toggleDropdown(notificationDropdown, notificationBtn));
+            }
+            
+            if (userBtn && userDropdown) {
+                userBtn.addEventListener('click', toggleDropdown(userDropdown, userBtn));
+            }
+            
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.pircom-notification-wrapper') && 
+                    !e.target.closest('.pircom-user-wrapper')) {
+                    
+                    if (notificationDropdown) {
+                        notificationDropdown.classList.remove('pircom-show');
+                    }
+                    if (userDropdown) {
+                        userDropdown.classList.remove('pircom-show');
+                    }
                 }
-            };
-
-            document.addEventListener('touchmove', preventScroll, { passive: false });
-
-            // Accessibility: ESC para fechar menu
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && layoutMenu.classList.contains('show')) {
-                    layoutMenu.classList.remove('show');
-                    sidebarBackdrop.classList.remove('show');
+            });
+            
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    if (notificationDropdown) {
+                        notificationDropdown.classList.remove('pircom-show');
+                    }
+                    if (userDropdown) {
+                        userDropdown.classList.remove('pircom-show');
+                    }
+                    
+                    if (sidebar && sidebar.classList.contains('pircom-mobile-open')) {
+                        sidebar.classList.remove('pircom-mobile-open');
+                        if (backdrop) backdrop.classList.remove('pircom-show');
+                        document.body.style.overflow = '';
+                    }
+                }
+            });
+            
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 1024) {
+                    if (sidebar) {
+                        sidebar.classList.remove('pircom-mobile-open');
+                    }
+                    if (backdrop) {
+                        backdrop.classList.remove('pircom-show');
+                    }
                     document.body.style.overflow = '';
+                    
+                    if (localStorage.getItem('pircomSidebarCollapsed') === 'true') {
+                        sidebar?.classList.add('pircom-collapsed');
+                        mainContent?.classList.add('pircom-expanded');
+                    } else {
+                        sidebar?.classList.remove('pircom-collapsed');
+                        mainContent?.classList.remove('pircom-expanded');
+                    }
                 }
             });
         })();
 
-        // ========== SISTEMA DE NOTIFICAÇÕES ==========
-        
-        /**
-         * Marcar uma notificação como lida
-         */
         function marcarNotificacao(id) {
             const formData = new FormData();
             formData.append('id', id);
             formData.append('action', 'marcar-lida');
             
-            fetch('actions/notificacoesAction.php', {
-                method: 'POST',
-                body: formData
+            fetch('actions/notificacoesAction.php', { 
+                method: 'POST', 
+                body: formData 
             })
             .then(response => response.json())
             .then(data => {
                 if (data.sucesso) {
-                    document.querySelector(`[data-id="${id}"]`).style.opacity = '0.5';
-                    atualizarContagemNotificacoes();
+                    atualizarNotificacoes();
                 }
             })
             .catch(error => console.error('Erro:', error));
         }
 
-        /**
-         * Marcar todas as notificações como lidas
-         */
         function marcarTodasComoLidas() {
             const formData = new FormData();
             formData.append('action', 'marcar-todas');
             
-            fetch('actions/notificacoesAction.php', {
-                method: 'POST',
-                body: formData
+            fetch('actions/notificacoesAction.php', { 
+                method: 'POST', 
+                body: formData 
             })
             .then(response => response.json())
             .then(data => {
                 if (data.sucesso) {
-                    carregarNotificacoes();
-                    atualizarContagemNotificacoes();
+                    atualizarNotificacoes();
                 }
             })
             .catch(error => console.error('Erro:', error));
         }
 
-        /**
-         * Deletar uma notificação
-         */
-        function deletarNotificacao(id) {
-            const formData = new FormData();
-            formData.append('id', id);
-            formData.append('action', 'deletar');
-            
-            fetch('actions/notificacoesAction.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.sucesso) {
-                    const elem = document.querySelector(`[data-id="${id}"]`);
-                    if (elem) {
-                        elem.remove();
-                    }
-                    atualizarContagemNotificacoes();
-                    carregarNotificacoes();
-                }
-            })
-            .catch(error => console.error('Erro:', error));
-        }
-
-        /**
-         * Carregar notificações via AJAX
-         */
-        function carregarNotificacoes() {
+        function atualizarNotificacoes() {
             fetch('actions/notificacoesAction.php?action=listar')
             .then(response => response.json())
             .then(data => {
-                const container = document.getElementById('notificationsList');
+                const badge = document.getElementById('pircomNotificationBadge');
+                const list = document.getElementById('pircomNotificationsList');
+                const header = document.querySelector('.pircom-dropdown-header small');
+                
                 if (data.total > 0) {
+                    if (badge) {
+                        badge.textContent = data.total;
+                    } else {
+                        const btn = document.getElementById('pircomNotificationBtn');
+                        const newBadge = document.createElement('span');
+                        newBadge.className = 'pircom-notification-badge';
+                        newBadge.id = 'pircomNotificationBadge';
+                        newBadge.textContent = data.total;
+                        btn.appendChild(newBadge);
+                    }
+                    
                     let html = '';
                     data.notificacoes.forEach(notif => {
-                        const time = new Date(notif.criada_em);
-                        const agora = new Date();
-                        const diff = Math.floor((agora - time) / 1000);
-                        let timeText = 'Há alguns segundos';
-                        if (diff > 60) timeText = 'Há ' + Math.floor(diff/60) + ' minutos';
-                        if (diff > 3600) timeText = 'Há ' + Math.floor(diff/3600) + ' horas';
-                        if (diff > 86400) timeText = 'Há ' + Math.floor(diff/86400) + ' dias';
+                        const diff = Math.floor((new Date() - new Date(notif.criada_em)) / 1000);
+                        let timeText = 'Agora mesmo';
+                        if (diff > 60) timeText = 'Há ' + Math.floor(diff/60) + ' min';
+                        if (diff > 3600) timeText = 'Há ' + Math.floor(diff/3600) + ' h';
+                        if (diff > 86400) timeText = 'Há ' + Math.floor(diff/86400) + ' d';
                         
                         html += `
-                        <a class="dropdown-item notification-item" data-id="${notif.id}" href="javascript:void(0);" onclick="marcarNotificacao(${notif.id})">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                                <div style="flex: 1;">
-                                    <strong style="color: #333; display: block;">${notif.titulo}</strong>
-                                    <small style="color: #666; display: block; margin-top: 4px;">${notif.mensagem}</small>
-                                    <small style="color: #999; display: block; margin-top: 6px;">${timeText}</small>
+                            <div class="pircom-dropdown-item" onclick="marcarNotificacao(${notif.id})">
+                                <i class='bx bx-bell'></i>
+                                <div class="pircom-item-content">
+                                    <div class="pircom-item-title">${notif.titulo}</div>
+                                    <div class="pircom-item-subtitle">${notif.mensagem}</div>
+                                    <div class="pircom-item-time">${timeText}</div>
                                 </div>
-                                <i class="bx bx-x" style="cursor: pointer; margin-left: 8px; color: #999;" onclick="event.stopPropagation(); deletarNotificacao(${notif.id})"></i>
                             </div>
-                        </a>
                         `;
                     });
-                    container.innerHTML = html;
-                } else {
-                    container.innerHTML = `
-                    <div style="padding: 20px; text-align: center; color: #999;">
-                        <i class="bx bx-info-circle" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
-                        <small>Nenhuma notificação no momento</small>
-                    </div>
-                    `;
-                }
-            })
-            .catch(error => console.error('Erro ao carregar notificações:', error));
-        }
-
-        /**
-         * Atualizar contagem de notificações
-         */
-        function atualizarContagemNotificacoes() {
-            fetch('actions/notificacoesAction.php?action=contar')
-            .then(response => response.json())
-            .then(data => {
-                const badge = document.getElementById('notificationBadge');
-                if (data.total > 0) {
-                    if (!badge) {
-                        const bell = document.querySelector('.notification-bell');
-                        const newBadge = document.createElement('span');
-                        newBadge.className = 'notification-badge';
-                        newBadge.id = 'notificationBadge';
-                        newBadge.textContent = data.total;
-                        bell.appendChild(newBadge);
-                    } else {
-                        badge.textContent = data.total;
+                    
+                    list.innerHTML = html;
+                    
+                    if (header) {
+                        header.textContent = data.total + ' não lidas';
                     }
-                } else if (badge) {
-                    badge.remove();
+                    
+                } else {
+                    if (badge) badge.remove();
+                    
+                    list.innerHTML = `
+                        <div class="pircom-empty-state">
+                            <i class='bx bx-check-circle'></i>
+                            <p>Tudo em ordem!</p>
+                            <small>Nenhuma notificação no momento</small>
+                        </div>
+                    `;
+                    
+                    if (header) {
+                        header.textContent = '0 não lidas';
+                    }
                 }
             })
-            .catch(error => console.error('Erro ao atualizar contagem:', error));
+            .catch(error => console.error('Erro:', error));
         }
 
-        // Atualizar notificações a cada 30 segundos
-        setInterval(atualizarContagemNotificacoes, 30000);
-        setInterval(carregarNotificacoes, 30000);
+        setInterval(atualizarNotificacoes, 30000);
     </script>
+</body>
+</html>
