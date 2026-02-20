@@ -23,6 +23,7 @@ $page_titles = [
     'dashboard.php' => 'Dashboard',
     'configuracoes.php' => 'Configurações da Missão',
     'homepagehero.php' => 'Banner Principal',
+    'team.php' => 'Gestão de team',
     'noticias.php' => 'Gestão de Notícias',
     'eventos.php' => 'Eventos',
     'utilizadores.php' => 'Utilizadores',
@@ -897,6 +898,13 @@ $current_title = $page_titles[$current_page] ?? 'Painel Administrativo';
                             <a href="utilizadores.php" class="pircom-nav-link" data-tooltip="Utilizadores">
                                 <i class='bx bx-group'></i>
                                 <span>Utilizadores</span>
+                            </a>
+                        </li>
+
+                         <li class="pircom-nav-item <?php echo ($current_page == 'team.php') ? 'pircom-active' : ''; ?>">
+                            <a href="team.php" class="pircom-nav-link" data-tooltip="Gestão de Orgãos">
+                                <i class='bx bx-group'></i>
+                                <span>Orgãos Sociais</span>
                             </a>
                         </li>
                     </ul>
