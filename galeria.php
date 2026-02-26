@@ -1,509 +1,625 @@
 <?php
 $page_title = "Pircom - Galeria";
 include 'includes/navbar.php';
+
+include('config/conexao.php');
+
+$tipos_sql    = "SELECT DISTINCT tipo FROM galeria WHERE tipo IS NOT NULL AND tipo != '' ORDER BY tipo";
+$tipos_result = @$conn->query($tipos_sql);
+$tipos        = [];
+if ($tipos_result && $tipos_result->num_rows > 0) {
+    while ($tr = $tipos_result->fetch_assoc()) $tipos[] = $tr['tipo'];
+}
+
+$sql    = "SELECT * FROM galeria ORDER BY created_date DESC";
+$result = @$conn->query($sql);
+$items  = [];
+if ($result && $result->num_rows > 0) {
+    while ($r = $result->fetch_assoc()) $items[] = $r;
+}
+
+// Contadores para stats
+$total_fotos  = count(array_filter($items, fn($i) => $i['tipo'] === 'imagem'));
+$total_videos = count(array_filter($items, fn($i) => $i['tipo'] === 'video'));
+
+function extractYouTubeId($url) {
+    $p = '/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/';
+    preg_match($p, $url, $m);
+    return $m[1] ?? null;
+}
+
+$conn->close();
 ?>
 
 <style>
-    .gallery-filter {
-        text-align: center;
-        margin-bottom: 40px;
-    }
+/* ═══════════════════════════════════════════════════
+   PIRCOM GALLERY — cores corporativas
+   Primário:   #D0021B  (vermelho PIRCOM)
+   Escuro:     #1A1A2E  (azul-noite)
+   Texto:      #2D2D2D
+   Superficie: #FFFFFF
+   Bg:         #F7F7F7
+═══════════════════════════════════════════════════ */
 
-    .gallery-filter button {
-        background: transparent;
-        border: 2px solid var(--secondary-color);
-        color: var(--secondary-color);
-        padding: 10px 25px;
-        margin: 5px;
-        border-radius: 30px;
-        font-weight: 600;
-        transition: all 0.3s;
-        cursor: pointer;
-    }
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-    .gallery-filter button:hover,
-    .gallery-filter button.active {
-        background: var(--primary-color);
-        border-color: var(--primary-color);
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(251, 10, 10, 0.3);
-    }
+:root {
+    --pir-red:        #D0021B;
+    --pir-red-dark:   #a80116;
+    --pir-red-light:  rgba(208, 2, 27, 0.08);
+    --pir-red-mid:    rgba(208, 2, 27, 0.18);
+    --pir-dark:       #1A1A2E;
+    --pir-dark-75:    rgba(26, 26, 46, 0.75);
+    --text:           #2D2D2D;
+    --text-secondary: #5A5A6E;
+    --text-muted:     #9096A2;
+    --surface:        #FFFFFF;
+    --bg:             #F7F7F9;
+    --border:         #E4E4ED;
+    --radius-sm:      8px;
+    --radius-md:      14px;
+    --radius-lg:      20px;
+    --shadow-sm:      0 2px 8px rgba(26,26,46,0.07);
+    --shadow-md:      0 6px 24px rgba(26,26,46,0.11);
+    --shadow-lg:      0 16px 48px rgba(26,26,46,0.16);
+}
 
-    .gallery-item {
-        position: relative;
-        overflow: hidden;
-        border-radius: 15px;
-        margin-bottom: 30px;
-        cursor: pointer;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        transition: all 0.4s;
-    }
+.gal-section {
+    background: var(--bg);
+    padding: 4rem 0 5rem;
+    min-height: 70vh;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
 
-    .gallery-item:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 15px 40px rgba(251, 10, 10, 0.2);
-    }
+/* ── SECTION TITLE ── */
+.gal-title-block {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+.gal-title-block h2 {
+    font-size: clamp(1.75rem, 4vw, 2.75rem);
+    font-weight: 800;
+    color: var(--pir-dark);
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+}
+.gal-title-block h2 span { color: var(--pir-red); }
+.gal-title-block p {
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+.gal-title-bar {
+    width: 60px; height: 4px;
+    background: linear-gradient(90deg, var(--pir-red), var(--pir-red-dark));
+    border-radius: 2px; margin: 1rem auto 0;
+}
 
-    .gallery-item img {
-        width: 100%;
-        height: 300px;
-        object-fit: cover;
-        transition: transform 0.4s;
-    }
+/* ── INTRO CARD ── */
+.gal-intro {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 2rem;
+    margin-bottom: 3rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+}
+.gal-intro-inner {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.75rem;
+}
+.gal-intro-icon {
+    width: 56px; height: 56px; flex-shrink: 0;
+    background: var(--pir-red-light);
+    border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; color: var(--pir-red);
+}
+.gal-intro-text h3 {
+    font-size: 1.2rem; font-weight: 800; color: var(--pir-dark); margin-bottom: 0.25rem;
+}
+.gal-intro-text p {
+    font-size: 0.9375rem; color: var(--text-secondary); margin: 0; line-height: 1.7;
+}
 
-    .gallery-item:hover img {
-        transform: scale(1.1);
-    }
+.gal-stats {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    border-top: 1px solid var(--border);
+    padding-top: 1.5rem;
+}
+.gal-stat {
+    text-align: center;
+    padding: 0 1rem;
+    border-right: 1px solid var(--border);
+}
+.gal-stat:last-child { border-right: none; }
+.gal-stat-num {
+    font-size: 2rem; font-weight: 800; color: var(--pir-red);
+    line-height: 1; display: block; margin-bottom: 0.25rem;
+}
+.gal-stat-lbl {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--text-muted);
+}
 
-    /* Estilos específicos para cards de vídeo */
-    .video-card {
-        border: 2px solid var(--primary-color);
-    }
+/* ── FILTER TABS ── */
+.gal-filter-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.375rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: var(--shadow-sm);
+}
 
-    .video-card .video-thumbnail {
-        position: relative;
-        width: 100%;
-        height: 300px;
-        background: #000;
-        overflow: hidden;
-    }
+.filter-btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: transparent; border: none;
+    color: var(--text-secondary);
+    padding: 0.5rem 1.125rem;
+    border-radius: 999px;
+    font-size: 0.875rem; font-weight: 600;
+    font-family: inherit; cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+.filter-btn:hover {
+    background: var(--pir-red-light);
+    color: var(--pir-red);
+}
+.filter-btn.active {
+    background: var(--pir-red);
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(208,2,27,0.35);
+}
+.filter-btn i { font-size: 0.9rem; }
 
-    .video-card .video-thumbnail img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.4s;
-    }
+/* filtros extras (tipos customizados) que não cabem na pílula */
+.gal-filter-extra {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+.filter-tag {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    background: var(--surface); border: 1.5px solid var(--border);
+    color: var(--text-secondary);
+    padding: 0.375rem 0.875rem; border-radius: 999px;
+    font-size: 0.8125rem; font-weight: 600;
+    font-family: inherit; cursor: pointer;
+    transition: all 0.2s ease;
+}
+.filter-tag:hover  { border-color: var(--pir-red); color: var(--pir-red); background: var(--pir-red-light); }
+.filter-tag.active { background: var(--pir-red); border-color: var(--pir-red); color: white; }
 
-    .video-card:hover .video-thumbnail img {
-        transform: scale(1.1);
-    }
+/* ── GALLERY GRID ── */
+#gallery-grid { --gap: 1.5rem; }
 
-    .video-play-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(251, 10, 10, 0.1);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.3s;
-    }
+.gallery-item-wrapper {
+    margin-bottom: var(--gap);
+}
 
-    .video-card:hover .video-play-overlay {
-        background: rgba(251, 10, 10, 0.2);
-    }
+.gallery-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    height: 280px;
+}
+.gallery-item:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+}
+.gallery-item img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.45s ease;
+    display: block;
+}
+.gallery-item:hover img { transform: scale(1.07); }
 
-    .video-play-icon {
-        font-size: 70px;
-        color: white;
-        text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-        transition: all 0.3s;
-    }
+/* ── VIDEO CARD ── */
+.video-card {
+    border: 2px solid var(--pir-red-mid);
+}
+.video-thumbnail {
+    position: relative; width: 100%; height: 100%; background: #000;
+}
+.video-thumbnail img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.45s ease; opacity: 0.85;
+}
+.video-card:hover .video-thumbnail img {
+    transform: scale(1.07); opacity: 1;
+}
+.video-play-overlay {
+    position: absolute; inset: 0;
+    background: rgba(26,26,46,0.3);
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.3s;
+}
+.video-card:hover .video-play-overlay { background: rgba(208,2,27,0.2); }
+.video-play-icon {
+    width: 64px; height: 64px;
+    background: rgba(255,255,255,0.92);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.75rem; color: var(--pir-red);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.video-card:hover .video-play-icon {
+    transform: scale(1.15);
+    box-shadow: 0 6px 28px rgba(208,2,27,0.4);
+}
 
-    .video-card:hover .video-play-icon {
-        transform: scale(1.2);
-        color: var(--primary-color);
-    }
+/* ── BADGES ── */
+.item-badge {
+    position: absolute; z-index: 3;
+    top: 12px; left: 12px;
+    background: var(--pir-red);
+    color: #fff;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.7rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    box-shadow: 0 2px 8px rgba(208,2,27,0.35);
+}
+.item-badge.type-badge {
+    top: 12px; left: auto; right: 12px;
+    background: rgba(26,26,46,0.7);
+    backdrop-filter: blur(4px);
+}
 
-    .video-badge {
-        position: absolute;
-        top: 15px;
-        left: 15px;
-        background: var(--primary-color);
-        color: white;
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: 600;
-        text-transform: uppercase;
-        z-index: 2;
-    }
+/* ── OVERLAY ── */
+.gallery-overlay {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(to top, rgba(26,26,46,0.92) 0%, rgba(26,26,46,0.4) 70%, transparent 100%);
+    padding: 1.25rem 1rem 1rem;
+    transform: translateY(101%);
+    transition: transform 0.3s ease;
+}
+.gallery-item:hover .gallery-overlay { transform: translateY(0); }
+.gallery-overlay h5 {
+    color: #fff; font-weight: 700; margin-bottom: 0.25rem;
+    font-size: 0.9375rem; line-height: 1.3;
+}
+.gallery-overlay p {
+    color: rgba(255,255,255,0.8); font-size: 0.8125rem; margin: 0; line-height: 1.5;
+}
 
-    .gallery-overlay {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: linear-gradient(to top, rgba(21, 21, 21, 0.9), transparent);
-        padding: 20px;
-        transform: translateY(100%);
-        transition: transform 0.3s;
-    }
+/* Placeholder (sem foto) */
+.item-placeholder {
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, #f0f0f5 0%, #e4e4ed 100%);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 0.5rem; color: var(--text-muted);
+}
+.item-placeholder i { font-size: 3rem; }
+.item-placeholder span { font-size: 0.8rem; font-weight: 600; }
 
-    .gallery-item:hover .gallery-overlay {
-        transform: translateY(0);
-    }
+/* ── LIGHTBOX ── */
+.lightbox {
+    display: none; position: fixed; inset: 0; z-index: 9999;
+    background: rgba(10,10,20,0.96);
+    backdrop-filter: blur(6px);
+    align-items: center; justify-content: center;
+    padding: 1rem;
+}
+.lightbox.active { display: flex; }
 
-    .gallery-overlay h5 {
-        color: white;
-        font-weight: 700;
-        margin-bottom: 5px;
-    }
+.lightbox-inner {
+    position: relative;
+    max-width: 900px; width: 100%;
+    display: flex; flex-direction: column; align-items: center; gap: 1rem;
+}
 
-    .gallery-overlay p {
-        color: rgba(255,255,255,0.9);
-        font-size: 14px;
-        margin: 0;
-    }
+.lightbox-media {
+    position: relative; width: 100%;
+}
+.lightbox-media img {
+    max-width: 100%; max-height: 70vh;
+    border-radius: var(--radius-md);
+    display: block; margin: 0 auto;
+    box-shadow: 0 8px 48px rgba(0,0,0,0.6);
+}
+.video-container {
+    width: 100%; aspect-ratio: 16/9;
+    border-radius: var(--radius-md); overflow: hidden;
+    box-shadow: 0 8px 48px rgba(0,0,0,0.6);
+}
+.video-container iframe { width: 100%; height: 100%; border: none; display: block; }
 
-    .gallery-badge {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        background: var(--primary-color);
-        color: white;
-        padding: 5px 15px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-        text-transform: uppercase;
-        z-index: 1;
-    }
+.lightbox-info {
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    width: 100%; text-align: center;
+    box-shadow: var(--shadow-md);
+}
+.lightbox-info h4 {
+    font-size: 1rem; font-weight: 700; color: var(--pir-dark); margin-bottom: 0.25rem;
+}
+.lightbox-info p   { font-size: 0.875rem; color: var(--text-secondary); margin: 0; }
+.lightbox-info .lb-badge {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    background: var(--pir-red); color: white;
+    padding: 0.2rem 0.65rem; border-radius: 999px;
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    margin-top: 0.5rem;
+}
 
-    .lightbox {
-        display: none;
-        position: fixed;
-        z-index: 9999;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.95);
-    }
+.lightbox-close {
+    position: fixed; top: 1.25rem; right: 1.5rem;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.2);
+    color: white; font-size: 1.25rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, transform 0.2s; z-index: 10001;
+}
+.lightbox-close:hover { background: var(--pir-red); transform: rotate(90deg); border-color: var(--pir-red); }
 
-    .lightbox.active {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+.lightbox-nav {
+    position: fixed; top: 50%; transform: translateY(-50%);
+    width: 48px; height: 48px; border-radius: 50%;
+    background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.2);
+    color: white; font-size: 1.25rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; z-index: 10001;
+}
+.lightbox-nav:hover { background: var(--pir-red); border-color: var(--pir-red); }
+.lightbox-prev { left: 1rem; }
+.lightbox-next { right: 1rem; }
+.video-mode .lightbox-nav { display: none; }
 
-    .lightbox-content {
-        max-width: 90%;
-        max-height: 90%;
-        position: relative;
-    }
+/* ── EMPTY STATE ── */
+.gal-empty {
+    text-align: center; padding: 4rem 1rem;
+    background: var(--surface); border-radius: var(--radius-lg);
+    border: 1px dashed var(--border);
+}
+.gal-empty i { font-size: 4rem; color: var(--pir-red); opacity: 0.3; display: block; margin-bottom: 1rem; }
+.gal-empty h4 { font-weight: 800; color: var(--pir-dark); margin-bottom: 0.5rem; }
+.gal-empty p  { color: var(--text-muted); margin: 0; }
 
-    .lightbox-content img {
-        max-width: 100%;
-        max-height: 85vh;
-        border-radius: 10px;
-    }
+/* ── CTA ── */
+.gal-cta {
+    background: linear-gradient(135deg, var(--pir-red) 0%, var(--pir-red-dark) 100%);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    margin-top: 3rem;
+    box-shadow: 0 8px 32px rgba(208,2,27,0.3);
+}
+.gal-cta h5 { font-size: 1.25rem; font-weight: 800; color: white; margin-bottom: 0.75rem; }
+.gal-cta p  { color: rgba(255,255,255,0.88); margin-bottom: 1.5rem; font-size: 0.9375rem; }
+.btn-gal-cta {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: white; color: var(--pir-red); font-weight: 700;
+    padding: 0.75rem 2rem; border-radius: 999px;
+    text-decoration: none; font-size: 0.9375rem;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-gal-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.25); color: var(--pir-red-dark); }
 
-    .video-container {
-        position: relative;
-        width: 800px;
-        max-width: 90vw;
-        height: 450px;
-        max-height: 80vh;
-    }
-
-    .video-container iframe {
-        width: 100%;
-        height: 100%;
-        border-radius: 10px;
-        border: none;
-    }
-
-    .lightbox-info {
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        margin-top: 20px;
-        text-align: center;
-    }
-
-    .lightbox-close {
-        position: absolute;
-        top: 20px;
-        right: 30px;
-        font-size: 40px;
-        color: white;
-        cursor: pointer;
-        transition: all 0.3s;
-        z-index: 10000;
-    }
-
-    .lightbox-close:hover {
-        color: var(--primary-color);
-        transform: rotate(90deg);
-    }
-
-    .lightbox-nav {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 40px;
-        color: white;
-        cursor: pointer;
-        transition: all 0.3s;
-        background: rgba(255,255,255,0.1);
-        width: 60px;
-        height: 60px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-    }
-
-    .lightbox-nav:hover {
-        background: var(--primary-color);
-    }
-
-    .lightbox-prev { left: 30px; }
-    .lightbox-next { right: 30px; }
-
-    /* Esconder navegação para vídeos */
-    .video-mode .lightbox-nav {
-        display: none;
-    }
-
-    .gallery-intro {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border-radius: 20px;
-        padding: 40px;
-        margin-bottom: 50px;
-        text-align: center;
-    }
-
-    .gallery-intro h3 {
-        color: var(--secondary-color);
-        font-weight: 700;
-        margin-bottom: 15px;
-    }
-
-    .gallery-intro p {
-        color: #666;
-        font-size: 16px;
-        margin-bottom: 0;
-        line-height: 1.8;
-    }
-
-    .stats-row {
-        display: flex;
-        justify-content: center;
-        gap: 30px;
-        margin-top: 25px;
-        flex-wrap: wrap;
-    }
-
-    .stat-item {
-        text-align: center;
-    }
-
-    .stat-number {
-        font-size: 32px;
-        font-weight: 700;
-        color: var(--primary-color);
-        display: block;
-    }
-
-    .stat-label {
-        font-size: 14px;
-        color: #666;
-        text-transform: uppercase;
-        font-weight: 600;
-    }
+/* ── RESPONSIVE ── */
+@media (max-width: 576px) {
+    .gal-filter-wrap { padding: 0.25rem; gap: 0.25rem; }
+    .filter-btn { padding: 0.4rem 0.75rem; font-size: 0.8125rem; }
+    .gallery-item { height: 220px; }
+    .gal-stat { padding: 0 0.5rem; }
+    .gal-stat-num { font-size: 1.5rem; }
+    .lightbox-nav { display: none; }
+}
 </style>
 
-<section class="py-5" style="min-height: 70vh;">
+<section class="gal-section">
     <div class="container">
-        <div class="section-title">
-            <h2>GALERIA PIRCOM</h2>
+
+        <!-- Título -->
+        <div class="gal-title-block">
+            <h2>GALERIA <span>PIRCOM</span></h2>
             <p>Registos do nosso trabalho pela saúde e paz</p>
+            <div class="gal-title-bar"></div>
         </div>
 
-        <!-- Introdução -->
-        <div class="gallery-intro">
-            <h3><i class="bi bi-camera-fill text-danger me-2"></i>Nossa História em Imagens</h3>
-            <p>Desde 2006, a PIRCOM tem trabalhado em comunidades moçambicanas unindo cristãos, muçulmanos, hindus e bahai na promoção da saúde. Aqui compartilhamos momentos das nossas intervenções em prevenção da malária, combate ao HIV, saúde materno-infantil e construção da paz.</p>
-            
-            <div class="stats-row">
-                <div class="stat-item">
-                    <span class="stat-number"><i class="bi bi-calendar-check"></i> 18+</span>
-                    <span class="stat-label">Anos de Impacto</span>
+        <!-- Intro -->
+        <div class="gal-intro">
+            <div class="gal-intro-inner">
+                <div class="gal-intro-icon"><i class="bi bi-camera-fill"></i></div>
+                <div class="gal-intro-text">
+                    <h3>Nossa História em Imagens</h3>
+                    <p>Desde 2006, a PIRCOM tem trabalhado em comunidades moçambicanas unindo cristãos, muçulmanos, hindus e bahai na promoção da saúde. Aqui partilhamos momentos das nossas intervenções em prevenção da malária, combate ao HIV, saúde materno-infantil e construção da paz.</p>
                 </div>
-                <div class="stat-item">
-                    <span class="stat-number"><i class="bi bi-people"></i> 4</span>
-                    <span class="stat-label">Comunidades Religiosas</span>
+            </div>
+            <div class="gal-stats">
+                <div class="gal-stat">
+                    <span class="gal-stat-num">18+</span>
+                    <span class="gal-stat-lbl">Anos de Impacto</span>
                 </div>
-                <div class="stat-item">
-                    <span class="stat-number"><i class="bi bi-heart-pulse"></i> 5+</span>
-                    <span class="stat-label">Áreas de Saúde</span>
+                <div class="gal-stat">
+                    <span class="gal-stat-num">4</span>
+                    <span class="gal-stat-lbl">Comunidades Religiosas</span>
+                </div>
+                <div class="gal-stat">
+                    <span class="gal-stat-num"><?php echo count($items); ?></span>
+                    <span class="gal-stat-lbl">Itens na Galeria</span>
+                </div>
+                <div class="gal-stat">
+                    <span class="gal-stat-num"><?php echo $total_videos; ?></span>
+                    <span class="gal-stat-lbl">Vídeos</span>
                 </div>
             </div>
         </div>
 
-        <?php
-        include('config/conexao.php');
-        
-        $tipos_sql = "SELECT DISTINCT tipo FROM galeria WHERE tipo IS NOT NULL AND tipo != '' ORDER BY tipo";
-        $tipos_result = @$conn->query($tipos_sql);
-        $tipos = [];
-        if ($tipos_result && $tipos_result->num_rows > 0) {
-            while ($tipo_row = $tipos_result->fetch_assoc()) {
-                $tipos[] = $tipo_row['tipo'];
-            }
-        }
-        ?>
-
-        <?php if (count($tipos) > 0): ?>
-        <div class="gallery-filter">
+        <!-- Filtros principais -->
+        <?php if (count($items) > 0): ?>
+        <div class="gal-filter-wrap">
             <button class="filter-btn active" data-filter="all">
-                <i class="bi bi-grid-3x3"></i> Todos
+                <i class="bi bi-grid-3x3-gap-fill"></i> Todos
             </button>
             <button class="filter-btn" data-filter="imagem">
-                <i class="bi bi-image"></i> Fotos
+                <i class="bi bi-image-fill"></i> Fotos
             </button>
             <button class="filter-btn" data-filter="video">
-                <i class="bi bi-play-btn"></i> Vídeos
+                <i class="bi bi-play-circle-fill"></i> Vídeos
             </button>
-            <?php foreach ($tipos as $tipo): ?>
-                <?php if ($tipo !== 'imagem' && $tipo !== 'video'): ?>
-                <button class="filter-btn" data-filter="<?php echo htmlspecialchars($tipo); ?>">
-                    <i class="bi bi-tag"></i> <?php echo htmlspecialchars(ucfirst($tipo)); ?>
-                </button>
-                <?php endif; ?>
+        </div>
+
+        <!-- Filtros de categorias customizadas -->
+        <?php
+        $extra_tipos = array_filter($tipos, fn($t) => $t !== 'imagem' && $t !== 'video');
+        if (count($extra_tipos) > 0):
+        ?>
+        <div class="gal-filter-extra">
+            <?php foreach ($extra_tipos as $tipo): ?>
+            <button class="filter-tag" data-filter="<?php echo htmlspecialchars($tipo); ?>">
+                <i class="bi bi-tag-fill"></i>
+                <?php echo htmlspecialchars(ucfirst($tipo)); ?>
+            </button>
             <?php endforeach; ?>
         </div>
         <?php endif; ?>
+        <?php endif; ?>
 
-        <div class="row" id="gallery-grid">
-            <?php
-            $sql = "SELECT * FROM galeria ORDER BY created_date DESC";
-            $result = @$conn->query($sql);
+        <!-- Grid -->
+        <div class="row g-4" id="gallery-grid">
+            <?php if (count($items) > 0): ?>
+                <?php foreach ($items as $row):
+                    $tipo      = !empty($row['tipo']) ? htmlspecialchars($row['tipo']) : 'outros';
+                    $isVideo   = ($tipo === 'video');
+                    $isImage   = ($tipo === 'imagem');
+                    $titulo    = htmlspecialchars($row['titulo'] ?? '');
+                    $descricao = htmlspecialchars($row['descricao'] ?? '');
+                    $desc_curta = mb_strlen($descricao) > 90 ? mb_substr($descricao, 0, 90) . '...' : $descricao;
+                ?>
+                <div class="col-lg-4 col-md-6 gallery-item-wrapper" data-category="<?php echo $tipo; ?>">
+                    <div class="gallery-item <?php echo $isVideo ? 'video-card' : 'image-card'; ?>"
+                         data-id="<?php echo (int)$row['id']; ?>"
+                         data-titulo="<?php echo $titulo; ?>"
+                         data-descricao="<?php echo $descricao; ?>"
+                         data-tipo="<?php echo $tipo; ?>"
+                         <?php if ($isVideo): ?>data-video-url="<?php echo htmlspecialchars($row['link'] ?? ''); ?>"<?php endif; ?>>
 
-            if ($result && $result->num_rows > 0) {
-                while ($row = $result->fetch_assoc()) {
-                    $tipo = !empty($row["tipo"]) ? htmlspecialchars($row["tipo"]) : 'outros';
-                    $isVideo = ($tipo === 'video');
-                    $isImage = ($tipo === 'imagem');
-                    
-                    // Classes diferentes para vídeos e imagens
-                    $cardClass = $isVideo ? 'video-card' : 'image-card';
-                    $contentType = $tipo; // Usa o próprio tipo como content type
-                    
-                    echo '<div class="col-lg-4 col-md-6 gallery-item-wrapper" data-category="' . $tipo . '" data-content-type="' . $contentType . '">';
-                    echo '<div class="gallery-item ' . $cardClass . '" data-id="' . $row["id"] . '" data-titulo="' . htmlspecialchars($row["titulo"]) . '" data-descricao="' . htmlspecialchars($row["descricao"]) . '" data-tipo="' . $tipo . '"';
-                    
-                    // Adicionar atributo específico para vídeos
-                    if ($isVideo) {
-                        echo ' data-video-url="' . htmlspecialchars($row["link"]) . '"';
-                    }
-                    
-                    echo '>';
-                    
-                    if (!empty($row["tipo"]) && $row["tipo"] !== 'imagem' && $row["tipo"] !== 'video') {
-                        echo '<span class="gallery-badge">' . htmlspecialchars($row["tipo"]) . '</span>';
-                    }
-                    
-                    // Conteúdo diferente baseado no tipo
-                    if ($isVideo) {
-                        // Para vídeos - card específico com thumbnail do YouTube
-                        $videoId = extractYouTubeId($row["link"]);
-                        $thumbnailUrl = $videoId ? "https://img.youtube.com/vi/$videoId/hqdefault.jpg" : '';
-                        
-                        echo '<div class="video-thumbnail">';
-                        echo '<span class="video-badge"><i class="bi bi-play-fill"></i> Vídeo</span>';
-                        
-                        if ($thumbnailUrl) {
-                            echo '<img src="' . $thumbnailUrl . '" alt="' . htmlspecialchars($row["titulo"]) . '" onerror="this.style.display=\'none\'">';
-                        } else {
-                            // Fallback se não conseguir pegar thumbnail
-                            echo '<div style="background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">';
-                            echo '<i class="bi bi-play-circle-fill" style="font-size: 80px; color: white;"></i>';
-                            echo '</div>';
-                        }
-                        
-                        echo '<div class="video-play-overlay">';
-                        echo '<div class="video-play-icon"><i class="bi bi-play-circle-fill"></i></div>';
-                        echo '</div>';
-                        echo '</div>';
-                    } else if ($isImage) {
-                        // Para imagens - comportamento original
-                        if (!empty($row["foto"])) {
-                            $imagemBLOB = base64_encode($row["foto"]);
-                            echo '<img src="data:image/jpeg;base64,' . $imagemBLOB . '" alt="' . htmlspecialchars($row["titulo"]) . '">';
-                        } else {
-                            // Fallback para imagem vazia
-                            echo '<div style="background: #f8f9fa; width: 100%; height: 300px; display: flex; align-items: center; justify-content: center;">';
-                            echo '<i class="bi bi-image" style="font-size: 50px; color: #6c757d;"></i>';
-                            echo '</div>';
-                        }
-                    } else {
-                        // Para outros tipos (fallback)
-                        if (!empty($row["foto"])) {
-                            $imagemBLOB = base64_encode($row["foto"]);
-                            echo '<img src="data:image/jpeg;base64,' . $imagemBLOB . '" alt="' . htmlspecialchars($row["titulo"]) . '">';
-                        } else {
-                            echo '<div style="background: #f8f9fa; width: 100%; height: 300px; display: flex; align-items: center; justify-content: center;">';
-                            echo '<i class="bi bi-file-earmark" style="font-size: 50px; color: #6c757d;"></i>';
-                            echo '</div>';
-                        }
-                    }
-                    
-                    echo '<div class="gallery-overlay">';
-                    echo '<h5>' . htmlspecialchars($row["titulo"]) . '</h5>';
-                    
-                    if (!empty($row["descricao"])) {
-                        $descricao = htmlspecialchars($row["descricao"]);
-                        echo '<p>' . (strlen($descricao) > 80 ? substr($descricao, 0, 80) . '...' : $descricao) . '</p>';
-                    }
-                    
-                    echo '</div></div></div>';
-                }
-            } else {
-                echo '<div class="col-12 text-center py-5">';
-                echo '<div style="background: white; border-radius: 20px; padding: 60px 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">';
-                echo '<i class="bi bi-images" style="font-size: 80px; color: var(--primary-color);"></i>';
-                echo '<h4 class="mt-4" style="color: var(--secondary-color);">Galeria em Construção</h4>';
-                echo '<p class="text-muted mb-0">Em breve, compartilharemos mais momentos do nosso trabalho nas comunidades moçambicanas.</p>';
-                echo '</div>';
-                echo '</div>';
-            }
+                        <?php if ($isVideo): ?>
+                            <?php
+                            $videoId  = extractYouTubeId($row['link'] ?? '');
+                            $thumbUrl = $videoId ? "https://img.youtube.com/vi/$videoId/hqdefault.jpg" : '';
+                            ?>
+                            <span class="item-badge"><i class="bi bi-play-fill"></i> Vídeo</span>
+                            <div class="video-thumbnail">
+                                <?php if ($thumbUrl): ?>
+                                <img src="<?php echo $thumbUrl; ?>"
+                                     alt="<?php echo $titulo; ?>"
+                                     onerror="this.parentElement.innerHTML='<div class=\'item-placeholder\'><i class=\'bi bi-play-btn-fill\'></i><span>Vídeo</span></div>'">
+                                <?php else: ?>
+                                <div class="item-placeholder">
+                                    <i class="bi bi-play-btn-fill"></i><span>Vídeo</span>
+                                </div>
+                                <?php endif; ?>
+                                <div class="video-play-overlay">
+                                    <div class="video-play-icon"><i class="bi bi-play-fill"></i></div>
+                                </div>
+                            </div>
 
-            $conn->close();
+                        <?php elseif ($isImage && !empty($row['foto'])): ?>
+                            <img src="data:image/jpeg;base64,<?php echo base64_encode($row['foto']); ?>"
+                                 alt="<?php echo $titulo; ?>" loading="lazy">
 
-            // Função para extrair ID do YouTube
-            function extractYouTubeId($url) {
-                $pattern = '/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/';
-                preg_match($pattern, $url, $matches);
-                return isset($matches[1]) ? $matches[1] : null;
-            }
-            ?>
+                        <?php else: ?>
+                            <?php if (!empty($tipo) && $tipo !== 'imagem' && $tipo !== 'video'): ?>
+                                <span class="item-badge type-badge">
+                                    <i class="bi bi-tag-fill"></i> <?php echo $tipo; ?>
+                                </span>
+                            <?php endif; ?>
+                            <?php if (!empty($row['foto'])): ?>
+                                <img src="data:image/jpeg;base64,<?php echo base64_encode($row['foto']); ?>"
+                                     alt="<?php echo $titulo; ?>" loading="lazy">
+                            <?php else: ?>
+                                <div class="item-placeholder">
+                                    <i class="bi bi-image"></i>
+                                    <span>Sem imagem</span>
+                                </div>
+                            <?php endif; ?>
+                        <?php endif; ?>
+
+                        <!-- Overlay -->
+                        <div class="gallery-overlay">
+                            <h5><?php echo $titulo; ?></h5>
+                            <?php if ($desc_curta): ?>
+                            <p><?php echo $desc_curta; ?></p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+
+            <?php else: ?>
+            <div class="col-12">
+                <div class="gal-empty">
+                    <i class="bi bi-images"></i>
+                    <h4>Galeria em Construção</h4>
+                    <p>Em breve, partilharemos momentos do nosso trabalho nas comunidades moçambicanas.</p>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
 
-        <!-- Call to Action -->
-        <div class="text-center mt-5">
-            <div class="alert" style="background: linear-gradient(135deg, var(--primary-color) 0%, #c70808 100%); color: white; border: none; border-radius: 15px; padding: 30px;">
-                <h5 style="font-weight: 700; margin-bottom: 15px;">
-                    <i class="bi bi-megaphone me-2"></i>Acompanhe Nosso Trabalho
-                </h5>
-                <p style="margin-bottom: 20px; opacity: 0.95;">Siga-nos nas redes sociais para mais atualizações sobre nossas atividades e impacto nas comunidades.</p>
-                <a href="contacto.php" class="btn btn-light btn-lg" style="font-weight: 700;">
-                    <i class="bi bi-telephone-fill me-2"></i>Entre em Contacto
-                </a>
-            </div>
+        <!-- CTA -->
+        <div class="gal-cta">
+            <h5><i class="bi bi-megaphone-fill me-2"></i>Acompanhe Nosso Trabalho</h5>
+            <p>Siga-nos nas redes sociais para mais atualizações sobre as nossas atividades e impacto nas comunidades.</p>
+            <a href="contacto.php" class="btn-gal-cta">
+                <i class="bi bi-telephone-fill"></i> Entre em Contacto
+            </a>
         </div>
     </div>
 </section>
 
+<!-- Lightbox -->
 <div class="lightbox" id="lightbox">
-    <span class="lightbox-close" id="lightbox-close">&times;</span>
-    <span class="lightbox-nav lightbox-prev" id="lightbox-prev"><i class="bi bi-chevron-left"></i></span>
-    <span class="lightbox-nav lightbox-next" id="lightbox-next"><i class="bi bi-chevron-right"></i></span>
-    <div class="lightbox-content">
-        <img id="lightbox-img" src="" alt="" style="display: none;">
-        <div class="video-container" id="video-container" style="display: none;">
-            <iframe id="lightbox-video" src="" allow="autoplay; fullscreen" allowfullscreen></iframe>
+    <button class="lightbox-close" id="lightboxClose" aria-label="Fechar">
+        <i class="bi bi-x-lg"></i>
+    </button>
+    <button class="lightbox-nav lightbox-prev" id="lbPrev" aria-label="Anterior">
+        <i class="bi bi-chevron-left"></i>
+    </button>
+    <button class="lightbox-nav lightbox-next" id="lbNext" aria-label="Próximo">
+        <i class="bi bi-chevron-right"></i>
+    </button>
+
+    <div class="lightbox-inner">
+        <div class="lightbox-media">
+            <img id="lbImg" src="" alt="" style="display:none;">
+            <div class="video-container" id="lbVideoWrap" style="display:none;">
+                <iframe id="lbVideo" src=""
+                        allow="autoplay; fullscreen; picture-in-picture"
+                        allowfullscreen></iframe>
+            </div>
         </div>
         <div class="lightbox-info">
-            <h4 id="lightbox-title"></h4>
-            <p id="lightbox-desc"></p>
-            <span id="lightbox-type" class="badge" style="background: var(--primary-color);"></span>
+            <h4 id="lbTitle"></h4>
+            <p id="lbDesc"></p>
+            <span id="lbBadge" class="lb-badge"></span>
         </div>
     </div>
 </div>
@@ -511,164 +627,133 @@ include 'includes/navbar.php';
 <?php include 'includes/footer.php'; ?>
 
 <script>
-document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        
-        const filter = this.getAttribute('data-filter');
-        document.querySelectorAll('.gallery-item-wrapper').forEach(item => {
-            const category = item.getAttribute('data-category');
-            const contentType = item.getAttribute('data-content-type');
-            
-            let shouldShow = false;
-            
-            if (filter === 'all') {
-                shouldShow = true;
-            } else if (filter === 'imagem') {
-                shouldShow = contentType === 'imagem';
-            } else if (filter === 'video') {
-                shouldShow = contentType === 'video';
-            } else {
-                shouldShow = category === filter;
-            }
-            
-            item.style.display = shouldShow ? 'block' : 'none';
+(function () {
+    // ── FILTER ──
+    let activeFilter = 'all';
+
+    function applyFilter(filter) {
+        activeFilter = filter;
+
+        document.querySelectorAll('.filter-btn, .filter-tag').forEach(b => {
+            b.classList.toggle('active', b.getAttribute('data-filter') === filter);
         });
-        
-        // Atualizar itens do lightbox após filtrar
-        setTimeout(updateGalleryItems, 100);
+
+        document.querySelectorAll('.gallery-item-wrapper').forEach(wrapper => {
+            const cat = wrapper.getAttribute('data-category');
+            let show = false;
+            if      (filter === 'all')    show = true;
+            else if (filter === 'imagem') show = cat === 'imagem';
+            else if (filter === 'video')  show = cat === 'video';
+            else                          show = cat === filter;
+            wrapper.style.display = show ? '' : 'none';
+        });
+
+        buildGalleryIndex();
+    }
+
+    document.querySelectorAll('.filter-btn, .filter-tag').forEach(btn => {
+        btn.addEventListener('click', () => applyFilter(btn.getAttribute('data-filter')));
     });
-});
 
-const lightbox = document.getElementById('lightbox');
-const lightboxImg = document.getElementById('lightbox-img');
-const lightboxVideo = document.getElementById('lightbox-video');
-const videoContainer = document.getElementById('video-container');
-const lightboxTitle = document.getElementById('lightbox-title');
-const lightboxDesc = document.getElementById('lightbox-desc');
-const lightboxType = document.getElementById('lightbox-type');
+    // ── GALLERY INDEX (itens visíveis) ──
+    let gallery = [];
 
-let currentIndex = 0;
-let galleryItems = [];
+    function buildGalleryIndex() {
+        gallery = [];
+        document.querySelectorAll('.gallery-item-wrapper:not([style*="display: none"]) .gallery-item').forEach(el => {
+            const imgEl    = el.querySelector('img');
+            const isVideo  = !!el.getAttribute('data-video-url');
+            gallery.push({
+                el,
+                src      : imgEl ? imgEl.src : null,
+                videoUrl : el.getAttribute('data-video-url'),
+                isVideo,
+                titulo   : el.getAttribute('data-titulo')   || '',
+                descricao: el.getAttribute('data-descricao') || '',
+                tipo     : el.getAttribute('data-tipo')      || '',
+            });
+        });
+    }
 
-// Extrair ID do YouTube
-function extractYouTubeId(url) {
-    const pattern = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-    const matches = url.match(pattern);
-    return matches ? matches[1] : null;
-}
+    buildGalleryIndex();
 
-// Coletar apenas itens visíveis para o lightbox
-function updateGalleryItems() {
-    galleryItems = [];
-    document.querySelectorAll('.gallery-item-wrapper:not([style*="display: none"]) .gallery-item').forEach((item, index) => {
-        const videoUrl = item.getAttribute('data-video-url');
-        const isVideo = !!videoUrl;
-        const tipo = item.getAttribute('data-tipo');
-        
-        galleryItems.push({
-            element: item,
-            src: isVideo ? null : item.querySelector('img').src,
-            videoUrl: videoUrl,
-            isVideo: isVideo,
-            tipo: tipo,
-            titulo: item.getAttribute('data-titulo'),
-            descricao: item.getAttribute('data-descricao')
+    // Click em cada item
+    document.querySelectorAll('.gallery-item').forEach(el => {
+        el.addEventListener('click', () => {
+            buildGalleryIndex();
+            const idx = gallery.findIndex(g => g.el === el);
+            if (idx !== -1) openLightbox(idx);
         });
     });
-}
 
-// Inicializar eventos dos itens da galeria
-function initializeGalleryItems() {
-    document.querySelectorAll('.gallery-item').forEach((item, index) => {
-        item.addEventListener('click', () => {
-            // Encontrar o índice atual baseado nos itens visíveis
-            const visibleItems = Array.from(document.querySelectorAll('.gallery-item-wrapper:not([style*="display: none"]) .gallery-item'));
-            currentIndex = visibleItems.indexOf(item);
-            updateGalleryItems();
-            openLightbox();
-        });
-    });
-}
+    // ── LIGHTBOX ──
+    const lightbox    = document.getElementById('lightbox');
+    const lbImg       = document.getElementById('lbImg');
+    const lbVideoWrap = document.getElementById('lbVideoWrap');
+    const lbVideo     = document.getElementById('lbVideo');
+    const lbTitle     = document.getElementById('lbTitle');
+    const lbDesc      = document.getElementById('lbDesc');
+    const lbBadge     = document.getElementById('lbBadge');
+    let currentIdx    = 0;
 
-function openLightbox() {
-    if (galleryItems.length === 0) return;
-    
-    const item = galleryItems[currentIndex];
-    
-    if (item.isVideo) {
-        // Modo vídeo
-        lightbox.classList.add('video-mode');
-        lightboxImg.style.display = 'none';
-        videoContainer.style.display = 'block';
-        
-        const videoId = extractYouTubeId(item.videoUrl);
-        if (videoId) {
-            lightboxVideo.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+    function openLightbox(idx) {
+        currentIdx = idx;
+        const item = gallery[idx];
+        if (!item) return;
+
+        if (item.isVideo) {
+            lightbox.classList.add('video-mode');
+            lbImg.style.display       = 'none';
+            lbVideoWrap.style.display = 'block';
+            const vid = extractYTId(item.videoUrl);
+            lbVideo.src = vid
+                ? `https://www.youtube.com/embed/${vid}?autoplay=1&rel=0`
+                : '';
+        } else {
+            lightbox.classList.remove('video-mode');
+            lbVideoWrap.style.display = 'none';
+            lbImg.style.display       = 'block';
+            lbImg.src                 = item.src || '';
+            lbImg.alt                 = item.titulo;
         }
-    } else {
-        // Modo imagem
-        lightbox.classList.remove('video-mode');
-        videoContainer.style.display = 'none';
-        lightboxImg.style.display = 'block';
-        lightboxImg.src = item.src;
+
+        lbTitle.textContent = item.titulo;
+        lbDesc.textContent  = item.descricao;
+        lbBadge.innerHTML   = `<i class="bi bi-${item.isVideo ? 'play-circle-fill' : 'image-fill'}"></i> ${item.tipo}`;
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden';
     }
-    
-    lightboxTitle.textContent = item.titulo;
-    lightboxDesc.textContent = item.descricao;
-    lightboxType.textContent = item.tipo;
-    lightbox.classList.add('active');
-    document.body.style.overflow = 'hidden';
-}
 
-function closeLightbox() {
-    // Parar vídeo ao fechar
-    if (lightboxVideo.src) {
-        lightboxVideo.src = '';
+    function closeLightbox() {
+        lbVideo.src = '';
+        lightbox.classList.remove('active', 'video-mode');
+        document.body.style.overflow = '';
     }
-    
-    lightbox.classList.remove('active');
-    document.body.style.overflow = 'auto';
-}
 
-document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
-
-document.getElementById('lightbox-next').addEventListener('click', () => {
-    // Parar vídeo atual antes de mudar
-    if (lightboxVideo.src) {
-        lightboxVideo.src = '';
+    function navigate(dir) {
+        if (gallery.length === 0) return;
+        lbVideo.src = '';
+        currentIdx  = (currentIdx + dir + gallery.length) % gallery.length;
+        openLightbox(currentIdx);
     }
-    currentIndex = (currentIndex + 1) % galleryItems.length;
-    openLightbox();
-});
 
-document.getElementById('lightbox-prev').addEventListener('click', () => {
-    // Parar vídeo atual antes de mudar
-    if (lightboxVideo.src) {
-        lightboxVideo.src = '';
-    }
-    currentIndex = (currentIndex - 1 + galleryItems.length) % galleryItems.length;
-    openLightbox();
-});
-
-lightbox.addEventListener('click', (e) => {
-    if (e.target === lightbox) closeLightbox();
-});
-
-document.addEventListener('keydown', (e) => {
-    if (lightbox.classList.contains('active')) {
-        if (e.key === 'Escape') closeLightbox();
-        
-        // Navegação apenas para imagens (não para vídeos)
+    document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+    document.getElementById('lbNext').addEventListener('click', () => navigate(1));
+    document.getElementById('lbPrev').addEventListener('click', () => navigate(-1));
+    lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+    document.addEventListener('keydown', e => {
+        if (!lightbox.classList.contains('active')) return;
+        if (e.key === 'Escape')      closeLightbox();
         if (!lightbox.classList.contains('video-mode')) {
-            if (e.key === 'ArrowRight') document.getElementById('lightbox-next').click();
-            if (e.key === 'ArrowLeft') document.getElementById('lightbox-prev').click();
+            if (e.key === 'ArrowRight') navigate(1);
+            if (e.key === 'ArrowLeft')  navigate(-1);
         }
-    }
-});
+    });
 
-// Inicializar
-updateGalleryItems();
-initializeGalleryItems();
+    function extractYTId(url) {
+        if (!url) return null;
+        const m = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+        return m ? m[1] : null;
+    }
+})();
 </script>

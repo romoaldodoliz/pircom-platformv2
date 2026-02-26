@@ -1,703 +1,677 @@
 <?php
+session_start();
 include('header.php');
 include('../config/conexao.php');
 
+// Flash message
+$message = null;
+if (!empty($_SESSION['flash'])) {
+    $message = $_SESSION['flash'];
+    unset($_SESSION['flash']);
+}
+
 // Verificar se usuário é manager e tenta remover - bloquear
 if (isset($_GET['delete']) && isManager()) {
-    $_SESSION['error_message'] = 'Gerenciadores não podem remover notícias. Apenas administradores podem executar esta ação.';
+    $_SESSION['flash'] = ['type' => 'danger', 'text' => 'Gerenciadores não podem remover notícias. Apenas administradores podem executar esta ação.'];
     header('Location: noticias.php');
     exit;
 }
 
-// Add search functionality
-$search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
-$dateFilter = isset($_GET['date']) ? $conn->real_escape_string($_GET['date']) : '';
+// Filtros
+$search     = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
+$dateFilter = isset($_GET['date'])   ? $conn->real_escape_string($_GET['date'])   : '';
 
-// Build search conditions
 $searchCondition = '';
 if (!empty($search)) {
-    $searchCondition = " WHERE descricao LIKE '%$search%'";
+    $searchCondition = " WHERE (descricao LIKE '%$search%' OR titulo LIKE '%$search%')";
 }
-
 if (!empty($dateFilter)) {
     $searchCondition .= empty($searchCondition) ? " WHERE " : " AND ";
     $searchCondition .= "DATE(data) = '$dateFilter'";
 }
 
-// Adicionar paginação
-$limit = 10; // Itens por página
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$page = max(1, $page); // Ensure page is at least 1
+// Paginação
+$limit  = 10;
+$page   = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $offset = ($page - 1) * $limit;
 
-// Contar total de registros
-$count_sql = "SELECT COUNT(*) as total FROM noticias" . $searchCondition;
-$count_result = $conn->query($count_sql);
-$total_rows = $count_result->fetch_assoc()['total'];
-$total_pages = ceil($total_rows / $limit);
+$count_result = $conn->query("SELECT COUNT(*) as total FROM noticias" . $searchCondition);
+$total_rows   = $count_result->fetch_assoc()['total'];
+$total_pages  = ceil($total_rows / $limit);
 
-// Get today's and yesterday's date for quick filters
-$today = date('Y-m-d');
+$today     = date('Y-m-d');
 $yesterday = date('Y-m-d', strtotime('-1 day'));
 
-// Buscar notícias com paginação
-$sql = "SELECT * FROM noticias $searchCondition ORDER BY data DESC LIMIT $limit OFFSET $offset";
-$result = $conn->query($sql);
+$result = $conn->query("SELECT id, titulo, descricao, data FROM noticias $searchCondition ORDER BY data DESC LIMIT $limit OFFSET $offset");
 
-// Get news stats
-$stats_sql = "SELECT 
+$stats = $conn->query("SELECT 
     COUNT(*) as total,
     COUNT(CASE WHEN DATE(data) = CURDATE() THEN 1 END) as today,
     COUNT(CASE WHEN DATE(data) = DATE_SUB(CURDATE(), INTERVAL 1 DAY) THEN 1 END) as yesterday
-    FROM noticias";
-$stats_result = $conn->query($stats_sql);
-$stats = $stats_result->fetch_assoc();
+    FROM noticias")->fetch_assoc();
 ?>
-<!-- Content wrapper -->
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --primary: #2563eb;
+    --primary-light: rgba(37,99,235,0.08);
+    --primary-mid: rgba(37,99,235,0.15);
+    --success: #16a34a;
+    --success-light: rgba(22,163,74,0.08);
+    --warning: #d97706;
+    --warning-light: rgba(217,119,6,0.08);
+    --danger: #dc2626;
+    --danger-light: rgba(220,38,38,0.08);
+    --info: #0891b2;
+    --info-light: rgba(8,145,178,0.08);
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --border: #e5e7eb;
+    --text-primary: #111827;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.04);
+}
+
+body, .content-wrapper * { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+.not-wrapper {
+    padding: 1.5rem;
+    background: var(--bg);
+    min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.not-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+}
+
+.not-header-left { display: flex; align-items: center; gap: 0.75rem; }
+
+.not-header-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--primary), #1e40af);
+    border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 1.25rem; flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(37,99,235,0.35);
+}
+
+.not-header h1 {
+    font-size: 1.5rem; font-weight: 800;
+    color: var(--text-primary); margin: 0; letter-spacing: -0.02em;
+}
+
+.not-count-pill {
+    display: inline-flex; align-items: center;
+    background: var(--primary-light); color: var(--primary);
+    font-size: 0.8125rem; font-weight: 700;
+    padding: 0.25rem 0.75rem; border-radius: 999px;
+    border: 1px solid var(--primary-mid);
+}
+
+/* ── ALERT ── */
+.not-alert {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 1rem 1.25rem; border-radius: var(--radius-md);
+    margin-bottom: 1.5rem; font-weight: 500; font-size: 0.9375rem;
+    animation: fadeSlideDown 0.3s ease;
+}
+.not-alert.success { background: var(--success-light); color: var(--success); border: 1px solid rgba(22,163,74,0.2); }
+.not-alert.danger  { background: var(--danger-light);  color: var(--danger);  border: 1px solid rgba(220,38,38,0.2); }
+
+@keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── STATS ── */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem; margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    background: var(--surface); border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem; box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; gap: 1rem;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+.stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.stat-card a { text-decoration: none; display: contents; }
+
+.stat-icon {
+    width: 52px; height: 52px; border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; flex-shrink: 0;
+}
+.stat-icon.primary { background: linear-gradient(135deg,#eff6ff,#dbeafe); color: var(--primary); }
+.stat-icon.info    { background: linear-gradient(135deg,#ecfeff,#cffafe); color: var(--info); }
+.stat-icon.warning { background: linear-gradient(135deg,#fffbeb,#fef3c7); color: var(--warning); }
+.stat-icon.success { background: linear-gradient(135deg,#ecfdf5,#d1fae5); color: var(--success); }
+
+.stat-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.25rem; }
+.stat-value { font-size: 1.625rem; font-weight: 800; color: var(--text-primary); line-height: 1.1; letter-spacing: -0.02em; }
+.stat-sub   { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; font-weight: 500; }
+
+/* ── FILTER ── */
+.filter-card {
+    background: var(--surface); border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem; box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border); margin-bottom: 1.25rem;
+}
+.filter-title { font-size: 0.9375rem; font-weight: 700; color: var(--text-primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+.filter-title i { color: var(--primary); }
+.filter-row { display: grid; grid-template-columns: 1fr 200px auto; gap: 0.75rem; align-items: end; }
+.form-group  { display: flex; flex-direction: column; gap: 0.35rem; }
+.form-label  { font-size: 0.8125rem; font-weight: 600; color: var(--text-secondary); }
+
+.form-control, .form-select {
+    height: 42px; padding: 0 0.875rem;
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    font-size: 0.9rem; font-family: inherit; color: var(--text-primary);
+    background: #fafafa; transition: border-color 0.2s, box-shadow 0.2s; width: 100%;
+}
+.form-control:focus, .form-select:focus {
+    outline: none; border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.12); background: white;
+}
+.filter-actions { display: flex; gap: 0.5rem; }
+
+/* ── BUTTONS ── */
+.btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 0.4rem; padding: 0 1.125rem; height: 42px;
+    border-radius: var(--radius-sm); font-size: 0.875rem; font-weight: 600;
+    font-family: inherit; cursor: pointer; border: none;
+    transition: all 0.18s ease; white-space: nowrap; text-decoration: none;
+}
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), #1e40af);
+    color: white; box-shadow: 0 2px 8px rgba(37,99,235,0.28);
+}
+.btn-primary:hover { box-shadow: 0 4px 14px rgba(37,99,235,0.38); transform: translateY(-1px); color: white; }
+.btn-ghost  { background: #f3f4f6; color: var(--text-secondary); border: 1.5px solid var(--border); }
+.btn-ghost:hover { background: #e5e7eb; color: var(--text-primary); }
+.btn-success-outline { background: var(--success-light); color: var(--success); border: 1.5px solid rgba(22,163,74,0.3); }
+.btn-success-outline:hover { background: var(--success); color: white; }
+
+.btn-icon-sm {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: var(--radius-sm);
+    font-size: 0.9rem; cursor: pointer; border: none; transition: all 0.15s;
+    text-decoration: none;
+}
+.btn-edit   { background: var(--primary-light); color: var(--primary); border: 1.5px solid rgba(37,99,235,0.2); }
+.btn-edit:hover { background: var(--primary); color: white; }
+.btn-delete { background: transparent; color: var(--text-muted); border: 1.5px solid var(--border); }
+.btn-delete:hover { background: var(--danger-light); color: var(--danger); border-color: rgba(220,38,38,0.3); }
+.btn-view   { background: var(--info-light); color: var(--info); border: 1.5px solid rgba(8,145,178,0.2); }
+.btn-view:hover { background: var(--info); color: white; }
+
+/* ── TABLE CARD ── */
+.table-card {
+    background: var(--surface); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm); border: 1px solid var(--border); overflow: hidden;
+}
+.table-card-header {
+    padding: 1.25rem 1.5rem; display: flex; align-items: center;
+    justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+}
+.table-card-title {
+    font-size: 1rem; font-weight: 700; color: var(--text-primary);
+    display: flex; align-items: center; gap: 0.5rem; margin: 0;
+}
+.table-card-title i { color: var(--primary); }
+.table-meta { font-size: 0.8125rem; color: var(--text-muted); font-weight: 500; }
+
+/* ── NEWS LIST ── */
+.news-list { padding: 0.5rem; }
+
+.news-row {
+    display: grid;
+    grid-template-columns: 48px 72px 1fr 130px auto;
+    align-items: center; gap: 0.75rem;
+    padding: 0.875rem 1rem; border-radius: var(--radius-md);
+    transition: background 0.15s; border-bottom: 1px solid #f3f4f6;
+}
+.news-row:last-child { border-bottom: none; }
+.news-row:hover { background: #fafafa; }
+
+.news-row.header-row {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--text-muted);
+    padding: 0.625rem 1rem; border-bottom: 1px solid var(--border);
+    background: #f9fafb; border-radius: 0;
+}
+
+.news-id { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-align: center; }
+
+.news-thumb {
+    width: 60px; height: 60px; border-radius: var(--radius-sm);
+    object-fit: cover; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid var(--border);
+}
+.news-thumb:hover { transform: scale(1.06); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+
+.news-thumb-placeholder {
+    width: 60px; height: 60px; border-radius: var(--radius-sm);
+    background: #f3f4f6; display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); font-size: 1.5rem; border: 1px solid var(--border);
+}
+
+.news-info { min-width: 0; }
+.news-title {
+    font-size: 0.9375rem; font-weight: 700; color: var(--text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 0.25rem;
+}
+.news-desc {
+    font-size: 0.8rem; color: var(--text-muted);
+    display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
+    overflow: hidden; max-width: 500px;
+}
+
+.news-date { text-align: center; }
+.date-badge {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    padding: 0.3rem 0.75rem; border-radius: 999px;
+    font-size: 0.75rem; font-weight: 700; white-space: nowrap;
+}
+.date-badge.today     { background: var(--success-light); color: var(--success); border: 1px solid rgba(22,163,74,0.2); }
+.date-badge.yesterday { background: var(--warning-light); color: var(--warning); border: 1px solid rgba(217,119,6,0.2); }
+.date-badge.old       { background: #f3f4f6; color: var(--text-secondary); border: 1px solid var(--border); }
+
+.news-time { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+.news-actions { display: flex; align-items: center; gap: 0.375rem; }
+
+/* ── EMPTY STATE ── */
+.empty-state { padding: 3.5rem 2rem; text-align: center; }
+.empty-state-icon {
+    width: 72px; height: 72px; background: #f3f4f6; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem; font-size: 2rem; color: var(--text-muted);
+}
+.empty-state h6 { font-size: 1rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.375rem; }
+.empty-state p  { font-size: 0.875rem; color: var(--text-muted); margin: 0; }
+
+/* ── PAGINATION ── */
+.pagination-wrap {
+    padding: 1rem 1.5rem; border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    gap: 0.375rem; flex-wrap: wrap;
+}
+.page-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 36px; height: 36px; padding: 0 0.625rem;
+    border-radius: var(--radius-sm); font-size: 0.875rem; font-weight: 600;
+    color: var(--text-secondary); border: 1.5px solid var(--border);
+    background: white; text-decoration: none; transition: all 0.15s;
+}
+.page-btn:hover  { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+.page-btn.active { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 2px 8px rgba(37,99,235,0.3); }
+.page-btn.disabled { opacity: 0.4; pointer-events: none; }
+.page-btn.ellipsis { border-color: transparent; background: none; cursor: default; }
+.page-btn.ellipsis:hover { border-color: transparent; background: none; color: var(--text-muted); }
+
+/* ── MODAL ── */
+.img-modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7); z-index: 9999;
+    align-items: center; justify-content: center; padding: 1rem;
+}
+.img-modal-overlay.open { display: flex; }
+.img-modal-box {
+    background: white; border-radius: var(--radius-lg);
+    max-width: 640px; width: 100%; overflow: hidden; position: relative;
+}
+.img-modal-header {
+    padding: 1rem 1.25rem; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+}
+.img-modal-header h6 { margin: 0; font-weight: 700; }
+.img-modal-body { padding: 1.25rem; text-align: center; }
+.img-modal-body img { max-width: 100%; border-radius: var(--radius-md); }
+.img-modal-close {
+    background: none; border: none; cursor: pointer; font-size: 1.25rem;
+    color: var(--text-muted); transition: color 0.15s; line-height: 1;
+}
+.img-modal-close:hover { color: var(--danger); }
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 1200px) {
+    .news-row { grid-template-columns: 44px 64px 1fr 120px auto; gap: 0.5rem; }
+}
+@media (max-width: 991px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .filter-row { grid-template-columns: 1fr 1fr; }
+    .filter-actions { grid-column: 1 / -1; }
+    .news-row.header-row { display: none; }
+    .news-row {
+        grid-template-columns: 64px 1fr;
+        grid-template-rows: auto auto auto;
+        gap: 0.5rem; padding: 1rem;
+        border-bottom: none; border-radius: var(--radius-md);
+        background: white; box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border); margin-bottom: 0.75rem;
+    }
+    .news-row:hover { background: white; box-shadow: var(--shadow-md); }
+    .news-list { padding: 1rem; display: flex; flex-direction: column; }
+    .news-id   { display: none; }
+    .news-thumb, .news-thumb-placeholder { grid-row: 1 / 3; }
+    .news-info { grid-column: 2; }
+    .news-date { grid-column: 2; text-align: left; }
+    .news-actions { grid-column: 1 / -1; border-top: 1px solid var(--border); padding-top: 0.75rem; margin-top: 0.25rem; }
+}
+@media (max-width: 767px) {
+    .not-wrapper { padding: 1rem; }
+    .not-header h1 { font-size: 1.25rem; }
+    .stats-grid { gap: 0.75rem; }
+    .stat-card { padding: 1rem; }
+    .stat-value { font-size: 1.25rem; }
+    .filter-row { grid-template-columns: 1fr; }
+}
+@media (max-width: 575px) {
+    .not-wrapper { padding: 0.75rem; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+    .stat-icon { width: 42px; height: 42px; font-size: 1.25rem; }
+}
+</style>
+
 <div class="content-wrapper">
-    <!-- Content -->
-    <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Page Header -->
-        <div class="row mb-4">
-            <div class="col-12 col-md-6">
-                <h4 class="fw-bold py-3 mb-2">Gestão de Notícias</h4>
-                <p class="text-muted mb-0">Gerencie todas as notícias publicadas no sistema</p>
-            </div>
-            <div class="col-12 col-md-6">
-                <div class="d-flex flex-column flex-md-row justify-content-md-end gap-2">
-                    <div class="position-relative">
-                        <form method="GET" action="" class="d-flex flex-column flex-md-row gap-2">
-                            <div class="input-group input-group-merge">
-                                <span class="input-group-text"><i class="bx bx-search"></i></span>
-                                <input 
-                                    type="text" 
-                                    class="form-control" 
-                                    name="search" 
-                                    placeholder="Pesquisar notícias..." 
-                                    value="<?php echo htmlspecialchars($search); ?>"
-                                    aria-label="Pesquisar"
-                                >
-                            </div>
-                            <div class="input-group input-group-merge">
-                                <span class="input-group-text"><i class="bx bx-calendar"></i></span>
-                                <input 
-                                    type="date" 
-                                    class="form-control" 
-                                    name="date" 
-                                    value="<?php echo htmlspecialchars($dateFilter); ?>"
-                                    aria-label="Filtrar por data"
-                                >
-                            </div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bx bx-filter"></i>
-                                <span class="d-none d-md-inline">Filtrar</span>
-                            </button>
-                            <?php if (!empty($search) || !empty($dateFilter)): ?>
-                            <a href="?" class="btn btn-outline-secondary">
-                                <i class="bx bx-x"></i>
-                                <span class="d-none d-md-inline">Limpar</span>
-                            </a>
-                            <?php endif; ?>
-                        </form>
-                    </div>
-                </div>
+<div class="not-wrapper">
+
+    <!-- Header -->
+    <div class="not-header">
+        <div class="not-header-left">
+            <div class="not-header-icon"><i class="bx bx-news"></i></div>
+            <div><h1>Gestão de Notícias</h1></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+            <span class="not-count-pill"><?php echo number_format($stats['total'], 0); ?> notícias</span>
+            <a href="noticiasform.php" class="btn btn-primary" style="height:38px;">
+                <i class="bx bx-plus"></i> Nova Notícia
+            </a>
+        </div>
+    </div>
+
+    <!-- Alert -->
+    <?php if ($message): ?>
+    <div class="not-alert <?php echo $message['type']; ?>">
+        <i class="bx <?php echo $message['type'] == 'success' ? 'bx-check-circle' : 'bx-error-circle'; ?>" style="font-size:1.25rem;flex-shrink:0;"></i>
+        <span><?php echo htmlspecialchars($message['text']); ?></span>
+    </div>
+    <?php endif; ?>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon primary"><i class="bx bx-news"></i></div>
+            <div>
+                <div class="stat-label">Total</div>
+                <div class="stat-value"><?php echo number_format($stats['total'], 0); ?></div>
+                <div class="stat-sub">notícias</div>
             </div>
         </div>
-
-        <!-- Stats Cards -->
-        <div class="row mb-4">
-            <div class="col-sm-6 col-lg-3 mb-4">
-                <div class="card card-border-shadow-primary h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-2 pb-1">
-                            <div class="avatar me-2">
-                                <span class="avatar-initial rounded bg-label-primary">
-                                    <i class="bx bx-news"></i>
-                                </span>
-                            </div>
-                            <h4 class="ms-1 mb-0"><?php echo $stats['total']; ?></h4>
-                        </div>
-                        <p class="mb-1">Total de Notícias</p>
-                        <p class="mb-0">
-                            <span class="badge bg-label-success"><?php echo $total_rows; ?> encontradas</span>
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6 col-lg-3 mb-4">
-                <div class="card card-border-shadow-info h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-2 pb-1">
-                            <div class="avatar me-2">
-                                <span class="avatar-initial rounded bg-label-info">
-                                    <i class="bx bx-calendar-check"></i>
-                                </span>
-                            </div>
-                            <h4 class="ms-1 mb-0"><?php echo $stats['today']; ?></h4>
-                        </div>
-                        <p class="mb-1">Hoje</p>
-                        <p class="mb-0">
-                            <a href="?date=<?php echo $today; ?>" class="text-info">Ver notícias de hoje</a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6 col-lg-3 mb-4">
-                <div class="card card-border-shadow-warning h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-2 pb-1">
-                            <div class="avatar me-2">
-                                <span class="avatar-initial rounded bg-label-warning">
-                                    <i class="bx bx-time-five"></i>
-                                </span>
-                            </div>
-                            <h4 class="ms-1 mb-0"><?php echo $stats['yesterday']; ?></h4>
-                        </div>
-                        <p class="mb-1">Ontem</p>
-                        <p class="mb-0">
-                            <a href="?date=<?php echo $yesterday; ?>" class="text-warning">Ver notícias de ontem</a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6 col-lg-3 mb-4">
-                <div class="card card-border-shadow-success h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-2 pb-1">
-                            <div class="avatar me-2">
-                                <span class="avatar-initial rounded bg-label-success">
-                                    <i class="bx bx-plus"></i>
-                                </span>
-                            </div>
-                            <div class="ms-1">
-                                <h4 class="mb-0">Nova</h4>
-                            </div>
-                        </div>
-                        <p class="mb-1">Adicionar</p>
-                        <p class="mb-0">
-                            <a href="noticiasform.php" class="text-success">Criar nova notícia</a>
-                        </p>
-                    </div>
-                </div>
+        <div class="stat-card" style="cursor:pointer;" onclick="window.location='?date=<?php echo $today; ?>'">
+            <div class="stat-icon info"><i class="bx bx-calendar-check"></i></div>
+            <div>
+                <div class="stat-label">Hoje</div>
+                <div class="stat-value"><?php echo $stats['today']; ?></div>
+                <div class="stat-sub">publicadas</div>
             </div>
         </div>
-
-        <!-- Quick Action Buttons -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="d-flex flex-wrap gap-2">
-                    <a href="?" class="btn btn-outline-primary">
-                        <i class="bx bx-list-ul"></i> Todas
-                    </a>
-                    <a href="?date=<?php echo $today; ?>" class="btn btn-outline-info">
-                        <i class="bx bx-calendar"></i> Hoje
-                    </a>
-                    <a href="?date=<?php echo $yesterday; ?>" class="btn btn-outline-warning">
-                        <i class="bx bx-time"></i> Ontem
-                    </a>
-                    <a href="noticiasform.php" class="btn btn-dark ms-auto">
-                        <i class="bx bx-plus me-1"></i>Adicionar notícia
-                    </a>
-                </div>
+        <div class="stat-card" style="cursor:pointer;" onclick="window.location='?date=<?php echo $yesterday; ?>'">
+            <div class="stat-icon warning"><i class="bx bx-time-five"></i></div>
+            <div>
+                <div class="stat-label">Ontem</div>
+                <div class="stat-value"><?php echo $stats['yesterday']; ?></div>
+                <div class="stat-sub">publicadas</div>
             </div>
         </div>
-
-        <!-- Main Card -->
-        <div class="card">
-            <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
-                <h5 class="card-title mb-0">
-                    Lista de Notícias
-                    <?php if (!empty($search) || !empty($dateFilter)): ?>
-                    <small class="text-muted">
-                        <?php 
-                        if (!empty($search)) echo "Resultados para: \"" . htmlspecialchars($search) . "\" ";
-                        if (!empty($dateFilter)) echo "Data: " . date('d/m/Y', strtotime($dateFilter));
-                        ?>
-                    </small>
-                    <?php endif; ?>
-                </h5>
-                <div class="mt-2 mt-md-0">
-                    <span class="badge bg-label-primary">
-                        <?php echo $total_rows; ?> notícia(s) encontrada(s)
-                    </span>
-                </div>
-            </div>
-            
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th width="80">
-                                <div class="d-flex align-items-center gap-1">
-                                    <span>#ID</span>
-                                </div>
-                            </th>
-                            <th width="120">Imagem</th>
-                            <th>Descrição</th>
-                            <th width="140" class="text-center">Data</th>
-                            <th width="120" class="text-center">Acções</th>
-                        </tr>
-                    </thead>
-                    <tbody class="table-border-bottom-0">
-                        <?php if ($result->num_rows > 0): ?>
-                            <?php while ($row = $result->fetch_assoc()): 
-                                $formattedDate = date('d/m/Y', strtotime($row["data"]));
-                                $formattedTime = date('H:i', strtotime($row["data"]));
-                                $isToday = date('Y-m-d', strtotime($row["data"])) == $today;
-                                $isYesterday = date('Y-m-d', strtotime($row["data"])) == $yesterday;
-                            ?>
-                                <tr class="<?php echo $isToday ? 'table-active' : ''; ?>">
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar avatar-xs me-2">
-                                                <span class="avatar-initial rounded-circle bg-label-primary">
-                                                    <?php echo $row["id"]; ?>
-                                                </span>
-                                            </div>
-                                            <strong>#<?php echo htmlspecialchars($row["id"]); ?></strong>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="image-preview-container">
-                                            <img 
-                                                src='data:image/jpeg;base64,<?php echo base64_encode($row['foto']); ?>' 
-                                                alt='Notícia <?php echo htmlspecialchars($row["id"]); ?>'
-                                                class="rounded border"
-                                                loading="lazy"
-                                                width="80"
-                                                height="80"
-                                                style="object-fit: cover;"
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#imageModal<?php echo $row['id']; ?>"
-                                                role="button"
-                                            />
-                                        </div>
-                                        
-                                        <!-- Image Modal -->
-                                        <div class="modal fade" id="imageModal<?php echo $row['id']; ?>" tabindex="-1" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered modal-lg">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">Visualização da Imagem</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body text-center">
-                                                        <img 
-                                                            src='data:image/jpeg;base64,<?php echo base64_encode($row['foto']); ?>' 
-                                                            class="img-fluid rounded"
-                                                            alt="Notícia <?php echo htmlspecialchars($row["id"]); ?>"
-                                                        />
-                                                        <div class="mt-3">
-                                                            <p class="mb-1"><strong>ID:</strong> <?php echo $row["id"]; ?></p>
-                                                            <p class="mb-0 text-muted"><small>Publicado em: <?php echo $formattedDate; ?> às <?php echo $formattedTime; ?></small></p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="news-description">
-                                            <h6 class="mb-1">
-                                                <span class="badge bg-label-<?php echo $isToday ? 'success' : ($isYesterday ? 'warning' : 'secondary'); ?> me-2">
-                                                    <?php echo $isToday ? 'Hoje' : ($isYesterday ? 'Ontem' : $formattedDate); ?>
-                                                </span>
-                                            </h6>
-                                            <p class="mb-0 text-truncate-2" 
-                                               data-bs-toggle="tooltip" 
-                                               title="<?php echo htmlspecialchars($row["descricao"]); ?>"
-                                               style="max-width: 400px;">
-                                                <?php echo htmlspecialchars($row["descricao"]); ?>
-                                            </p>
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="d-flex flex-column align-items-center">
-                                            <span class="badge bg-label-primary mb-1">
-                                                <?php echo $formattedDate; ?>
-                                            </span>
-                                            <small class="text-muted"><?php echo $formattedTime; ?></small>
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="d-flex justify-content-center gap-2">
-                                            <a href="noticiasform.php?edit=<?php echo $row['id']; ?>" 
-                                               class="btn btn-icon btn-outline-primary btn-sm"
-                                               data-bs-toggle="tooltip"
-                                               title="Editar">
-                                                <i class="bx bx-edit"></i>
-                                            </a>
-                                            <button type="button" 
-                                                    class="btn btn-icon btn-outline-info btn-sm preview-btn"
-                                                    data-bs-toggle="tooltip"
-                                                    title="Pré-visualizar"
-                                                    onclick="previewNews(<?php echo $row['id']; ?>, '<?php echo htmlspecialchars(addslashes($row["descricao"])); ?>', '<?php echo $formattedDate; ?>')">
-                                                <i class="bx bx-show"></i>
-                                            </button>
-                                            <?php if (isAdmin()): ?>
-                                            <form method='POST' 
-                                                  action='remover_noticia.php' 
-                                                  class="delete-form"
-                                                  data-item-name="<?php echo htmlspecialchars(addslashes($row["descricao"])); ?>">
-                                                <input type='hidden' name='noticia_id' value='<?php echo $row['id']; ?>'>
-                                                <button type='submit' 
-                                                        class='btn btn-icon btn-outline-danger btn-sm'
-                                                        data-bs-toggle="tooltip"
-                                                        title="Remover">
-                                                    <i class='bx bx-trash'></i>
-                                                </button>
-                                            </form>
-                                            <?php else: ?>
-                                            <button type="button" 
-                                                    class="btn btn-icon btn-outline-secondary btn-sm" 
-                                                    data-bs-toggle="tooltip" 
-                                                    title="Apenas admins podem remover"
-                                                    disabled>
-                                                <i class="bx bx-trash"></i>
-                                            </button>
-                                            <?php endif; ?>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endwhile; ?>
-                        <?php else: ?>
-                            <tr>
-                                <td colspan="5" class="text-center py-5">
-                                    <div class="empty-state">
-                                        <div class="empty-state-icon">
-                                            <i class="bx bx-news" style="font-size: 3rem;"></i>
-                                        </div>
-                                        <h5 class="mt-3">
-                                            <?php echo !empty($search) || !empty($dateFilter) 
-                                                ? 'Nenhuma notícia encontrada' 
-                                                : 'Nenhuma notícia cadastrada'; ?>
-                                        </h5>
-                                        <p class="text-muted mb-3">
-                                            <?php echo !empty($search) || !empty($dateFilter) 
-                                                ? 'Tente ajustar seus filtros de pesquisa.' 
-                                                : 'Comece adicionando sua primeira notícia.'; ?>
-                                        </p>
-                                        <a href="noticiasform.php" class="btn btn-dark">
-                                            <i class="bx bx-plus"></i> Adicionar primeira notícia
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-                
-                <!-- Paginação -->
-                <?php if ($total_pages > 1): ?>
-                <div class="card-footer">
-                    <div class="row align-items-center">
-                        <div class="col-lg-6 text-muted mb-3 mb-lg-0">
-                            Mostrando <strong><?php echo min($offset + 1, $total_rows); ?>-<?php echo min($offset + $limit, $total_rows); ?></strong> 
-                            de <strong><?php echo $total_rows; ?></strong> notícias
-                        </div>
-                        <div class="col-lg-6">
-                            <nav aria-label="Page navigation">
-                                <ul class="pagination justify-content-center justify-content-lg-end mb-0">
-                                    <?php if ($page > 1): ?>
-                                        <li class="page-item">
-                                            <a class="page-link" 
-                                               href="?page=<?php echo $page - 1; ?>&search=<?php echo urlencode($search); ?>&date=<?php echo urlencode($dateFilter); ?>"
-                                               aria-label="Previous">
-                                                <i class="bx bx-chevron-left"></i>
-                                            </a>
-                                        </li>
-                                    <?php endif; ?>
-                                    
-                                    <?php
-                                    $startPage = max(1, $page - 2);
-                                    $endPage = min($total_pages, $page + 2);
-                                    
-                                    for ($i = $startPage; $i <= $endPage; $i++):
-                                    ?>
-                                        <li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
-                                            <a class="page-link" 
-                                               href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>&date=<?php echo urlencode($dateFilter); ?>">
-                                                <?php echo $i; ?>
-                                            </a>
-                                        </li>
-                                    <?php endfor; ?>
-                                    
-                                    <?php if ($page < $total_pages): ?>
-                                        <li class="page-item">
-                                            <a class="page-link" 
-                                               href="?page=<?php echo $page + 1; ?>&search=<?php echo urlencode($search); ?>&date=<?php echo urlencode($dateFilter); ?>"
-                                               aria-label="Next">
-                                                <i class="bx bx-chevron-right"></i>
-                                            </a>
-                                        </li>
-                                    <?php endif; ?>
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
-                <?php endif; ?>
+        <div class="stat-card" style="cursor:pointer;" onclick="window.location='noticiasform.php'">
+            <div class="stat-icon success"><i class="bx bx-plus-circle"></i></div>
+            <div>
+                <div class="stat-label">Adicionar</div>
+                <div class="stat-value" style="font-size:1rem;margin-top:0.15rem;">Nova</div>
+                <div class="stat-sub">criar notícia</div>
             </div>
         </div>
     </div>
-    <!-- / Content -->
 
-    <!-- Footer -->
-    <?php include('footerprincipal.php'); ?>
-    <!-- / Footer -->
-
-    <div class="content-backdrop fade"></div>
-</div>
-<!-- Content wrapper -->
-
-<!-- Custom Styles -->
-<style>
-    .card {
-        border: none;
-        box-shadow: 0 2px 6px 0 rgba(67, 89, 113, 0.12);
-        border-radius: 10px;
-    }
-    
-    .card-header {
-        background-color: #fff;
-        border-bottom: 1px solid #e0e0e0;
-        padding: 1.5rem;
-    }
-    
-    .table th {
-        border-top: none;
-        font-weight: 600;
-        color: #566a7f;
-        padding: 1rem 0.75rem;
-        background-color: #f8f9fa;
-    }
-    
-    .table td {
-        padding: 1rem 0.75rem;
-        vertical-align: middle;
-    }
-    
-    .table-hover tbody tr:hover {
-        background-color: rgba(67, 89, 113, 0.04);
-    }
-    
-    .empty-state {
-        padding: 3rem 1rem;
-        text-align: center;
-    }
-    
-    .empty-state-icon {
-        color: #b4bdc6;
-        margin-bottom: 1rem;
-    }
-    
-    .image-preview-container img {
-        transition: transform 0.3s ease;
-        cursor: pointer;
-        border-radius: 8px;
-    }
-    
-    .image-preview-container img:hover {
-        transform: scale(1.05);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    
-    .btn-icon {
-        width: 36px;
-        height: 36px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-    }
-    
-    .avatar-initial {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-    }
-    
-    .text-truncate-2 {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    
-    .card-border-shadow-primary {
-        border: 1px solid;
-        border-color: #696cff;
-    }
-    
-    .card-border-shadow-info {
-        border: 1px solid;
-        border-color: #17c1e8;
-    }
-    
-    .card-border-shadow-warning {
-        border: 1px solid;
-        border-color: #ffab00;
-    }
-    
-    .card-border-shadow-success {
-        border: 1px solid;
-        border-color: #71dd37;
-    }
-    
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-        .card-header {
-            padding: 1rem;
-        }
-        
-        .btn {
-            padding: 0.375rem 0.75rem;
-            font-size: 0.875rem;
-        }
-        
-        .news-description {
-            max-width: 100% !important;
-        }
-        
-        .table-responsive {
-            border: none;
-        }
-        
-        .table td {
-            padding: 0.75rem;
-        }
-        
-        .image-preview-container img {
-            width: 60px;
-            height: 60px;
-        }
-    }
-    
-    @media (max-width: 576px) {
-        .d-flex.gap-2 {
-            gap: 0.5rem !important;
-        }
-        
-        .table td {
-            font-size: 0.875rem;
-        }
-    }
-</style>
-
-<!-- JavaScript Enhancements -->
-<script>
-    // Initialize tooltips
-    document.addEventListener('DOMContentLoaded', function() {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-    });
-
-    // Enhanced confirm delete function
-    function confirmDelete(form, newsTitle) {
-        const title = newsTitle.length > 50 ? newsTitle.substring(0, 50) + '...' : newsTitle;
-        return confirm(`Tem certeza que deseja remover a notícia "${title}"?\n\nEsta ação não pode ser desfeita.`);
-    }
-
-    // News preview function
-    function previewNews(id, title, date) {
-        const modalContent = `
-            <div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Pré-visualização da Notícia</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="text-center mb-3">
-                                <span class="badge bg-primary mb-2">ID: #${id}</span>
-                                <h6 class="mb-2">${title}</h6>
-                                <p class="text-muted mb-0"><small>Publicado em: ${date}</small></p>
-                            </div>
-                            <div class="alert alert-info">
-                                <i class="bx bx-info-circle me-2"></i>
-                                Esta é apenas uma pré-visualização. A visualização completa incluirá a imagem e conteúdo completo.
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <a href="noticiasform.php?edit=${id}" class="btn btn-primary">
-                                <i class="bx bx-edit me-1"></i>Editar Notícia
-                            </a>
-                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
-                        </div>
-                    </div>
+    <!-- Filters -->
+    <div class="filter-card">
+        <div class="filter-title"><i class="bx bx-filter-alt"></i> Filtros de Pesquisa</div>
+        <form method="GET" action="">
+            <div class="filter-row">
+                <div class="form-group">
+                    <label class="form-label">Pesquisar</label>
+                    <input type="text" name="search" class="form-control" placeholder="Título ou descrição..."
+                           value="<?php echo htmlspecialchars($search); ?>">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Filtrar por data</label>
+                    <input type="date" name="date" class="form-control"
+                           value="<?php echo htmlspecialchars($dateFilter); ?>">
+                </div>
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn-primary"><i class="bx bx-search-alt"></i> Filtrar</button>
+                    <a href="noticias.php" class="btn btn-ghost"><i class="bx bx-reset"></i> Limpar</a>
                 </div>
             </div>
-        `;
-        
-        // Remove existing modal if any
-        const existingModal = document.getElementById('previewModal');
-        if (existingModal) {
-            existingModal.remove();
+        </form>
+    </div>
+
+    <!-- Table Card -->
+    <div class="table-card">
+        <div class="table-card-header">
+            <h5 class="table-card-title">
+                <i class="bx bx-list-ul"></i> Notícias Registradas
+                <?php if (!empty($search) || !empty($dateFilter)): ?>
+                <span style="font-size:0.8rem;font-weight:500;color:var(--text-muted);">
+                    — filtradas
+                </span>
+                <?php endif; ?>
+            </h5>
+            <span class="table-meta">
+                Mostrando <?php echo min($offset + 1, $total_rows); ?>–<?php echo min($offset + $limit, $total_rows); ?> de <?php echo $total_rows; ?>
+            </span>
+        </div>
+
+        <div class="news-list">
+            <!-- Desktop header -->
+            <div class="news-row header-row">
+                <div>#</div>
+                <div>Imagem</div>
+                <div>Notícia</div>
+                <div style="text-align:center;">Data</div>
+                <div>Ações</div>
+            </div>
+
+            <?php if ($result && $result->num_rows > 0):
+                while ($row = $result->fetch_assoc()):
+                    $fDate = date('d/m/Y', strtotime($row['data']));
+                    $fTime = date('H:i',   strtotime($row['data']));
+                    $rDate = date('Y-m-d', strtotime($row['data']));
+                    $isToday     = $rDate == $today;
+                    $isYesterday = $rDate == $yesterday;
+                    $dateClass   = $isToday ? 'today' : ($isYesterday ? 'yesterday' : 'old');
+                    $dateLabel   = $isToday ? 'Hoje' : ($isYesterday ? 'Ontem' : $fDate);
+            ?>
+            <div class="news-row">
+                <div class="news-id">#<?php echo $row['id']; ?></div>
+
+                <!-- Thumb: carregada via rota separada para não pesar a lista -->
+                <div>
+                    <img class="news-thumb"
+                         src="get_news_image.php?id=<?php echo $row['id']; ?>"
+                         alt="<?php echo htmlspecialchars($row['titulo']); ?>"
+                         loading="lazy"
+                         onclick="openImgModal(<?php echo $row['id']; ?>, '<?php echo htmlspecialchars(addslashes($row['titulo'])); ?>')"
+                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                    <div class="news-thumb-placeholder" style="display:none;"><i class="bx bx-image"></i></div>
+                </div>
+
+                <div class="news-info">
+                    <div class="news-title"><?php echo htmlspecialchars($row['titulo']); ?></div>
+                    <div class="news-desc"><?php echo htmlspecialchars($row['descricao']); ?></div>
+                </div>
+
+                <div class="news-date">
+                    <span class="date-badge <?php echo $dateClass; ?>"><?php echo $dateLabel; ?></span>
+                    <div class="news-time"><?php echo $fTime; ?></div>
+                </div>
+
+                <div class="news-actions">
+                    <a href="noticiasform.php?edit=<?php echo $row['id']; ?>"
+                       class="btn-icon-sm btn-edit" title="Editar">
+                        <i class="bx bx-edit"></i>
+                    </a>
+
+                    <button type="button"
+                            class="btn-icon-sm btn-view"
+                            title="Pré-visualizar"
+                            onclick="openImgModal(<?php echo $row['id']; ?>, '<?php echo htmlspecialchars(addslashes($row['titulo'])); ?>')">
+                        <i class="bx bx-show"></i>
+                    </button>
+
+                    <?php if (isAdmin()): ?>
+                    <form method="POST" action="remover_noticia.php" class="delete-form" style="display:contents;"
+                          data-item-name="<?php echo htmlspecialchars(addslashes($row['titulo'])); ?>">
+                        <input type="hidden" name="noticia_id" value="<?php echo $row['id']; ?>">
+                        <button type="submit" class="btn-icon-sm btn-delete" title="Remover">
+                            <i class="bx bx-trash"></i>
+                        </button>
+                    </form>
+                    <?php else: ?>
+                    <button type="button" class="btn-icon-sm btn-delete" disabled title="Apenas admins podem remover" style="opacity:0.4;cursor:not-allowed;">
+                        <i class="bx bx-trash"></i>
+                    </button>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endwhile;
+            else: ?>
+            <div class="empty-state">
+                <div class="empty-state-icon"><i class="bx bx-news"></i></div>
+                <h6><?php echo (!empty($search) || !empty($dateFilter)) ? 'Nenhuma notícia encontrada' : 'Nenhuma notícia cadastrada'; ?></h6>
+                <p><?php echo (!empty($search) || !empty($dateFilter)) ? 'Tente ajustar os filtros.' : 'Comece criando sua primeira notícia.'; ?></p>
+                <?php if (empty($search) && empty($dateFilter)): ?>
+                <a href="noticiasform.php" class="btn btn-primary" style="height:38px;margin-top:1rem;">
+                    <i class="bx bx-plus"></i> Adicionar notícia
+                </a>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
+        </div>
+
+        <!-- Paginação -->
+        <?php if ($total_pages > 1): ?>
+        <div class="pagination-wrap">
+            <?php
+            $qs = '';
+            if (!empty($search))     $qs .= '&search=' . urlencode($search);
+            if (!empty($dateFilter)) $qs .= '&date='   . urlencode($dateFilter);
+
+            echo $page > 1
+                ? '<a href="?page=' . ($page-1) . $qs . '" class="page-btn"><i class="bx bx-chevron-left"></i></a>'
+                : '<span class="page-btn disabled"><i class="bx bx-chevron-left"></i></span>';
+
+            $start = max(1, $page - 2);
+            $end   = min($total_pages, $page + 2);
+
+            if ($start > 1) {
+                echo '<a href="?page=1' . $qs . '" class="page-btn">1</a>';
+                if ($start > 2) echo '<span class="page-btn ellipsis">…</span>';
+            }
+            for ($i = $start; $i <= $end; $i++) {
+                $active = $i == $page ? ' active' : '';
+                echo '<a href="?page=' . $i . $qs . '" class="page-btn' . $active . '">' . $i . '</a>';
+            }
+            if ($end < $total_pages) {
+                if ($end < $total_pages - 1) echo '<span class="page-btn ellipsis">…</span>';
+                echo '<a href="?page=' . $total_pages . $qs . '" class="page-btn">' . $total_pages . '</a>';
+            }
+
+            echo $page < $total_pages
+                ? '<a href="?page=' . ($page+1) . $qs . '" class="page-btn"><i class="bx bx-chevron-right"></i></a>'
+                : '<span class="page-btn disabled"><i class="bx bx-chevron-right"></i></span>';
+            ?>
+        </div>
+        <?php endif; ?>
+    </div>
+
+</div>
+</div>
+
+<!-- Image preview modal -->
+<div class="img-modal-overlay" id="imgModal" onclick="closeImgModal(event)">
+    <div class="img-modal-box">
+        <div class="img-modal-header">
+            <h6 id="imgModalTitle">Visualização</h6>
+            <button class="img-modal-close" onclick="closeImgModalDirect()"><i class="bx bx-x"></i></button>
+        </div>
+        <div class="img-modal-body">
+            <img id="imgModalSrc" src="" alt="Preview">
+        </div>
+    </div>
+</div>
+
+<?php include('footerprincipal.php'); ?>
+<div class="content-backdrop fade"></div>
+
+<script>
+// Confirm delete
+document.querySelectorAll('.delete-form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const name = this.getAttribute('data-item-name');
+        const short = name.length > 60 ? name.substring(0, 60) + '...' : name;
+        if (confirm(`Tem a certeza que deseja remover:\n"${short}"?\n\nEsta ação não pode ser desfeita.`)) {
+            this.submit();
         }
-        
-        // Add new modal to body
-        document.body.insertAdjacentHTML('beforeend', modalContent);
-        
-        // Show modal
-        const previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
-        previewModal.show();
+    });
+});
+
+// Image modal
+function openImgModal(id, title) {
+    document.getElementById('imgModalTitle').textContent = title;
+    document.getElementById('imgModalSrc').src = 'get_news_image.php?id=' + id;
+    document.getElementById('imgModal').classList.add('open');
+}
+function closeImgModal(e) {
+    if (e.target === document.getElementById('imgModal')) {
+        document.getElementById('imgModal').classList.remove('open');
     }
+}
+function closeImgModalDirect() {
+    document.getElementById('imgModal').classList.remove('open');
+}
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.getElementById('imgModal').classList.remove('open');
+});
 
-    // Auto-submit search on date change
-    document.addEventListener('DOMContentLoaded', function() {
-        const dateInput = document.querySelector('input[name="date"]');
-        if (dateInput) {
-            dateInput.addEventListener('change', function() {
-                if (this.value) {
-                    this.form.submit();
-                }
-            });
-        }
-    });
-
-    // Keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-        // Ctrl/Cmd + F to focus search
-        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-            e.preventDefault();
-            const searchInput = document.querySelector('input[name="search"]');
-            if (searchInput) {
-                searchInput.focus();
-                searchInput.select();
-            }
-        }
-        
-        // Ctrl/Cmd + N to add new news
-        if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
-            e.preventDefault();
-            window.location.href = 'noticiasform.php';
-        }
-    });
-    
-    // Interceptar delete forms - simples validação
-    document.querySelectorAll('.delete-form').forEach(form => {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const itemName = this.getAttribute('data-item-name');
-            
-            // Validação: pergunta se tem certeza
-            if (confirm(`Tem a certeza que deseja remover: "${itemName}"?`)) {
-                this.submit();
-            }
-        });
-    });
+// Auto-submit date
+document.querySelector('input[name="date"]')?.addEventListener('change', function() {
+    if (this.value) this.form.submit();
+});
 </script>
 
 <?php
-// Fechar a conexão apenas se ainda estiver aberta
-if (isset($conn) && $conn->ping()) {
-    $conn->close();
-}
+if (isset($conn) && $conn->ping()) $conn->close();
 include('footer.php');
 ?>

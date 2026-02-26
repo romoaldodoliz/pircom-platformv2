@@ -100,6 +100,50 @@ include 'includes/swiper-styles.php';
 </section>
 
 <!-- CTA -->
+<style>
+.cta {
+    background: #f8f9fa;
+    padding: 80px 0;
+    text-align: center;
+}
+
+.cta h3 {
+    color: #000000 !important;  /* Texto preto */
+    font-weight: 700;
+    margin-bottom: 20px;
+    font-size: 2.5rem;
+}
+
+.cta p {
+    color: #000000 !important;  /* Texto preto */
+    font-size: 1.2rem;
+    max-width: 800px;
+    margin: 0 auto 30px;
+    line-height: 1.6;
+    opacity: 0.9;
+}
+
+.cta-btn {
+    display: inline-block;
+    padding: 12px 40px;
+    background: #FF6F0F;  /* Laranja */
+    color: #ffffff !important;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    border: 2px solid #FF6F0F;
+}
+
+.cta-btn:hover {
+    background: #D95A00;  /* Laranja escuro */
+    border-color: #D95A00;
+    color: #ffffff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255,111,15,0.3);
+}
+</style>
+
 <section class="cta">
     <div class="container text-center">
         <h3>SEJA PARTE DA SOLUÇÃO</h3>

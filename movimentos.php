@@ -12,7 +12,7 @@ include 'includes/navbar.php';
         <div class="row g-4">
             <?php
             include('config/conexao.php');
-            $sql = "SELECT * FROM movimentos ORDER BY id DESC";
+           $sql = "SELECT * FROM movimentos WHERE status = 'publicado' ORDER BY id DESC";
             $result = @$conn->query($sql);
             if ($result && $result->num_rows > 0) {
                 while ($row = $result->fetch_assoc()) {

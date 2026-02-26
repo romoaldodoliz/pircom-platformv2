@@ -99,31 +99,6 @@ body { font-family: var(--ff-body); color: var(--ink); background: var(--white);
 .sec-rule span:nth-child(2) { width: 40px; }
 .sec-rule span:nth-child(3) { width: 12px; opacity:.4; }
 
-/* ── About cards ── */
-.about-card {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 2.5rem;
-  box-shadow: var(--sh-card);
-  margin-bottom: 1.75rem;
-  position: relative;
-  overflow: hidden;
-}
-.about-card::before {
-  content: '';
-  position: absolute; top: 0; left: 0; bottom: 0; width: 4px;
-  background: var(--orange);
-  border-radius: 4px 0 0 4px;
-}
-.about-card h3 {
-  font-family: var(--ff-head);
-  letter-spacing: 1px; font-size: 1.4rem;
-  color: var(--black); margin-bottom: 1rem;
-  display: flex; align-items: center; gap: .55rem;
-}
-.about-card h3 i { color: var(--orange); }
-
 /* ═══════════════════════════════════════
    TEAM SECTION
 ═══════════════════════════════════════ */
@@ -420,127 +395,12 @@ body { font-family: var(--ff-body); color: var(--ink); background: var(--white);
 .mc-btn-linkedin { background: #EBF2FF; color: #0A66C2; border: 1.5px solid #C5D9F5; }
 .mc-btn-linkedin:hover { background: #0A66C2; color: var(--white); border-color: #0A66C2; }
 
-/* ═══════════════════════════════════════
-   INTER-RELIGIOUS BANNER
-═══════════════════════════════════════ */
-.ir-banner {
-  background: var(--black);
-  border-radius: 16px; padding: 2.75rem;
-  color: var(--white); text-align: center;
-  position: relative; overflow: hidden;
-}
-.ir-banner::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: repeating-linear-gradient(
-    -45deg,
-    transparent 0, transparent 18px,
-    rgba(255,111,15,.06) 18px, rgba(255,111,15,.06) 20px
-  );
-}
-.ir-banner::after {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0; height: 4px;
-  background: var(--orange);
-}
-.ir-banner h3 {
-  font-family: var(--ff-head); font-size: 1.6rem; letter-spacing: 1.5px;
-  color: var(--white); margin-bottom: .85rem; position: relative;
-}
-.ir-banner h3 i { color: var(--orange); }
-.ir-banner p { color: rgba(255,255,255,.75); font-size: 1rem; margin: 0; position: relative; }
-
-/* ═══════════════════════════════════════
-   VALUES
-═══════════════════════════════════════ */
-.value-card {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 14px; padding: 2rem 1.5rem; text-align: center;
-  box-shadow: var(--sh-card);
-  transition: transform var(--ease), box-shadow var(--ease), border-color var(--ease);
-  position: relative; overflow: hidden;
-}
-.value-card::before {
-  content: '';
-  position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
-  background: var(--orange); transform: scaleX(0);
-  transform-origin: left; transition: transform var(--ease);
-}
-.value-card:hover { transform: translateY(-5px); box-shadow: var(--sh-hov); border-color: #FFD4B0; }
-.value-card:hover::before { transform: scaleX(1); }
-.value-icon {
-  width: 60px; height: 60px; border-radius: 14px;
-  background: var(--black); color: var(--orange);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.55rem; margin: 0 auto 1.1rem;
-}
-.value-card h4 { font-family: var(--ff-head); letter-spacing: .8px; color: var(--black); margin-bottom: .5rem; font-size: 1.05rem; }
-.value-card p  { font-size: .875rem; color: var(--ink-s); margin: 0; }
-
 /* Scroll reveal */
 .reveal { opacity: 0; transform: translateY(22px); transition: opacity .5s ease, transform .5s ease; }
 .reveal.visible { opacity: 1; transform: none; }
 </style>
 
-<!-- ══ SOBRE NÓS ══════════════════════════════ -->
-<section class="py-5" style="background:var(--white);">
-  <div class="container">
-
-    <div class="sec-head reveal">
-      <span class="sec-label">Sobre Nós</span>
-      <h2 class="sec-title">Plataforma <span>Inter-Religiosa</span><br>de Comunicação para a Saúde</h2>
-      <div class="sec-rule"><span></span><span></span><span></span></div>
-    </div>
-
-    <div class="row mb-5">
-      <div class="col-lg-10 mx-auto reveal">
-        <div class="about-card">
-          <h3 style="font-size:1.5rem;justify-content:center;">PIRCOM</h3>
-          <p class="lead" style="text-align:justify;color:var(--ink-s);line-height:1.85;margin-bottom:1rem;">
-            A <strong>Plataforma Inter-Religiosa de Comunicação para a Saúde (PIRCOM)</strong> é uma organização baseada na fé,
-            empenhada e comprometida com a melhoria da qualidade de vida e das condições de saúde da população Moçambicana
-            através da mobilização das comunidades para se empenharem na eliminação da Malária e na redução da incidência
-            e impacto de outros problemas de saúde pública.
-          </p>
-          <p style="text-align:justify;color:var(--ink-s);line-height:1.85;margin:0;">
-            Criada em <strong>19 de abril de 2006</strong>, a PIRCOM é considerada a <strong>primeira aliança múltipla baseada na fé</strong>
-            através da colaboração entre comunidades <strong>Cristãs, Muçulmanas, Hindus e Bahai</strong> visando contribuir
-            na melhoria do comportamento dos beneficiários prioritários em relação à prevenção e tratamento da Malária,
-            Nutrição, Saúde Materno, Neonatal e Infantil e HIV.
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <div class="row mb-2">
-      <div class="col-lg-6 mb-4 reveal" style="transition-delay:.1s">
-        <div class="about-card h-100">
-          <h3><i class="bi bi-bullseye"></i> Nossa Missão</h3>
-          <p style="text-align:justify;color:var(--ink-s);line-height:1.85;margin:0;">
-            <?php echo $config ? nl2br(htmlspecialchars($config['missao'])) :
-            'Mobilizar comunidades religiosas para promover a saúde pública em Moçambique, focando na eliminação da malária,
-            nutrição, saúde materno-infantil e HIV/SIDA através de comunicação para mudança social e comportamental
-            baseada em valores religiosos e escrituras sagradas.'; ?>
-          </p>
-        </div>
-      </div>
-      <div class="col-lg-6 mb-4 reveal" style="transition-delay:.2s">
-        <div class="about-card h-100">
-          <h3><i class="bi bi-eye"></i> Nossa Visão</h3>
-          <p style="text-align:justify;color:var(--ink-s);line-height:1.85;margin:0;">
-            <?php echo $config ? nl2br(htmlspecialchars($config['visao'])) :
-            'Ser a plataforma de referência em Moçambique na articulação inter-religiosa para a promoção da saúde pública,
-            contribuindo para comunidades mais saudáveis e resilientes através da colaboração baseada na fé.'; ?>
-          </p>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-<!-- ══ LIDERANÇA ══════════════════════════════ -->
+<!-- ══ LIDERANÇA / ORGÃOS SOCIAIS ══════════════════════════════ -->
 <section id="team" class="team-section">
 
   <div class="team-band">
@@ -548,7 +408,7 @@ body { font-family: var(--ff-body); color: var(--ink); background: var(--white);
       <span class="sec-label">Orgãos Sociais</span>
       <h2 class="sec-title" style="color:var(--white);">Nossa <span>Liderança</span></h2>
       <div class="sec-rule"><span></span><span></span><span></span></div>
-      <p class="sec-sub">Conselho de Direcção da PIRCOM</p>
+      <p class="sec-sub">Conheça os membros que compõem os órgãos sociais da PIRCOM</p>
     </div>
   </div>
 
@@ -567,7 +427,7 @@ body { font-family: var(--ff-body); color: var(--ink); background: var(--white);
       <div class="cat-group reveal">
         <h3 class="cat-title"><?= $cat_label ?></h3>
 
-        <!-- Destaque -->
+        <!-- Destaque (primeiro membro) -->
         <div class="grid-president">
           <?php $ini = initials($pres['nome']); ?>
           <div class="mc mc-president"
@@ -605,7 +465,7 @@ body { font-family: var(--ff-body); color: var(--ink); background: var(--white);
           </div>
         </div>
 
-        <!-- Restantes -->
+        <!-- Restantes membros -->
         <?php if (!empty($rest)): ?>
         <div class="grid-members">
           <?php foreach ($rest as $idx => $m):
@@ -653,48 +513,6 @@ body { font-family: var(--ff-body); color: var(--ink); background: var(--white);
 
     <?php endif; ?>
 
-    <!-- Inter-religious banner -->
-    <div class="row mt-2 reveal">
-      <div class="col-lg-10 mx-auto">
-        <div class="ir-banner">
-          <h3><i class="bi bi-people-fill"></i> Colaboração Inter-Religiosa</h3>
-          <p>A PIRCOM reúne líderes e comunidades de diversas religiões (Cristãos, Muçulmanos, Hindus e Bahai)
-             trabalhando juntos pela saúde e bem-estar da população moçambicana.</p>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-<!-- ══ VALORES ════════════════════════════════ -->
-<section class="py-5" style="background:var(--off-white);">
-  <div class="container">
-    <div class="sec-head reveal">
-      <span class="sec-label">O Que Nos Guia</span>
-      <h2 class="sec-title">Nossos <span>Valores</span></h2>
-      <div class="sec-rule"><span></span><span></span><span></span></div>
-      <p class="sec-sub">Princípios que orientam cada acção da PIRCOM</p>
-    </div>
-    <div class="row g-4">
-      <?php
-      $values = [
-        ['bi-heart-pulse','Saúde para Todos',     'Compromisso com a saúde pública e bem-estar comunitário', '.1s'],
-        ['bi-peace',      'Diálogo Inter-Religioso','Respeito e colaboração entre todas as religiões',       '.2s'],
-        ['bi-people',     'Comunidade',            'Mobilização e empoderamento comunitário',                '.3s'],
-        ['bi-shield-check','Integridade',          'Transparência, ética e responsabilidade em tudo que fazemos', '.4s'],
-      ];
-      foreach ($values as [$ico, $title, $desc, $delay]):
-      ?>
-      <div class="col-lg-3 col-md-6 reveal" style="transition-delay:<?= $delay ?>">
-        <div class="value-card">
-          <div class="value-icon"><i class="bi <?= $ico ?>"></i></div>
-          <h4><?= $title ?></h4>
-          <p><?= $desc ?></p>
-        </div>
-      </div>
-      <?php endforeach; ?>
-    </div>
   </div>
 </section>
 
@@ -702,14 +520,14 @@ body { font-family: var(--ff-body); color: var(--ink); background: var(--white);
 <div class="modal-overlay" id="memberModal" role="dialog" aria-modal="true" aria-labelledby="modalName">
   <div class="modal-box">
 
-    <!-- Black band (close btn only — no photo inside) -->
+    <!-- Black band (close btn only) -->
     <div class="modal-band">
       <button class="modal-close" onclick="closeModal()" aria-label="Fechar">
         <i class="bi bi-x-lg"></i>
       </button>
     </div>
 
-    <!-- Body: photo is first child, pulled up with negative margin -->
+    <!-- Body with photo and info -->
     <div class="modal-body">
       <div class="modal-photo-wrap" id="modalPhotoWrap"></div>
       <h2 class="modal-name" id="modalName"></h2>

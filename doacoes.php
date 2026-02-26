@@ -56,6 +56,11 @@ $config = ($result && $result->num_rows > 0) ? $result->fetch_assoc() : null;
 ?>
 
 <style>
+    :root {
+        --primary-color: #FF6F0F;  /* Laranja PIRCOM */
+        --secondary-color: #0D0D0D; /* Preto PIRCOM */
+    }
+
     .payment-method {
         background: white;
         border: 2px solid #e9ecef;
@@ -69,7 +74,7 @@ $config = ($result && $result->num_rows > 0) ? $result->fetch_assoc() : null;
     .payment-method:hover {
         border-color: var(--primary-color);
         transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(251, 10, 10, 0.15);
+        box-shadow: 0 10px 30px rgba(255, 111, 15, 0.15); /* Sombra laranja ajustada */
     }
     
     .payment-icon {
@@ -86,26 +91,43 @@ $config = ($result && $result->num_rows > 0) ? $result->fetch_assoc() : null;
     }
     
     .impact-card {
-        background: linear-gradient(135deg, var(--primary-color) 0%, #c70808 100%);
+        background: linear-gradient(135deg, var(--primary-color) 0%, #D95A00 100%); /* Gradiente laranja */
         color: white;
         border-radius: 15px;
-        padding: 40px;
+        padding: 50px 40px;
         margin-bottom: 40px;
         text-align: center;
+        box-shadow: 0 10px 30px rgba(255, 111, 15, 0.2);
     }
     
     .impact-card h3 {
-        font-size: 28px;
+        font-size: 32px;
         font-weight: 700;
-        margin-bottom: 15px;
+        margin-bottom: 20px;
+        color: white; /* Mantém branco para contraste no fundo laranja */
+    }
+
+    .impact-card p {
+        color: white; /* Mantém branco para contraste no fundo laranja */
+        font-size: 1.2rem;
+        line-height: 1.6;
+        max-width: 900px;
+        margin: 0 auto;
+        opacity: 0.95;
     }
 
     .mission-highlight {
         background: #f8f9fa;
         border-left: 4px solid var(--primary-color);
-        padding: 25px;
+        padding: 30px;
         margin-bottom: 30px;
         border-radius: 10px;
+    }
+
+    .mission-highlight h4 {
+        color: var(--secondary-color) !important; /* Preto */
+        font-weight: 700;
+        margin-bottom: 20px;
     }
 
     .mission-highlight ul {
@@ -115,7 +137,36 @@ $config = ($result && $result->num_rows > 0) ? $result->fetch_assoc() : null;
 
     .mission-highlight li {
         margin-bottom: 10px;
-        color: #555;
+        color: #333; /* Preto suave para melhor legibilidade */
+    }
+
+    .mission-highlight li strong {
+        color: var(--secondary-color); /* Preto */
+    }
+
+    .btn-primary {
+        background: var(--primary-color) !important;
+        border-color: var(--primary-color) !important;
+        color: white !important;
+    }
+
+    .btn-primary:hover {
+        background: #D95A00 !important; /* Laranja escuro */
+        border-color: #D95A00 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 111, 15, 0.3);
+    }
+
+    .text-danger {
+        color: var(--primary-color) !important; /* Laranja em vez de vermelho */
+    }
+
+    .section-title h2 {
+        color: var(--secondary-color);
+    }
+
+    .section-title p {
+        color: var(--primary-color);
     }
 </style>
 
@@ -142,7 +193,7 @@ $config = ($result && $result->num_rows > 0) ? $result->fetch_assoc() : null;
         <!-- Áreas de Impacto -->
         <div class="mission-highlight">
             <h4 style="color: var(--secondary-color); font-weight: 700; margin-bottom: 20px;">
-                <i class="bi bi-bullseye text-danger me-2"></i>O Seu Apoio Contribui Para:
+                <i class="bi bi-bullseye me-2" style="color: var(--primary-color);"></i>O Seu Apoio Contribui Para:
             </h4>
             <div class="row">
                 <div class="col-md-6">
@@ -167,7 +218,7 @@ $config = ($result && $result->num_rows > 0) ? $result->fetch_assoc() : null;
         <div class="row mb-5">
             <div class="col-12 mb-4">
                 <h3 class="text-center mb-4" style="color: var(--secondary-color); font-weight: 700;">
-                    <i class="bi bi-wallet2 text-danger me-2"></i>Métodos de Doação
+                    <i class="bi bi-wallet2 me-2" style="color: var(--primary-color);"></i>Métodos de Doação
                 </h3>
             </div>
             
@@ -221,19 +272,19 @@ $config = ($result && $result->num_rows > 0) ? $result->fetch_assoc() : null;
             <div class="col-lg-8 mx-auto">
                 <div class="donation-form-card">
                     <h3 class="mb-4 text-center" style="color: var(--secondary-color);">
-                        <i class="bi bi-clipboard-check text-danger me-2"></i>Registar Sua Doação
+                        <i class="bi bi-clipboard-check me-2" style="color: var(--primary-color);"></i>Registar Sua Doação
                     </h3>
                     <p class="text-muted text-center mb-4">Após efetuar a doação por um dos métodos acima, preencha o formulário abaixo para confirmarmos o seu apoio.</p>
                     
                     <form method="POST" enctype="multipart/form-data">
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Nome Completo <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold">Nome Completo <span style="color: var(--primary-color);">*</span></label>
                                 <input type="text" class="form-control" name="nome" required>
                             </div>
                             
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Email <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold">Email <span style="color: var(--primary-color);">*</span></label>
                                 <input type="email" class="form-control" name="email" required>
                             </div>
                             
@@ -243,12 +294,12 @@ $config = ($result && $result->num_rows > 0) ? $result->fetch_assoc() : null;
                             </div>
                             
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Valor (MZN) <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold">Valor (MZN) <span style="color: var(--primary-color);">*</span></label>
                                 <input type="number" class="form-control" name="valor" step="0.01" min="1" required>
                             </div>
                             
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Método de Pagamento <span class="text-danger">*</span></label>
+                                <label class="form-label fw-bold">Método de Pagamento <span style="color: var(--primary-color);">*</span></label>
                                 <select class="form-select" name="metodo_pagamento" required>
                                     <option value="">Selecione...</option>
                                     <option value="transferencia">Transferência Bancária</option>
@@ -289,9 +340,9 @@ $config = ($result && $result->num_rows > 0) ? $result->fetch_assoc() : null;
             <div class="col-lg-10 mx-auto text-center">
                 <div class="alert alert-info" style="background: #e8f4f8; border: none; border-radius: 15px;">
                     <h5 style="color: var(--secondary-color); font-weight: 700;">
-                        <i class="bi bi-info-circle me-2"></i>Cada Contribuição Faz a Diferença
+                        <i class="bi bi-info-circle me-2" style="color: var(--primary-color);"></i>Cada Contribuição Faz a Diferença
                     </h5>
-                    <p class="mb-0">Através da união de comunidades de fé e do apoio de pessoas como você, continuamos a salvar vidas, promover a saúde e construir um Moçambique mais saudável e pacífico. Obrigado por fazer parte desta missão!</p>
+                    <p class="mb-0" style="color: #333;">Através da união de comunidades de fé e do apoio de pessoas como você, continuamos a salvar vidas, promover a saúde e construir um Moçambique mais saudável e pacífico. Obrigado por fazer parte desta missão!</p>
                 </div>
             </div>
         </div>

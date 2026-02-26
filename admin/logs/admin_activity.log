@@ -168,3 +168,17 @@
 [2026-02-19 05:04:11] User: Administrador PIRCOM (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
 [2026-02-19 15:05:20] User: Administrador PIRCOM (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
 [2026-02-20 01:27:01] User: Administrador PIRCOM (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-24 09:58:29] User: Administrador PIRCOM (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-25 15:46:02] User: Administrador PIRCOM (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-25 15:46:12] User: Administrador PIRCOM (ID: 1) | Action: DELETE_HOMEPAGEHERO | Details: HomePage Hero ID: 1 | IP: ::1
+[2026-02-25 15:46:22] User: Administrador PIRCOM (ID: 1) | Action: DELETE_HOMEPAGEHERO | Details: HomePage Hero ID: 2 | IP: ::1
+[2026-02-26 19:17:33] User: Administrador PIRCOM (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-26 19:17:40] User: Administrador PIRCOM (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-26 20:30:39] User: Administrador PIRCOM (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-26 22:04:57] User: Administrador PIRCOM (ID: 1) | Action: LOGIN | Details: Usuário fez login com sucesso | IP: ::1
+[2026-02-26 22:05:46] User: Administrador PIRCOM (ID: 1) | Action: DELETE_EVENTO | Details: Evento ID: 2 | IP: ::1
+[2026-02-26 22:05:51] User: Administrador PIRCOM (ID: 1) | Action: DELETE_EVENTO | Details: Evento ID: 3 | IP: ::1
+[2026-02-26 22:05:55] User: Administrador PIRCOM (ID: 1) | Action: DELETE_EVENTO | Details: Evento ID: 4 | IP: ::1
+[2026-02-26 22:05:58] User: Administrador PIRCOM (ID: 1) | Action: DELETE_EVENTO | Details: Evento ID: 1 | IP: ::1
+[2026-02-26 22:54:23] User: Administrador PIRCOM (ID: 1) | Action: DELETE_DOADOR | Details: Doador ID: 1 | IP: ::1
+[2026-02-26 23:02:16] User: Administrador PIRCOM (ID: 1) | Action: DELETE_DOADOR | Details: Doador ID: 2 | IP: ::1

@@ -2,8 +2,6 @@
 session_start();
 require_once(__DIR__ . '/helpers/auth.php');
 
-header('Content-Type: application/json; charset=utf-8');
-
 include('config/conexao.php');
 require_once('helpers/upload.php');
 
@@ -33,17 +31,17 @@ if (isset($_POST['doador_id'])) {
     
     if ($stmt->execute()) {
         logAdminActivity('DELETE_DOADOR', 'Doador ID: ' . $doador_id);
-        echo json_encode(['success' => true, 'message' => 'Doador removido com sucesso.']);
+        $_SESSION['flash'] = ['type' => 'success', 'text' => 'Doador removido com sucesso.'];
     } else {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Erro ao remover doador: ' . $conn->error]);
+        $_SESSION['flash'] = ['type' => 'danger', 'text' => 'Erro ao remover doador: ' . $conn->error];
     }
     
     $stmt->close();
 } else {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Parâmetros inválidos.']);
+    $_SESSION['flash'] = ['type' => 'danger', 'text' => 'Parâmetros inválidos.'];
 }
 
 $conn->close();
+header('Location: doadores.php');
+exit;
 ?>
