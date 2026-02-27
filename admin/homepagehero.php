@@ -1,467 +1,659 @@
 <?php
+session_start();
 include('header.php');
 include('config/conexao.php');
 
-// Add sorting functionality
-$sort = isset($_GET['sort']) ? $_GET['sort'] : 'id';
-$order = isset($_GET['order']) && $_GET['order'] == 'desc' ? 'desc' : 'asc';
-$validSortColumns = ['id', 'descricao'];
-$sort = in_array($sort, $validSortColumns) ? $sort : 'id';
-
-// Add search functionality
-$search = isset($_GET['search']) ? $_GET['search'] : '';
-$searchCondition = '';
-if (!empty($search)) {
-    $search = $conn->real_escape_string($search);
-    $searchCondition = " WHERE descricao LIKE '%$search%'";
+// Flash message
+$message = null;
+if (!empty($_SESSION['flash'])) {
+    $message = $_SESSION['flash'];
+    unset($_SESSION['flash']);
 }
 
-$sql = "SELECT * FROM homepagehero $searchCondition ORDER BY $sort $order";
-$result = $conn->query($sql);
-$totalRecords = $result->num_rows;
+// ── SORTING ──
+$sort      = isset($_GET['sort']) ? $_GET['sort'] : 'id';
+$order     = isset($_GET['order']) && $_GET['order'] == 'desc' ? 'desc' : 'asc';
+$validSort = ['id', 'descricao'];
+$sort      = in_array($sort, $validSort) ? $sort : 'id';
 
-// Add pagination
+// ── SEARCH ──
+$search          = isset($_GET['search']) ? $_GET['search'] : '';
+$searchCondition = '';
+if (!empty($search)) {
+    $s               = $conn->real_escape_string($search);
+    $searchCondition = " WHERE descricao LIKE '%$s%'";
+}
+
+// ── COUNT ──
+$countResult  = $conn->query("SELECT COUNT(*) as total FROM homepagehero" . $searchCondition);
+$totalRecords = (int)$countResult->fetch_assoc()['total'];
+
+// ── PAGINATION ──
 $recordsPerPage = 10;
-$totalPages = ceil($totalRecords / $recordsPerPage);
-$currentPage = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
-$currentPage = max(1, min($currentPage, $totalPages));
-$offset = ($currentPage - 1) * $recordsPerPage;
+$totalPages     = max(1, ceil($totalRecords / $recordsPerPage));
+$currentPage    = isset($_GET['page']) && is_numeric($_GET['page']) ? (int)$_GET['page'] : 1;
+$currentPage    = max(1, min($currentPage, $totalPages));
+$offset         = ($currentPage - 1) * $recordsPerPage;
 
-$sql .= " LIMIT $offset, $recordsPerPage";
+// ── QUERY ──
+$sql    = "SELECT id, descricao, data FROM homepagehero $searchCondition ORDER BY $sort $order LIMIT $offset, $recordsPerPage";
 $result = $conn->query($sql);
 ?>
 
-<!-- Content wrapper -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --primary: #2563eb;
+    --primary-light: rgba(37,99,235,0.08);
+    --primary-mid: rgba(37,99,235,0.15);
+    --success: #16a34a;
+    --success-light: rgba(22,163,74,0.08);
+    --warning: #d97706;
+    --warning-light: rgba(217,119,6,0.08);
+    --danger: #dc2626;
+    --danger-light: rgba(220,38,38,0.08);
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --border: #e5e7eb;
+    --text-primary: #111827;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.04);
+    --shadow-lg: 0 10px 30px rgba(0,0,0,0.10), 0 4px 10px rgba(0,0,0,0.05);
+}
+
+body, .content-wrapper * { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+.hero-wrapper {
+    padding: 1.5rem;
+    background: var(--bg);
+    min-height: 100vh;
+}
+
+/* ── PAGE HEADER ── */
+.hero-header {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 1rem; margin-bottom: 1.75rem;
+}
+.hero-header-left { display: flex; align-items: center; gap: 0.75rem; }
+.hero-header-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--primary), #1e40af);
+    border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 1.25rem; flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(37,99,235,0.35);
+}
+.hero-header h1 {
+    font-size: 1.5rem; font-weight: 800;
+    color: var(--text-primary); margin: 0; letter-spacing: -0.02em;
+}
+.hero-header p { font-size: 0.85rem; color: var(--text-muted); margin: 0; }
+.hero-count-pill {
+    display: inline-flex; align-items: center;
+    background: var(--primary-light); color: var(--primary);
+    font-size: 0.8125rem; font-weight: 700;
+    padding: 0.25rem 0.75rem; border-radius: 999px;
+    border: 1px solid var(--primary-mid);
+}
+
+/* ── ALERT ── */
+.hero-alert {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 1rem 1.25rem; border-radius: var(--radius-md);
+    margin-bottom: 1.5rem; font-weight: 500; font-size: 0.9375rem;
+    animation: fadeSlideDown 0.3s ease;
+}
+.hero-alert.success { background: var(--success-light); color: var(--success); border: 1px solid rgba(22,163,74,0.2); }
+.hero-alert.danger  { background: var(--danger-light);  color: var(--danger);  border: 1px solid rgba(220,38,38,0.2); }
+@keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── STATS ── */
+.stats-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1rem; margin-bottom: 1.5rem;
+}
+.stat-card {
+    background: var(--surface); border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem; box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; gap: 1rem;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+.stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.stat-icon {
+    width: 52px; height: 52px; border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; flex-shrink: 0;
+}
+.stat-icon.primary { background: linear-gradient(135deg,#eff6ff,#dbeafe); color: var(--primary); }
+.stat-icon.success { background: linear-gradient(135deg,#ecfdf5,#d1fae5); color: var(--success); }
+.stat-icon.warning { background: linear-gradient(135deg,#fffbeb,#fef3c7); color: var(--warning); }
+.stat-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.25rem; }
+.stat-value { font-size: 1.625rem; font-weight: 800; color: var(--text-primary); line-height: 1.1; letter-spacing: -0.02em; }
+.stat-sub   { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+/* ── FILTER CARD ── */
+.filter-card {
+    background: var(--surface); border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem; box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border); margin-bottom: 1.25rem;
+}
+.filter-title { font-size: 0.9375rem; font-weight: 700; color: var(--text-primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+.filter-title i { color: var(--primary); }
+.filter-row { display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; align-items: end; }
+.form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+.form-label { font-size: 0.8125rem; font-weight: 600; color: var(--text-secondary); }
+.form-control {
+    height: 42px; padding: 0 0.875rem;
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    font-size: 0.9rem; font-family: inherit; color: var(--text-primary);
+    background: #fafafa; transition: border-color 0.2s, box-shadow 0.2s; width: 100%;
+}
+.form-control:focus {
+    outline: none; border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.12); background: white;
+}
+.filter-actions { display: flex; gap: 0.5rem; }
+
+/* ── BUTTONS ── */
+.btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 0.4rem; padding: 0 1.125rem; height: 42px;
+    border-radius: var(--radius-sm); font-size: 0.875rem; font-weight: 600;
+    font-family: inherit; cursor: pointer; border: none;
+    transition: all 0.18s ease; white-space: nowrap; text-decoration: none;
+}
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), #1e40af);
+    color: white; box-shadow: 0 2px 8px rgba(37,99,235,0.28);
+}
+.btn-primary:hover { box-shadow: 0 4px 14px rgba(37,99,235,0.38); transform: translateY(-1px); color: white; }
+.btn-ghost { background: #f3f4f6; color: var(--text-secondary); border: 1.5px solid var(--border); }
+.btn-ghost:hover { background: #e5e7eb; color: var(--text-primary); }
+
+.btn-icon-sm {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: var(--radius-sm);
+    font-size: 0.9rem; cursor: pointer; border: none; transition: all 0.15s;
+    text-decoration: none;
+}
+.btn-edit   { background: var(--primary-light); color: var(--primary); border: 1.5px solid rgba(37,99,235,0.2); }
+.btn-edit:hover { background: var(--primary); color: white; }
+.btn-delete { background: transparent; color: var(--text-muted); border: 1.5px solid var(--border); }
+.btn-delete:hover { background: var(--danger-light); color: var(--danger); border-color: rgba(220,38,38,0.3); }
+
+/* ── SORT LINK ── */
+.sort-link {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    color: var(--text-muted); text-decoration: none;
+    font-size: 0.75rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    transition: color 0.15s;
+}
+.sort-link:hover { color: var(--primary); }
+.sort-link.active { color: var(--primary); }
+
+/* ── TABLE CARD ── */
+.table-card {
+    background: var(--surface); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm); border: 1px solid var(--border); overflow: hidden;
+}
+.table-card-header {
+    padding: 1.25rem 1.5rem; display: flex; align-items: center;
+    justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+}
+.table-card-title { font-size: 1rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; margin: 0; }
+.table-card-title i { color: var(--primary); }
+.table-meta { font-size: 0.8125rem; color: var(--text-muted); font-weight: 500; }
+
+/* ── HERO LIST ── */
+.hero-list { padding: 0.5rem; }
+.hero-row {
+    display: grid;
+    grid-template-columns: 48px 90px 1fr 130px auto;
+    align-items: center; gap: 0.75rem;
+    padding: 0.875rem 1rem; border-radius: var(--radius-md);
+    transition: background 0.15s; border-bottom: 1px solid #f3f4f6;
+}
+.hero-row:last-child { border-bottom: none; }
+.hero-row:hover { background: #fafafa; }
+.hero-row.header-row {
+    font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--text-muted);
+    padding: 0.625rem 1rem; border-bottom: 1px solid var(--border);
+    background: #f9fafb; border-radius: 0;
+}
+
+.item-id { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-align: center; }
+
+.item-thumb {
+    width: 72px; height: 56px; border-radius: var(--radius-sm);
+    object-fit: cover; cursor: pointer; display: block;
+    border: 1px solid var(--border);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.item-thumb:hover { transform: scale(1.05); box-shadow: var(--shadow-md); }
+.item-thumb-placeholder {
+    width: 72px; height: 56px; border-radius: var(--radius-sm);
+    background: #f3f4f6; display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); font-size: 1.25rem; border: 1px solid var(--border);
+}
+
+.item-info { min-width: 0; }
+.item-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.2rem; }
+.item-desc {
+    font-size: 0.875rem; color: var(--text-secondary);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.item-desc.empty { color: var(--text-muted); font-style: italic; }
+
+.item-date {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    background: var(--primary-light); color: var(--primary);
+    border: 1px solid rgba(37,99,235,0.15);
+    padding: 0.25rem 0.65rem; border-radius: 6px;
+    font-size: 0.75rem; font-weight: 700; white-space: nowrap;
+}
+
+.item-actions { display: flex; align-items: center; gap: 0.375rem; }
+
+/* ── EMPTY STATE ── */
+.empty-state { padding: 3.5rem 2rem; text-align: center; }
+.empty-state-icon {
+    width: 72px; height: 72px; background: #f3f4f6; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem; font-size: 2rem; color: var(--text-muted);
+}
+.empty-state h6 { font-size: 1rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.375rem; }
+.empty-state p  { font-size: 0.875rem; color: var(--text-muted); margin: 0 0 1rem; }
+
+/* ── PAGINATION ── */
+.pagination-wrap {
+    padding: 1rem 1.5rem; border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; flex-wrap: wrap;
+}
+.pagination-info { font-size: 0.8125rem; color: var(--text-muted); font-weight: 500; }
+.pagination-btns { display: flex; align-items: center; gap: 0.375rem; }
+.page-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 36px; height: 36px; padding: 0 0.625rem;
+    border-radius: var(--radius-sm); font-size: 0.875rem; font-weight: 600;
+    color: var(--text-secondary); border: 1.5px solid var(--border);
+    background: white; text-decoration: none; transition: all 0.15s;
+}
+.page-btn:hover  { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+.page-btn.active { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 2px 8px rgba(37,99,235,0.3); }
+.page-btn.disabled { opacity: 0.4; pointer-events: none; }
+.page-btn.ellipsis { border-color: transparent; background: none; cursor: default; }
+.page-btn.ellipsis:hover { border-color: transparent; background: none; color: var(--text-muted); }
+
+/* ── IMG MODAL ── */
+.img-modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75); z-index: 9999;
+    align-items: center; justify-content: center; padding: 1rem;
+    backdrop-filter: blur(4px);
+}
+.img-modal-overlay.open { display: flex; }
+.img-modal-box {
+    background: white; border-radius: var(--radius-lg);
+    max-width: 700px; width: 100%; overflow: hidden;
+}
+.img-modal-header {
+    padding: 1rem 1.25rem; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+}
+.img-modal-header h6 { margin: 0; font-weight: 700; font-size: 0.9375rem; }
+.img-modal-body { padding: 1.25rem; text-align: center; background: #f9fafb; }
+.img-modal-body img { max-width: 100%; border-radius: var(--radius-md); box-shadow: var(--shadow-md); }
+.img-modal-footer { padding: 0.875rem 1.25rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.img-modal-footer small { color: var(--text-muted); font-weight: 500; }
+.img-modal-close {
+    background: none; border: none; cursor: pointer; font-size: 1.125rem;
+    color: var(--text-muted); transition: color 0.15s; line-height: 1; padding: 0;
+}
+.img-modal-close:hover { color: var(--danger); }
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 991px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .hero-row.header-row { display: none; }
+    .hero-row {
+        grid-template-columns: 90px 1fr;
+        grid-template-rows: auto auto auto;
+        gap: 0.5rem 0.75rem;
+        padding: 1rem;
+        border-bottom: none; border-radius: var(--radius-md);
+        background: white; box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border); margin-bottom: 0.75rem;
+    }
+    .hero-row:hover { background: white; box-shadow: var(--shadow-md); }
+    .hero-list { padding: 1rem; display: flex; flex-direction: column; }
+    .item-id   { display: none; }
+    .item-thumb, .item-thumb-placeholder { grid-row: 1 / 3; width: 80px; height: 64px; }
+    .item-info { grid-column: 2; }
+    .item-date { grid-column: 2; }
+    .item-actions { grid-column: 1 / -1; border-top: 1px solid var(--border); padding-top: 0.75rem; }
+    .filter-row { grid-template-columns: 1fr; }
+}
+@media (max-width: 767px) {
+    .hero-wrapper { padding: 1rem; }
+    .hero-header h1 { font-size: 1.25rem; }
+    .stats-grid { gap: 0.75rem; }
+    .stat-card { padding: 1rem; }
+    .stat-value { font-size: 1.25rem; }
+    .pagination-wrap { justify-content: center; }
+    .pagination-info { text-align: center; width: 100%; }
+}
+@media (max-width: 575px) {
+    .hero-wrapper { padding: 0.75rem; }
+    .stats-grid { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+}
+</style>
+
 <div class="content-wrapper">
-    <!-- Content -->
-    <div class="container-xxl flex-grow-1 container-p-y">
-        <!-- Page Header with Stats -->
-        <div class="row mb-4">
-            <div class="col-12 col-md-6">
-                <h4 class="fw-bold py-3 mb-2">Gerenciar Hero da Página Inicial</h4>
-                <p class="text-muted mb-0">Gerencie as imagens e descrições da seção principal da página inicial</p>
+<div class="hero-wrapper">
+
+    <!-- Header -->
+    <div class="hero-header">
+        <div class="hero-header-left">
+            <div class="hero-header-icon"><i class="bx bx-images"></i></div>
+            <div>
+                <h1>Hero da Página Inicial</h1>
+                <p>Gerencie os slides e imagens principais</p>
             </div>
-            <div class="col-12 col-md-6">
-                <div class="d-flex flex-column flex-md-row justify-content-md-end gap-2">
-                    <div class="position-relative">
-                        <form method="GET" action="" class="d-flex">
-                            <div class="input-group input-group-merge">
-                                <span class="input-group-text"><i class="bx bx-search"></i></span>
-                                <input 
-                                    type="text" 
-                                    class="form-control" 
-                                    name="search" 
-                                    placeholder="Pesquisar descrição..." 
-                                    value="<?php echo htmlspecialchars($search); ?>"
-                                    aria-label="Pesquisar"
-                                >
-                                <?php if (!empty($search)): ?>
-                                <a href="?" class="btn btn-outline-secondary" type="button">
-                                    <i class="bx bx-x"></i>
-                                </a>
-                                <?php endif; ?>
-                            </div>
-                        </form>
-                    </div>
-                    <a class="btn btn-dark d-flex align-items-center gap-2" href="homepageheroform.php">
-                        <i class="bx bx-plus"></i>
-                        <span>Adicionar Novo</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+            <span class="hero-count-pill"><?php echo number_format($totalRecords); ?> registos</span>
+            <a href="homepageheroform.php" class="btn btn-primary" style="height:38px;">
+                <i class="bx bx-plus"></i> Adicionar Novo
+            </a>
+        </div>
+    </div>
+
+    <!-- Flash Alert -->
+    <?php if ($message): ?>
+    <div class="hero-alert <?php echo $message['type']; ?>">
+        <i class="bx <?php echo $message['type'] == 'success' ? 'bx-check-circle' : 'bx-error-circle'; ?>" style="font-size:1.25rem;flex-shrink:0;"></i>
+        <span><?php echo htmlspecialchars($message['text']); ?></span>
+    </div>
+    <?php endif; ?>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon primary"><i class="bx bx-images"></i></div>
+            <div>
+                <div class="stat-label">Total de Slides</div>
+                <div class="stat-value"><?php echo number_format($totalRecords); ?></div>
+                <div class="stat-sub">hero sections</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon success"><i class="bx bx-check-shield"></i></div>
+            <div>
+                <div class="stat-label">Ativos</div>
+                <div class="stat-value"><?php echo number_format($totalRecords); ?></div>
+                <div class="stat-sub">todos ativos</div>
+            </div>
+        </div>
+        <div class="stat-card" style="cursor:pointer;" onclick="window.location='homepageheroform.php'">
+            <div class="stat-icon warning"><i class="bx bx-plus-circle"></i></div>
+            <div>
+                <div class="stat-label">Adicionar</div>
+                <div class="stat-value" style="font-size:1rem;margin-top:0.15rem;">Novo Slide</div>
+                <div class="stat-sub">criar registo</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-card">
+        <div class="filter-title"><i class="bx bx-filter-alt"></i> Pesquisa</div>
+        <form method="GET" action="">
+            <div class="filter-row">
+                <div class="form-group">
+                    <label class="form-label">Pesquisar por descrição</label>
+                    <input type="text" name="search" class="form-control"
+                           placeholder="Digite para pesquisar..."
+                           value="<?php echo htmlspecialchars($search); ?>">
+                </div>
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn-primary"><i class="bx bx-search-alt"></i> Pesquisar</button>
+                    <?php if (!empty($search)): ?>
+                    <a href="homepagehero.php" class="btn btn-ghost"><i class="bx bx-reset"></i> Limpar</a>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Table Card -->
+    <div class="table-card">
+        <div class="table-card-header">
+            <h5 class="table-card-title">
+                <i class="bx bx-list-ul"></i> Lista de Hero Sections
+                <?php if (!empty($search)): ?>
+                <span style="font-size:0.8rem;font-weight:500;color:var(--text-muted);">
+                    — "<?php echo htmlspecialchars($search); ?>"
+                </span>
+                <?php endif; ?>
+            </h5>
+            <span class="table-meta">
+                <?php if ($totalRecords > 0): ?>
+                Mostrando <?php echo $offset + 1; ?>–<?php echo min($offset + $recordsPerPage, $totalRecords); ?> de <?php echo $totalRecords; ?>
+                <?php else: ?>
+                Nenhum registo
+                <?php endif; ?>
+            </span>
+        </div>
+
+        <div class="hero-list">
+            <!-- Desktop header -->
+            <div class="hero-row header-row">
+                <div>
+                    <a class="sort-link <?php echo $sort == 'id' ? 'active' : ''; ?>"
+                       href="?sort=id&order=<?php echo ($sort == 'id' && $order == 'asc') ? 'desc' : 'asc'; ?>&search=<?php echo urlencode($search); ?>&page=<?php echo $currentPage; ?>">
+                        # <i class="bx bx-chevron-<?php echo ($sort == 'id' && $order == 'asc') ? 'up' : 'down'; ?>"></i>
                     </a>
                 </div>
-            </div>
-        </div>
-
-        <!-- Stats Cards -->
-        <div class="row mb-4">
-            <div class="col-sm-6 col-lg-3 mb-4">
-                <div class="card card-border-shadow-primary h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-2 pb-1">
-                            <div class="avatar me-2">
-                                <span class="avatar-initial rounded bg-label-primary">
-                                    <i class="bx bx-images"></i>
-                                </span>
-                            </div>
-                            <h4 class="ms-1 mb-0"><?php echo $totalRecords; ?></h4>
-                        </div>
-                        <p class="mb-1">Total de Itens</p>
-                        <p class="mb-0 text-muted">
-                            <span class="fw-medium">Hero sections</span> cadastradas
-                        </p>
-                    </div>
+                <div>Imagem</div>
+                <div>
+                    <a class="sort-link <?php echo $sort == 'descricao' ? 'active' : ''; ?>"
+                       href="?sort=descricao&order=<?php echo ($sort == 'descricao' && $order == 'asc') ? 'desc' : 'asc'; ?>&search=<?php echo urlencode($search); ?>&page=<?php echo $currentPage; ?>">
+                        Descrição <i class="bx bx-chevron-<?php echo ($sort == 'descricao' && $order == 'asc') ? 'up' : 'down'; ?>"></i>
+                    </a>
                 </div>
+                <div>Data</div>
+                <div>Ações</div>
             </div>
-            <div class="col-sm-6 col-lg-3 mb-4">
-                <div class="card card-border-shadow-warning h-100">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-2 pb-1">
-                            <div class="avatar me-2">
-                                <span class="avatar-initial rounded bg-label-warning">
-                                    <i class="bx bx-star"></i>
-                                </span>
-                            </div>
-                            <h4 class="ms-1 mb-0"><?php echo $totalRecords; ?></h4>
-                        </div>
-                        <p class="mb-1">Ativos</p>
-                        <p class="mb-0 text-muted">
-                            Todos os itens estão <span class="fw-medium">ativos</span>
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Main Card -->
-        <div class="card">
-            <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
-                <h5 class="card-title mb-0">Lista de Hero Sections</h5>
-                
-                <?php if (!empty($search)): ?>
-                <div class="mt-2 mt-md-0">
-                    <span class="badge bg-label-info">
-                        Resultados para: "<?php echo htmlspecialchars($search); ?>"
+            <?php if ($result && $result->num_rows > 0):
+                while ($row = $result->fetch_assoc()):
+                    $desc        = htmlspecialchars($row['descricao'] ?? '');
+                    $dataFormatada = !empty($row['data']) ? date('d/m/Y', strtotime($row['data'])) : '—';
+            ?>
+            <div class="hero-row">
+                <!-- ID -->
+                <div class="item-id">#<?php echo $row['id']; ?></div>
+
+                <!-- Thumb -->
+                <div>
+                    <img class="item-thumb"
+                         src="get_hero_image.php?id=<?php echo $row['id']; ?>"
+                         alt="Slide <?php echo $row['id']; ?>"
+                         loading="lazy"
+                         onclick="openImgModal(<?php echo $row['id']; ?>, '<?php echo addslashes($desc ?: 'Slide #' . $row['id']); ?>')"
+                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                    <div class="item-thumb-placeholder" style="display:none;"><i class="bx bx-image"></i></div>
+                </div>
+
+                <!-- Descrição -->
+                <div class="item-info">
+                    <div class="item-label">Descrição</div>
+                    <?php if (!empty($desc)): ?>
+                    <div class="item-desc"><?php echo $desc; ?></div>
+                    <?php else: ?>
+                    <div class="item-desc empty">Sem descrição</div>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Data -->
+                <div>
+                    <span class="item-date">
+                        <i class="bx bx-calendar" style="font-size:0.8rem;"></i>
+                        <?php echo $dataFormatada; ?>
                     </span>
                 </div>
-                <?php endif; ?>
-            </div>
-            
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th style="width: 80px;">
-                                <a href="?sort=id&order=<?php echo $sort == 'id' && $order == 'asc' ? 'desc' : 'asc'; ?>&search=<?php echo urlencode($search); ?>"
-                                   class="text-dark text-decoration-none d-flex align-items-center gap-1">
-                                    #ID
-                                    <?php if ($sort == 'id'): ?>
-                                    <i class="bx bx-chevron-<?php echo $order == 'asc' ? 'up' : 'down'; ?>"></i>
-                                    <?php endif; ?>
-                                </a>
-                            </th>
-                            <th style="width: 120px;">Foto</th>
-                            <th>
-                                <a href="?sort=descricao&order=<?php echo $sort == 'descricao' && $order == 'asc' ? 'desc' : 'asc'; ?>&search=<?php echo urlencode($search); ?>"
-                                   class="text-dark text-decoration-none d-flex align-items-center gap-1">
-                                    Descrição
-                                    <?php if ($sort == 'descricao'): ?>
-                                    <i class="bx bx-chevron-<?php echo $order == 'asc' ? 'up' : 'down'; ?>"></i>
-                                    <?php endif; ?>
-                                </a>
-                            </th>
-                            <th style="width: 150px;">Data de Criação</th>
-                            <th style="width: 120px;" class="text-end">Acção</th>
-                        </tr>
-                    </thead>
-                    <tbody class="table-border-bottom-0">
-                        <?php
-                        if ($result->num_rows > 0) {
-                            while ($row = $result->fetch_assoc()) {
-                                $truncatedDesc = strlen($row["descricao"]) > 100 
-                                    ? substr($row["descricao"], 0, 100) . '...' 
-                                    : $row["descricao"];
-                                
-                                $createdDate = isset($row['created_at']) 
-                                    ? date('d/m/Y H:i', strtotime($row['created_at'])) 
-                                    : '--/--/----';
-                                ?>
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar avatar-xs me-2">
-                                                <span class="avatar-initial rounded-circle bg-label-primary">
-                                                    <?php echo $row["id"]; ?>
-                                                </span>
-                                            </div>
-                                            <strong><?php echo $row["id"]; ?></strong>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="image-preview-container">
-                                            <img 
-                                                src='data:image/jpeg;base64,<?php echo base64_encode($row['foto']); ?>' 
-                                                class="rounded border" 
-                                                width="80" 
-                                                height="80"
-                                                style="object-fit: cover;"
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#imageModal<?php echo $row['id']; ?>"
-                                                role="button"
-                                                alt="Hero image"
-                                            />
-                                        </div>
-                                        
-                                        <!-- Image Modal -->
-                                        <div class="modal fade" id="imageModal<?php echo $row['id']; ?>" tabindex="-1" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered modal-lg">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">Visualização da Imagem</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body text-center">
-                                                        <img 
-                                                            src='data:image/jpeg;base64,<?php echo base64_encode($row['foto']); ?>' 
-                                                            class="img-fluid rounded"
-                                                            alt="Hero image full size"
-                                                        />
-                                                        <p class="mt-3 text-muted">ID: <?php echo $row["id"]; ?></p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex flex-column">
-                                            <span class="fw-medium mb-1">Descrição:</span>
-                                            <span class="text-muted" data-bs-toggle="tooltip" title="<?php echo htmlspecialchars($row["descricao"]); ?>">
-                                                <?php echo htmlspecialchars($truncatedDesc); ?>
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-label-secondary"><?php echo $createdDate; ?></span>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex justify-content-end gap-2">
-                                            <a href="homepageheroform.php?edit=<?php echo $row['id']; ?>" 
-                                               class="btn btn-icon btn-outline-primary btn-sm"
-                                               data-bs-toggle="tooltip"
-                                               title="Editar">
-                                                <i class="bx bx-edit"></i>
-                                            </a>
-                                            <form method='POST' action='remover_homepagehero.php' 
-                                                  class="delete-form"
-                                                  onsubmit="return confirmDelete(this);">
-                                                <input type='hidden' name='homepagehero_id' value='<?php echo $row['id']; ?>'>
-                                                <button type='submit' 
-                                                        class='btn btn-icon btn-outline-danger btn-sm'
-                                                        data-bs-toggle="tooltip"
-                                                        title="Remover"
-                                                        name='remover'>
-                                                    <i class='bx bx-trash'></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <?php
-                            }
-                        } else {
-                            ?>
-                            <tr>
-                                <td colspan="5" class="text-center py-5">
-                                    <div class="empty-state">
-                                        <div class="empty-state-icon">
-                                            <i class="bx bx-images" style="font-size: 3rem;"></i>
-                                        </div>
-                                        <h5 class="mt-3">Nenhum resultado encontrado</h5>
-                                        <p class="text-muted">
-                                            <?php echo !empty($search) 
-                                                ? 'Tente ajustar sua pesquisa ou ' 
-                                                : ''; ?>
-                                            <a href="homepageheroform.php" class="btn btn-sm btn-dark mt-2">
-                                                <i class="bx bx-plus"></i> Adicionar seu primeiro item
-                                            </a>
-                                        </p>
-                                    </div>
-                                </td>
-                            </tr>
-                            <?php
-                        }
-                        ?>
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Pagination & Footer -->
-            <?php if ($totalPages > 1): ?>
-            <div class="card-footer">
-                <div class="row align-items-center">
-                    <div class="col-lg-6 text-muted mb-3 mb-lg-0">
-                        Mostrando <strong><?php echo ($offset + 1); ?>-<?php echo min($offset + $recordsPerPage, $totalRecords); ?></strong> 
-                        de <strong><?php echo $totalRecords; ?></strong> itens
-                    </div>
-                    <div class="col-lg-6">
-                        <nav aria-label="Page navigation">
-                            <ul class="pagination justify-content-center justify-content-lg-end mb-0">
-                                <li class="page-item <?php echo $currentPage == 1 ? 'disabled' : ''; ?>">
-                                    <a class="page-link" 
-                                       href="?page=<?php echo $currentPage - 1; ?>&sort=<?php echo $sort; ?>&order=<?php echo $order; ?>&search=<?php echo urlencode($search); ?>">
-                                        <i class="bx bx-chevron-left"></i>
-                                    </a>
-                                </li>
-                                
-                                <?php
-                                $startPage = max(1, $currentPage - 2);
-                                $endPage = min($totalPages, $currentPage + 2);
-                                
-                                for ($i = $startPage; $i <= $endPage; $i++):
-                                ?>
-                                <li class="page-item <?php echo $i == $currentPage ? 'active' : ''; ?>">
-                                    <a class="page-link" 
-                                       href="?page=<?php echo $i; ?>&sort=<?php echo $sort; ?>&order=<?php echo $order; ?>&search=<?php echo urlencode($search); ?>">
-                                        <?php echo $i; ?>
-                                    </a>
-                                </li>
-                                <?php endfor; ?>
-                                
-                                <li class="page-item <?php echo $currentPage == $totalPages ? 'disabled' : ''; ?>">
-                                    <a class="page-link" 
-                                       href="?page=<?php echo $currentPage + 1; ?>&sort=<?php echo $sort; ?>&order=<?php echo $order; ?>&search=<?php echo urlencode($search); ?>">
-                                        <i class="bx bx-chevron-right"></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
+
+                <!-- Ações -->
+                <div class="item-actions">
+                    <a href="homepageheroform.php?edit=<?php echo $row['id']; ?>"
+                       class="btn-icon-sm btn-edit" title="Editar">
+                        <i class="bx bx-edit"></i>
+                    </a>
+                    <form method="POST" action="remover_homepagehero.php"
+                          class="delete-form" style="display:contents;"
+                          data-item-id="<?php echo $row['id']; ?>">
+                        <input type="hidden" name="homepagehero_id" value="<?php echo $row['id']; ?>">
+                        <button type="submit" name="remover"
+                                class="btn-icon-sm btn-delete" title="Remover">
+                            <i class="bx bx-trash"></i>
+                        </button>
+                    </form>
                 </div>
+            </div>
+            <?php endwhile;
+            else: ?>
+            <div class="empty-state">
+                <div class="empty-state-icon"><i class="bx bx-images"></i></div>
+                <h6><?php echo !empty($search) ? 'Nenhum resultado encontrado' : 'Nenhum slide cadastrado'; ?></h6>
+                <p><?php echo !empty($search) ? 'Tente ajustar a pesquisa.' : 'Adicione o primeiro slide da página inicial.'; ?></p>
+                <?php if (empty($search)): ?>
+                <a href="homepageheroform.php" class="btn btn-primary" style="height:38px;">
+                    <i class="bx bx-plus"></i> Adicionar primeiro slide
+                </a>
+                <?php endif; ?>
             </div>
             <?php endif; ?>
         </div>
-    </div>
-    <!-- / Content -->
 
-    <!-- Footer -->
-    <?php include('footerprincipal.php'); ?>
-    <!-- / Footer -->
+        <!-- Paginação -->
+        <?php if ($totalPages > 1): ?>
+        <div class="pagination-wrap">
+            <span class="pagination-info">
+                Mostrando <?php echo $offset + 1; ?>–<?php echo min($offset + $recordsPerPage, $totalRecords); ?> de <?php echo $totalRecords; ?> registos
+            </span>
+            <div class="pagination-btns">
+                <?php
+                $qs = '';
+                if (!empty($search)) $qs .= '&search=' . urlencode($search);
+                $qs .= '&sort=' . $sort . '&order=' . $order;
 
-    <div class="content-backdrop fade"></div>
-</div>
-<!-- Content wrapper -->
+                echo $currentPage > 1
+                    ? '<a href="?page=' . ($currentPage-1) . $qs . '" class="page-btn"><i class="bx bx-chevron-left"></i></a>'
+                    : '<span class="page-btn disabled"><i class="bx bx-chevron-left"></i></span>';
 
-<!-- Custom Styles -->
-<style>
-    .card {
-        border: none;
-        box-shadow: 0 2px 6px 0 rgba(67, 89, 113, 0.12);
-        border-radius: 10px;
-    }
-    
-    .card-header {
-        background-color: #fff;
-        border-bottom: 1px solid #e0e0e0;
-        padding: 1.5rem;
-    }
-    
-    .table th {
-        border-top: none;
-        font-weight: 600;
-        color: #566a7f;
-        padding: 1rem 0.75rem;
-    }
-    
-    .table td {
-        padding: 1rem 0.75rem;
-        vertical-align: middle;
-    }
-    
-    .table-hover tbody tr:hover {
-        background-color: rgba(67, 89, 113, 0.04);
-    }
-    
-    .empty-state {
-        padding: 3rem 1rem;
-        text-align: center;
-    }
-    
-    .empty-state-icon {
-        color: #b4bdc6;
-        margin-bottom: 1rem;
-    }
-    
-    .image-preview-container img {
-        transition: transform 0.3s ease;
-        cursor: pointer;
-    }
-    
-    .image-preview-container img:hover {
-        transform: scale(1.05);
-    }
-    
-    .btn-icon {
-        width: 36px;
-        height: 36px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-    }
-    
-    .avatar-initial {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-    }
-    
-    .card-border-shadow-primary {
-        border: 1px solid;
-        border-color: #696cff;
-    }
-    
-    .card-border-shadow-warning {
-        border: 1px solid;
-        border-color: #ffab00;
-    }
-    
-    @media (max-width: 768px) {
-        .table-responsive {
-            border: none;
-        }
-        
-        .card-header {
-            padding: 1rem;
-        }
-        
-        .btn {
-            padding: 0.375rem 0.75rem;
-            font-size: 0.875rem;
-        }
-    }
-</style>
+                $start = max(1, $currentPage - 2);
+                $end   = min($totalPages, $currentPage + 2);
 
-<!-- JavaScript Enhancements -->
-<script>
-    // Initialize tooltips
-    document.addEventListener('DOMContentLoaded', function() {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-    });
-
-    // Confirm delete function
-    function confirmDelete(form) {
-        return confirm('Tem certeza que deseja remover este item? Esta ação não pode ser desfeita.');
-    }
-
-    // Live search debounce
-    let searchTimeout;
-    const searchInput = document.querySelector('input[name="search"]');
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                this.form.submit();
-            }, 500);
-        });
-    }
-
-    // Sort indicator
-    document.addEventListener('DOMContentLoaded', function() {
-        const sortLinks = document.querySelectorAll('th a[href*="sort="]');
-        sortLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                const currentUrl = new URL(window.location.href);
-                const newUrl = new URL(this.href);
-                
-                if (currentUrl.searchParams.get('sort') === newUrl.searchParams.get('sort') &&
-                    currentUrl.searchParams.get('order') === newUrl.searchParams.get('order')) {
-                    e.preventDefault();
+                if ($start > 1) {
+                    echo '<a href="?page=1' . $qs . '" class="page-btn">1</a>';
+                    if ($start > 2) echo '<span class="page-btn ellipsis">…</span>';
                 }
-            });
-        });
+                for ($i = $start; $i <= $end; $i++) {
+                    $active = $i == $currentPage ? ' active' : '';
+                    echo '<a href="?page=' . $i . $qs . '" class="page-btn' . $active . '">' . $i . '</a>';
+                }
+                if ($end < $totalPages) {
+                    if ($end < $totalPages - 1) echo '<span class="page-btn ellipsis">…</span>';
+                    echo '<a href="?page=' . $totalPages . $qs . '" class="page-btn">' . $totalPages . '</a>';
+                }
+
+                echo $currentPage < $totalPages
+                    ? '<a href="?page=' . ($currentPage+1) . $qs . '" class="page-btn"><i class="bx bx-chevron-right"></i></a>'
+                    : '<span class="page-btn disabled"><i class="bx bx-chevron-right"></i></span>';
+                ?>
+            </div>
+        </div>
+        <?php endif; ?>
+    </div>
+
+</div>
+</div>
+
+<!-- Image preview modal -->
+<div class="img-modal-overlay" id="imgModal" onclick="closeImgModalBg(event)">
+    <div class="img-modal-box">
+        <div class="img-modal-header">
+            <h6 id="imgModalTitle">Visualização</h6>
+            <button class="img-modal-close" onclick="closeImgModal()"><i class="bx bx-x"></i></button>
+        </div>
+        <div class="img-modal-body">
+            <img id="imgModalSrc" src="" alt="Preview">
+        </div>
+        <div class="img-modal-footer">
+            <small id="imgModalId"></small>
+            <a id="imgModalEdit" href="#" class="btn btn-edit btn-icon-sm" title="Editar">
+                <i class="bx bx-edit"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<?php include('footerprincipal.php'); ?>
+<div class="content-backdrop fade"></div>
+
+<script>
+// ── CONFIRM DELETE ──
+document.querySelectorAll('.delete-form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const id = this.getAttribute('data-item-id');
+        if (confirm(`Remover o slide #${id}?\n\nEsta ação não pode ser desfeita.`)) {
+            this.submit();
+        }
     });
+});
+
+// ── LIVE SEARCH DEBOUNCE ──
+let searchTimer;
+const searchInput = document.querySelector('input[name="search"]');
+if (searchInput) {
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => this.form.submit(), 500);
+    });
+}
+
+// ── IMAGE MODAL ──
+function openImgModal(id, title) {
+    document.getElementById('imgModalTitle').textContent = title || 'Slide #' + id;
+    document.getElementById('imgModalId').textContent    = 'ID: #' + id;
+    document.getElementById('imgModalSrc').src           = 'get_hero_image.php?id=' + id;
+    document.getElementById('imgModalEdit').href         = 'homepageheroform.php?edit=' + id;
+    document.getElementById('imgModal').classList.add('open');
+}
+function closeImgModal() {
+    document.getElementById('imgModal').classList.remove('open');
+}
+function closeImgModalBg(e) {
+    if (e.target === document.getElementById('imgModal')) closeImgModal();
+}
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeImgModal();
+});
 </script>
 
 <?php

@@ -182,3 +182,5 @@
 [2026-02-26 22:05:58] User: Administrador PIRCOM (ID: 1) | Action: DELETE_EVENTO | Details: Evento ID: 1 | IP: ::1
 [2026-02-26 22:54:23] User: Administrador PIRCOM (ID: 1) | Action: DELETE_DOADOR | Details: Doador ID: 1 | IP: ::1
 [2026-02-26 23:02:16] User: Administrador PIRCOM (ID: 1) | Action: DELETE_DOADOR | Details: Doador ID: 2 | IP: ::1
+[2026-02-26 23:59:21] User: Administrador PIRCOM (ID: 1) | Action: DELETE_HOMEPAGEHERO | Details: HomePage Hero ID: 4 | IP: ::1
+[2026-02-27 00:04:25] User: Administrador PIRCOM (ID: 1) | Action: DELETE_HOMEPAGEHERO | Details: HomePage Hero ID: 4 | IP: ::1
